@@ -34,6 +34,7 @@ model Program {
   payoutsTotal String?
   brandAge     String?
   usersTotal   String?
+  approvalTime String?
   clickCount   Int      @default(0)
   randomWeight Float    @default(0)
   status       String   @default("pending")

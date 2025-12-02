@@ -22,6 +22,7 @@ export interface Program {
     payoutsTotal?: string;
     brandAge?: string;
     usersTotal?: string;
+    approvalTime?: string;
     clickCount: number;
     randomWeight: number;
     status: string;

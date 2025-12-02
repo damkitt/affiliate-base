@@ -55,6 +55,7 @@ export default function AddProgramModal({ isOpen, onClose, onSuccess }: AddProgr
 
   const AFFILIATE_RANGES = ["0-100", "100-500", "500-1k", "1k-5k", "5k-10k", "10k+"];
   const PAYOUT_RANGES = ["$0-$1k", "$1k-$10k", "$10k-$50k", "$50k-$100k", "$100k+"];
+  const APPROVAL_TIMES = ["1", "2-3", "3-5", "5-7", "7-14", "14+"];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -78,6 +79,7 @@ export default function AddProgramModal({ isOpen, onClose, onSuccess }: AddProgr
     minPayout: "",
     avgOrderValue: "",
     targetAudience: "",
+    approvalTime: "",
   });
 
   const validateEnglishInput = (value: string) => {
@@ -181,6 +183,7 @@ export default function AddProgramModal({ isOpen, onClose, onSuccess }: AddProgr
         avgOrderValue: formData.avgOrderValue || null,
         targetAudience: formData.targetAudience || null,
         additionalInfo: formData.additionalInfo || null,
+        approvalTime: formData.approvalTime || null,
       };
 
       console.log("Submitting payload:", payload);
@@ -680,6 +683,26 @@ export default function AddProgramModal({ isOpen, onClose, onSuccess }: AddProgr
                         <option key={range} value={range}>{range}</option>
                       ))}
                     </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide flex items-center gap-1.5">
+                      Approval Time
+                      <span className="text-[var(--text-tertiary)] font-normal normal-case">(optional)</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        name="approvalTime"
+                        value={formData.approvalTime}
+                        onChange={handleChange}
+                        className="w-full h-11 px-4 pr-16 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300 appearance-none"
+                      >
+                        <option value="">Select</option>
+                        {APPROVAL_TIMES.map((time) => (
+                          <option key={time} value={time}>{time}</option>
+                        ))}
+                      </select>
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[var(--text-tertiary)]">days</span>
+                    </div>
                   </div>
                 </div>
 

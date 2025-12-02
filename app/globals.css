@@ -17,7 +17,7 @@
   --accent-secondary: #4f46e5;
   --accent-dim: hsla(239, 84%, 67%, 0.08);
   --accent-glow: hsla(239, 84%, 67%, 0.15);
-  --spotlight: radial-gradient(circle at 50% 0%, hsla(242, 30%, 62%, 0.15), hsla(0, 0%, 100%, 0) 60%);
+  --spotlight: radial-gradient(ellipse 100% 80% at 50% 0%, hsla(239, 70%, 65%, 0.15), hsla(239, 70%, 65%, 0.08) 30%, hsla(239, 70%, 65%, 0.02) 60%, transparent 100%);
   --accent-foreground: #ffffff;
   --background: #ffffff;
   --foreground: #171717;
@@ -37,7 +37,7 @@
   --accent-secondary: #6366f1;
   --accent-dim: hsla(239, 84%, 67%, 0.12);
   --accent-glow: hsla(239, 84%, 67%, 0.2);
-  --spotlight: radial-gradient(circle at 50% 0%, hsla(0, 0%, 100%, 0.08), hsla(0, 0%, 0%, 0) 60%);
+  --spotlight: radial-gradient(ellipse 100% 80% at 50% 0%, hsla(239, 70%, 70%, 0.2), hsla(239, 70%, 70%, 0.1) 30%, hsla(239, 70%, 70%, 0.03) 60%, transparent 100%);
   --accent-foreground: #000000;
   --background: #050505;
   --foreground: #ededed;

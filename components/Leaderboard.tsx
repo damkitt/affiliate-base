@@ -90,7 +90,7 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
 
                             {/* Metrics */}
                             <div className="text-right flex flex-col items-end gap-1">
-                                <div className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-bold border border-emerald-500/20 tabular-nums">
+                                <div className="px-2.5 py-1 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] text-xs font-medium border border-[var(--border)] tabular-nums">
                                     {program.commissionRate}
                                 </div>
                             </div>
