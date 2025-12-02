@@ -19,7 +19,7 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
                 {/* Logo - Simple text */}
                 <div className="mb-8">
                     <span className="text-xs font-medium tracking-[0.2em] uppercase text-[var(--text-tertiary)]">
-                        Trust Affiliate
+                        Affiliate <span className="text-[var(--accent)]">Base</span>
                     </span>
                 </div>
 

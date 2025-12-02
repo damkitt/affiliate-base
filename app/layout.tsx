@@ -3,13 +3,13 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
-const inter = Inter({ 
+const inter = Inter({
     subsets: ["latin"],
     weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-    title: "AffiliateBase",
+    title: 'Affiliate Base - Verified Programs Directory',
     description: "The database of verified affiliate programs",
 };
 
