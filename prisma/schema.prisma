@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Program {
+  id           Int      @id @default(autoincrement())
+  name         String
+  tagline      String
+  description  String
+  category     String
+  websiteUrl   String
+  affiliateUrl String
+  country      String
+  xHandle      String?
+  email        String?
+  logoBase64   String?
+  commissionRate String @default("Not specified")
+  cookieDuration String?
+  payoutMethod String?
+  minPayout    String?
+  avgOrderValue String?
+  targetAudience String?
+  additionalInfo String?
+  affiliatesCount String?
+  payoutsLast30Days String?
+  payoutsTotal String?
+  brandAge     String?
+  usersTotal   String?
+  clickCount   Int      @default(0)
+  randomWeight Float    @default(0)
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
