@@ -11,58 +11,72 @@ import AddProgramModal from "@/components/AddProgramModal";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function Home() {
-    const { data: programs = [], error, isLoading, mutate } = useSWR<Program[]>("/api/programs", fetcher);
+  const { data, error, isLoading, mutate } = useSWR<Program[]>(
+    "/api/programs",
+    fetcher
+  );
 
-    const [search, setSearch] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+  // Ensure programs is always an array
+  const programs = Array.isArray(data) ? data : [];
 
-    // Derive available categories from data
-    const availableCategories = useMemo(() => {
-        const categories = new Set<string>();
-        programs.forEach((p) => {
-            if (p.category) categories.add(p.category);
-        });
-        return Array.from(categories);
-    }, [programs]);
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Filter programs
-    const filteredPrograms = useMemo(() => {
-        return programs.filter((p) => {
-            const matchesSearch =
-                p.name.toLowerCase().includes(search.toLowerCase()) ||
-                p.tagline.toLowerCase().includes(search.toLowerCase()) ||
-                p.description.toLowerCase().includes(search.toLowerCase());
+  // Derive available categories from data
+  const availableCategories = useMemo(() => {
+    const categories = new Set<string>();
+    for (const p of programs) {
+      if (p.category) categories.add(p.category);
+    }
+    return Array.from(categories);
+  }, [programs]);
 
-            const matchesCategory = selectedCategory ? p.category === selectedCategory : true;
+  // Filter programs
+  const filteredPrograms = useMemo(() => {
+    return programs.filter((p) => {
+      const matchesSearch =
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.tagline.toLowerCase().includes(search.toLowerCase()) ||
+        p.description.toLowerCase().includes(search.toLowerCase());
 
-            return matchesSearch && matchesCategory;
-        });
-    }, [programs, search, selectedCategory]);
+      const matchesCategory = selectedCategory
+        ? p.category === selectedCategory
+        : true;
 
-    return (
-        <div className="min-h-screen pb-20">
-            <Header
-                onAddProgram={() => setIsModalOpen(true)}
-                search={search}
-                setSearch={setSearch}
-            />
+      return matchesSearch && matchesCategory;
+    });
+  }, [programs, search, selectedCategory]);
 
-            <main className="animate-fade-in-up delay-100">
-                <SearchFilter
-                    selectedCategory={selectedCategory}
-                    setSelectedCategory={setSelectedCategory}
-                    availableCategories={availableCategories}
-                />
+  return (
+    <div className="min-h-screen pb-20">
+      <Header
+        onAddProgram={() => setIsModalOpen(true)}
+        search={search}
+        setSearch={setSearch}
+      />
 
-                <Leaderboard programs={filteredPrograms} isLoading={isLoading} />
-            </main>
+      <main className="animate-fade-in-up delay-100">
+        <SearchFilter
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          availableCategories={availableCategories}
+        />
 
-            <AddProgramModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSuccess={() => mutate()}
-            />
-        </div>
-    );
+        {error && (
+          <div className="text-center py-8 text-red-500">
+            Failed to load programs. Please try again later.
+          </div>
+        )}
+
+        <Leaderboard programs={filteredPrograms} isLoading={isLoading} />
+      </main>
+
+      <AddProgramModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => mutate()}
+      />
+    </div>
+  );
 }

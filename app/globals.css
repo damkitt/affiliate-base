@@ -4,43 +4,45 @@
 
 :root {
   --radius: 12px;
-  --bg: #ffffff;
-  --bg-secondary: #f7f7f8;
-  --bg-card: #ffffff;
-  --bg-elevated: #ffffff;
-  --text-primary: #171717;
-  --text-secondary: #666666;
-  --text-tertiary: #a3a3a3;
-  --border: #ebebeb;
-  --border-light: #f5f5f5;
-  --accent: #6366f1;
-  --accent-secondary: #4f46e5;
-  --accent-dim: hsla(239, 84%, 67%, 0.08);
-  --accent-glow: hsla(239, 84%, 67%, 0.15);
-  --spotlight: radial-gradient(ellipse 100% 80% at 50% 0%, hsla(239, 70%, 65%, 0.15), hsla(239, 70%, 65%, 0.08) 30%, hsla(239, 70%, 65%, 0.02) 60%, transparent 100%);
-  --accent-foreground: #ffffff;
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: oklch(100% 0 0);
+  --bg-secondary: oklch(97.5% 0 0);
+  --bg-card: oklch(100% 0 0);
+  --bg-elevated: oklch(100% 0 0);
+  --text-primary: oklch(20% 0 0);
+  --text-secondary: oklch(50% 0 0);
+  --text-tertiary: oklch(70% 0 0);
+  --border: oklch(93% 0 0);
+  --border-light: oklch(96.5% 0 0);
+  --clr-green: oklch(68% 0.19 145);
+  --accent: var(--clr-green);
+  --accent-secondary: var(--clr-green);
+  --accent-dim: oklch(68% 0.19 145 / 0.08);
+  --accent-glow: oklch(68% 0.19 145 / 0.25);
+  --spotlight: radial-gradient(ellipse 100% 80% at 50% 0%, oklch(68% 0.19 145 / 0.35), oklch(68% 0.19 145 / 0.18) 30%, oklch(68% 0.19 145 / 0.05) 60%, transparent 100%);
+  --accent-foreground: oklch(100% 0 0);
+  --background: oklch(100% 0 0);
+  --foreground: oklch(20% 0 0);
 }
 
 .dark {
-  --bg: #050505;
-  --bg-secondary: #0f0f0f;
-  --bg-card: #0a0a0a;
-  --bg-elevated: #141414;
-  --text-primary: #ededed;
-  --text-secondary: #a1a1a1;
-  --text-tertiary: #525252;
-  --border: #262626;
-  --border-light: #1f1f1f;
-  --accent: #818cf8;
-  --accent-secondary: #6366f1;
-  --accent-dim: hsla(239, 84%, 67%, 0.12);
-  --accent-glow: hsla(239, 84%, 67%, 0.2);
-  --spotlight: radial-gradient(ellipse 100% 80% at 50% 0%, hsla(239, 70%, 70%, 0.2), hsla(239, 70%, 70%, 0.1) 30%, hsla(239, 70%, 70%, 0.03) 60%, transparent 100%);
-  --accent-foreground: #000000;
-  --background: #050505;
-  --foreground: #ededed;
+  --bg: oklch(10% 0 0);
+  --bg-secondary: oklch(15% 0 0);
+  --bg-card: oklch(12% 0 0);
+  --bg-elevated: oklch(18% 0 0);
+  --text-primary: oklch(95% 0 0);
+  --text-secondary: oklch(68% 0 0);
+  --text-tertiary: oklch(42% 0 0);
+  --border: oklch(25% 0 0);
+  --border-light: oklch(20% 0 0);
+  --clr-green: oklch(68% 0.19 145);
+  --accent: var(--clr-green);
+  --accent-secondary: var(--clr-green);
+  --accent-dim: oklch(68% 0.19 145 / 0.12);
+  --accent-glow: oklch(68% 0.19 145 / 0.3);
+  --spotlight: radial-gradient(ellipse 100% 80% at 50% 0%, oklch(70% 0.20 145 / 0.4), oklch(70% 0.20 145 / 0.2) 30%, oklch(70% 0.20 145 / 0.06) 60%, transparent 100%);
+  --accent-foreground: oklch(10% 0 0);
+  --background: oklch(10% 0 0);
+  --foreground: oklch(95% 0 0);
 }
 
 * {
