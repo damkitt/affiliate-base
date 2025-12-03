@@ -62,7 +62,7 @@ export async function POST(
       })
       .inc();
 
-    await pushMetrics("clicks");
+    await pushMetrics("clicks", { instance: "api", program_id: id });
 
     const response: ClickResponse = {
       success: true,

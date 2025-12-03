@@ -12,7 +12,10 @@ interface ProgramCTAProps {
 
 export function ProgramCTA({ program, onApplyClick }: ProgramCTAProps) {
   return (
-    <div className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)]" style={{ boxShadow: 'var(--shadow-card)' }}>
+    <div
+      className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)]"
+      style={{ boxShadow: "var(--shadow-card)" }}
+    >
       {/* Commission Highlight */}
       <div className="mb-5 p-4 rounded-lg bg-[var(--accent-dim)] border border-[var(--accent-solid)]/20">
         <div className="text-2xl font-bold text-[var(--accent-solid)] mb-0.5">
@@ -27,7 +30,7 @@ export function ProgramCTA({ program, onApplyClick }: ProgramCTAProps) {
       <button
         onClick={onApplyClick}
         className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 text-white font-semibold rounded-lg transition-all mb-2 hover:opacity-95 shadow-lg"
-        style={{ background: 'var(--accent-gradient-dark)' }}
+        style={{ background: "var(--accent-gradient-dark)" }}
       >
         Apply to Program
         <HiArrowTopRightOnSquare className="w-4 h-4" />

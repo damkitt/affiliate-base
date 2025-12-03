@@ -4,6 +4,7 @@ import { Program } from "@/types";
 import { CATEGORY_ICONS } from "@/constants";
 import { HiArrowUpRight, HiEye } from "react-icons/hi2";
 import Link from "next/link";
+import useSWR from "swr";
 
 interface LeaderboardProps {
   programs: Program[];
@@ -11,6 +12,11 @@ interface LeaderboardProps {
 }
 
 export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
+  const fetcher = (url: string) => fetch(url).then((r) => r.json());
+  const { data: clicksMap } = useSWR<Record<string, number>>(
+    "/api/metrics/clicks",
+    fetcher
+  );
   if (isLoading) {
     return (
       <div className="max-w-[800px] mx-auto px-6 py-8">
@@ -68,8 +74,16 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
             >
               {/* Rank */}
               <div className="w-10 h-10 flex items-center justify-center">
-                {index === 0 ? <span className="text-2xl">🥇</span> : index === 1 ? <span className="text-2xl">🥈</span> : index === 2 ? <span className="text-2xl">🥉</span> : (
-                  <span className="text-base font-semibold text-[var(--text-secondary)]">{index + 1}</span>
+                {index === 0 ? (
+                  <span className="text-2xl">🥇</span>
+                ) : index === 1 ? (
+                  <span className="text-2xl">🥈</span>
+                ) : index === 2 ? (
+                  <span className="text-2xl">🥉</span>
+                ) : (
+                  <span className="text-base font-semibold text-[var(--text-secondary)]">
+                    {index + 1}
+                  </span>
                 )}
               </div>
 
@@ -108,7 +122,7 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
                 {/* Interest/Views */}
                 <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] text-xs font-medium border border-[var(--border)] tabular-nums">
                   <HiEye className="w-3.5 h-3.5 text-[var(--accent-solid)]" />
-                  <span>{program.clicksCount || 0}</span>
+                  <span>{clicksMap?.[program.id] ?? 0}</span>
                 </div>
 
                 {/* Commission */}

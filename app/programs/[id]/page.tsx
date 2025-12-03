@@ -14,11 +14,12 @@ import {
   ProgramHowItWorks,
   InterestChart,
 } from "@/components/ProgramDetail";
-import { 
-  generateFingerprint, 
-  wasViewedInSession, 
-  markViewedInSession 
+import {
+  generateFingerprint,
+  wasViewedInSession,
+  markViewedInSession,
 } from "@/lib/fingerprint";
+import useSWRImmutable from "swr/immutable";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -26,13 +27,18 @@ export default function ProgramDetailPage() {
   const params = useParams();
   const viewTracked = useRef(false);
   const [fingerprint, setFingerprint] = useState<string | null>(null);
-  
+
   const {
     data: program,
     error,
     isLoading,
   } = useSWR<Program>(
     params?.id ? `/api/programs/${params.id}` : null,
+    fetcher
+  );
+
+  const { data: clicksMap } = useSWRImmutable<Record<string, number>>(
+    "/api/metrics/clicks",
     fetcher
   );
 
@@ -49,11 +55,11 @@ export default function ProgramDetailPage() {
         viewTracked.current = true;
         return;
       }
-      
+
       viewTracked.current = true;
       markViewedInSession(program.id);
-      
-      fetch(`/api/programs/${program.id}/view`, { 
+
+      fetch(`/api/programs/${program.id}/view`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,7 +132,10 @@ export default function ProgramDetailPage() {
             <ProgramHowItWorks />
 
             {/* Interest Analytics - instead of FAQ */}
-            <InterestChart programId={program.id} totalClicks={program.clicksCount || 0} />
+            <InterestChart
+              programId={program.id}
+              totalClicks={clicksMap?.[program.id] ?? 0}
+            />
 
             {/* Additional Info */}
             {program.additionalInfo && (
