@@ -1,0 +1,330 @@
+"use client";
+
+import { useState, useRef, ChangeEvent } from "react";
+import {
+  HiXMark,
+  HiArrowRight,
+  HiArrowLeft,
+  HiCheck,
+  HiSparkles,
+} from "react-icons/hi2";
+import type { FormData } from "./types";
+import { STEPS, INITIAL_FORM_DATA } from "./constants";
+import {
+  validateEnglishInput,
+  shouldValidateField,
+  canProceedToStep,
+  canSubmitForm,
+} from "./validation";
+import { buildPayload } from "./utils";
+import { ProgressBar } from "./ProgressBar";
+import { SuccessModal } from "./SuccessModal";
+import { BasicInfoStep } from "./FormSteps/BasicInfoStep";
+import { DetailsStep } from "./FormSteps/DetailsStep";
+import { ContactStep } from "./FormSteps/ContactStep";
+
+interface AddProgramModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export default function AddProgramModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: AddProgramModalProps) {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+  const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
+  const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<"left" | "right">(
+    "right"
+  );
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+
+    if (shouldValidateField(name) && !validateEnglishInput(value)) {
+      return;
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLogoUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLogoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to MinIO
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload/avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const data = await response.json();
+      setFormData((prev) => ({ ...prev, logoUrl: data.url }));
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Failed to upload logo. Please try again.");
+      setLogoPreview(null);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStep < 3 && canProceedToStep(currentStep + 1, formData)) {
+      setSlideDirection("right");
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setSlideDirection("left");
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!canSubmitForm(formData)) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const payload = buildPayload(formData);
+
+      console.log("Submitting payload:", payload);
+
+      const response = await fetch("/api/programs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Success:", data);
+        onSuccess();
+        setShowSuccess(true);
+      } else {
+        console.error("API Error:", response.status, data);
+        alert(`Error: ${data.error || "Failed to create program"}`);
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error("Network Error:", error);
+      alert("Network error. Please try again.");
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData(INITIAL_FORM_DATA);
+    setLogoPreview(null);
+    setCurrentStep(1);
+    setShowSuccess(false);
+  };
+
+  const handleSuccessClose = () => {
+    onClose();
+    resetForm();
+  };
+
+  if (!isOpen) return null;
+
+  if (showSuccess) {
+    return <SuccessModal onClose={handleSuccessClose} />;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-2xl bg-[var(--bg-card)] rounded-xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-scaleIn border border-[var(--border)]">
+        {/* Header */}
+        <div className="relative px-6 pt-6 pb-4">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[var(--bg-secondary)] transition-all duration-300 hover:rotate-90"
+          >
+            <HiXMark className="w-5 h-5 text-[var(--text-tertiary)]" />
+          </button>
+
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--bg-secondary)] rounded-full mb-3">
+              <HiSparkles className="w-4 h-4 text-[var(--text-tertiary)]" />
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
+                Add Program
+              </span>
+            </div>
+            <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              {STEPS[currentStep - 1].title}
+            </h2>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
+              {STEPS[currentStep - 1].description}
+            </p>
+          </div>
+
+          <ProgressBar steps={STEPS} currentStep={currentStep} />
+        </div>
+
+        {/* Form Content */}
+        <div className="flex-1 overflow-auto">
+          <div
+            className={`h-full overflow-y-auto px-6 py-4 transition-all duration-500 ease-out ${
+              slideDirection === "right"
+                ? "animate-slideInRight"
+                : "animate-slideInLeft"
+            }`}
+            key={currentStep}
+          >
+            {currentStep === 1 && (
+              <BasicInfoStep
+                formData={formData}
+                logoPreview={logoPreview}
+                isUploading={isUploading}
+                fileInputRef={fileInputRef}
+                onFormChange={handleChange}
+                onLogoUpload={handleLogoUpload}
+                onCategorySelect={(category) =>
+                  setFormData((prev) => ({ ...prev, category }))
+                }
+              />
+            )}
+
+            {currentStep === 2 && (
+              <DetailsStep
+                formData={formData}
+                monthDropdownOpen={monthDropdownOpen}
+                yearDropdownOpen={yearDropdownOpen}
+                countryDropdownOpen={countryDropdownOpen}
+                onFormChange={handleChange}
+                onSetMonth={(month) => {
+                  setFormData((prev) => ({ ...prev, foundingMonth: month }));
+                  setMonthDropdownOpen(false);
+                }}
+                onSetYear={(year) => {
+                  setFormData((prev) => ({ ...prev, foundingYear: year }));
+                  setYearDropdownOpen(false);
+                }}
+                onSetCountry={(country) => {
+                  setFormData((prev) => ({ ...prev, country }));
+                  setCountryDropdownOpen(false);
+                }}
+                onToggleMonthDropdown={() => {
+                  setMonthDropdownOpen(!monthDropdownOpen);
+                  setYearDropdownOpen(false);
+                }}
+                onToggleYearDropdown={() => {
+                  setYearDropdownOpen(!yearDropdownOpen);
+                  setMonthDropdownOpen(false);
+                }}
+                onToggleCountryDropdown={() =>
+                  setCountryDropdownOpen(!countryDropdownOpen)
+                }
+              />
+            )}
+
+            {currentStep === 3 && (
+              <ContactStep
+                formData={formData}
+                logoPreview={logoPreview}
+                onFormChange={handleChange}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between p-5 border-t border-[var(--border)]">
+          <button
+            type="button"
+            onClick={currentStep === 1 ? onClose : handleBack}
+            className="h-10 px-4 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors duration-150 flex items-center gap-2"
+          >
+            {currentStep === 1 ? (
+              "Cancel"
+            ) : (
+              <>
+                <HiArrowLeft className="w-4 h-4" />
+                Back
+              </>
+            )}
+          </button>
+
+          {currentStep < 3 ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={!canProceedToStep(currentStep + 1, formData)}
+              className={`h-10 px-5 rounded-lg text-sm font-medium transition-colors duration-150 flex items-center gap-2 ${
+                canProceedToStep(currentStep + 1, formData)
+                  ? "bg-[var(--accent)] text-[var(--bg)] hover:opacity-90"
+                  : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed"
+              }`}
+            >
+              Continue
+              <HiArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting || !canSubmitForm(formData)}
+              className={`h-10 px-5 rounded-lg text-sm font-medium transition-colors duration-150 flex items-center gap-2 ${
+                canSubmitForm(formData) && !isSubmitting
+                  ? "bg-[var(--accent)] text-[var(--bg)] hover:opacity-90"
+                  : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed"
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <HiCheck className="w-4 h-4" />
+                  Add Program
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

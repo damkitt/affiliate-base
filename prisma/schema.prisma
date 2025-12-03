@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,33 +8,82 @@ datasource db {
 }
 
 model Program {
-  id           Int      @id @default(autoincrement())
-  name         String
-  tagline      String
-  description  String
-  category     String
-  websiteUrl   String
-  affiliateUrl String
-  country      String
-  xHandle      String?
-  email        String?
-  logoBase64   String?
-  commissionRate String @default("Not specified")
-  cookieDuration String?
-  payoutMethod String?
-  minPayout    String?
-  avgOrderValue String?
-  targetAudience String?
-  additionalInfo String?
-  affiliatesCount String?
-  payoutsLast30Days String?
-  payoutsTotal String?
-  brandAge     String?
-  usersTotal   String?
-  approvalTime String?
-  clickCount   Int      @default(0)
-  randomWeight Float    @default(0)
-  status       String   @default("pending")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                   String    @id @default(uuid())
+  programName          String    @unique @default("N/A") @map("program_name")
+  tagline              String    @default("No tagline provided.")
+  description          String    @default("No description provided.")
+  category             String    @default("Not specified")
+  websiteUrl           String    @unique @map("website_url")
+  affiliateUrl         String    @unique @map("affiliate_url")
+  country              Country   @default(Other)
+  xHandle              String?   @map("x_handle")
+  email                String?
+  logoUrl              String?   @map("logo_url")
+  commissionRate       Int       @default(0)
+  commissionDuration   String?   @map("commission_duration")
+  cookieDuration       Int?      @map("cookie_duration")
+  payoutMethod         String?   @map("payout_method")
+  minPayoutValue       Int?      @map("min_payout_value")
+  avgOrderValue        Int?      @map("avg_order_value")
+  targetAudience       String?   @map("target_audience")
+  additionalInfo       String?   @map("additional_info")
+  affiliatesCountRange String?   @map("affiliates_count_range")
+  payoutsTotalRange    String?   @map("payouts_total_range")
+  foundingDate         DateTime? @map("founding_date")
+  approvalTimeRange    String?   @map("approval_time_range")
+  clicksCount          Int       @default(0) @map("clicks_count")
+  approvalStatus       Boolean   @default(true) @map("approval_status")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt
+}
+
+enum Country {
+  US
+  GB
+  DE
+  FR
+  ES
+  IT
+  NL
+  BE
+  AT
+  CH
+  SE
+  NO
+  DK
+  FI
+  PL
+  CZ
+  PT
+  IE
+  RU
+  UA
+  CA
+  MX
+  BR
+  AR
+  CO
+  CL
+  AU
+  NZ
+  JP
+  KR
+  CN
+  HK
+  SG
+  IN
+  ID
+  TH
+  VN
+  MY
+  PH
+  AE
+  SA
+  IL
+  TR
+  EG
+  ZA
+  NG
+  KE
+  Other
 }

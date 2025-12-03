@@ -36,7 +36,7 @@ export default function Home() {
   const filteredPrograms = useMemo(() => {
     return programs.filter((p) => {
       const matchesSearch =
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.programName.toLowerCase().includes(search.toLowerCase()) ||
         p.tagline.toLowerCase().includes(search.toLowerCase()) ||
         p.description.toLowerCase().includes(search.toLowerCase());
 

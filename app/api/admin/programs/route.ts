@@ -1,39 +1,54 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
+/**
+ * GET /api/admin/programs
+ * Retrieves programs based on query parameters
+ */
 export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
+  const { searchParams } = new URL(request.url);
+  const status = searchParams.get("status");
 
-    try {
-        const where: any = {};
-        if (status) {
-            where.status = status;
-        }
+  const where = status === "pending" ? { approvalStatus: false } : {};
 
-        const programs = await prisma.program.findMany({
-            where,
-            orderBy: {
-                createdAt: 'desc'
-            }
-        });
-        return NextResponse.json(programs);
-    } catch (error) {
-        return NextResponse.json({ error: "Failed to fetch programs" }, { status: 500 });
-    }
+  const programs = await prisma.program.findMany({
+    where,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return NextResponse.json(programs);
 }
 
+/**
+ * PATCH /api/admin/programs
+ * Updates the approval status of a program
+ */
 export async function PATCH(request: Request) {
-    try {
-        const { id, status } = await request.json();
+  try {
+    const { id, status } = await request.json();
 
-        const program = await prisma.program.update({
-            where: { id: parseInt(id) },
-            data: { status }
-        });
-
-        return NextResponse.json(program);
-    } catch (error) {
-        return NextResponse.json({ error: "Failed to update program" }, { status: 500 });
+    if (!id) {
+      return NextResponse.json(
+        { error: "Missing required field: id" },
+        { status: 400 }
+      );
     }
+
+    const approvalStatus = status === "approved";
+
+    const program = await prisma.program.update({
+      where: { id },
+      data: { approvalStatus },
+    });
+
+    return NextResponse.json(program);
+  } catch (error) {
+    console.error("Error updating program status:", error);
+    return NextResponse.json(
+      { error: "Failed to update program" },
+      { status: 500 }
+    );
+  }
 }
