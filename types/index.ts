@@ -1,12 +1,7 @@
-/**
- * Core domain types for AffiliateBase platform
- */
+import { CATEGORIES, COUNTRIES, VALID_COUNTRIES } from "@/constants";
+import { type JWTPayload } from "jose";
 
-// =============================================================================
-// Program Types
-// =============================================================================
-
-export interface Program {
+export type Program = {
   readonly id: string;
   readonly programName: string;
   readonly tagline: string;
@@ -34,100 +29,88 @@ export interface Program {
   readonly approvalStatus: boolean;
   readonly createdAt: Date;
   readonly updatedAt: Date;
-}
+};
 
-export type ProgramCreateInput = Omit<Program, 'id' | 'createdAt' | 'updatedAt' | 'clicksCount'>;
+export type ProgramCreateInput = Omit<
+  Program,
+  "id" | "createdAt" | "updatedAt" | "clicksCount"
+>;
 export type ProgramUpdateInput = Partial<ProgramCreateInput>;
 
-// =============================================================================
-// Analytics Types
-// =============================================================================
-
-export interface AnalyticsEvent {
+export type AnalyticsEvent = {
   readonly id: string;
   readonly programId: string;
-  readonly eventType: 'view' | 'click';
+  readonly eventType: "view" | "click";
   readonly fingerprint: string;
   readonly ipHash: string;
   readonly userAgent?: string | null;
   readonly referer?: string | null;
   readonly country?: string | null;
   readonly createdAt: Date;
-}
+};
 
-export interface AnalyticsData {
+export type AnalyticsData = {
   readonly chartData: ReadonlyArray<{ day: string; clicks: number }>;
   readonly totalViews: number;
   readonly todayViews: number;
   readonly weeklyViews: number;
-}
+};
 
-// =============================================================================
-// Categories
-// =============================================================================
+export type Category = (typeof CATEGORIES)[number];
 
-export const CATEGORIES = [
-  "Artificial Intelligence",
-  "SaaS",
-  "Developer Tools",
-  "Fintech",
-  "Productivity",
-  "Marketing",
-  "E-commerce",
-  "Design Tools",
-  "No-Code",
-  "Analytics",
-  "Education",
-  "Health & Fitness",
-  "Social Media",
-  "Content Creation",
-  "Sales",
-  "Customer Support",
-  "Recruiting & HR",
-  "Real Estate",
-  "Travel",
-  "Security",
-] as const;
-
-export type Category = typeof CATEGORIES[number];
-
-// Icon mapping for categories (Heroicons 2)
-export const CATEGORY_ICONS: Readonly<Record<Category, string>> = {
-  "Artificial Intelligence": "HiSparkles",
-  "SaaS": "HiCloud",
-  "Developer Tools": "HiWrenchScrewdriver",
-  "Fintech": "HiCreditCard",
-  "Productivity": "HiBolt",
-  "Marketing": "HiMegaphone",
-  "E-commerce": "HiShoppingCart",
-  "Design Tools": "HiPaintBrush",
-  "No-Code": "HiPuzzlePiece",
-  "Analytics": "HiChartBar",
-  "Education": "HiAcademicCap",
-  "Health & Fitness": "HiHeart",
-  "Social Media": "HiDevicePhoneMobile",
-  "Content Creation": "HiPencilSquare",
-  "Sales": "HiBanknotes",
-  "Customer Support": "HiChatBubbleLeftRight",
-  "Recruiting & HR": "HiUserGroup",
-  "Real Estate": "HiHomeModern",
-  "Travel": "HiPaperAirplane",
-  "Security": "HiLockClosed",
-} as const;
-
-// =============================================================================
-// API Response Types
-// =============================================================================
-
-export interface ApiResponse<T> {
+export type ApiResponse<T> = {
   readonly data?: T;
   readonly error?: string;
   readonly message?: string;
-}
+};
 
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
+export type PaginatedResponse<T> = ApiResponse<T[]> & {
   readonly total: number;
   readonly page: number;
   readonly limit: number;
   readonly hasMore: boolean;
-}
+};
+
+export type AdminTokenPayload = JWTPayload & {
+  role: "admin";
+  jwtNumber: number;
+  iat: number;
+  exp: number;
+};
+
+export type ValidCountry = (typeof VALID_COUNTRIES)[number];
+
+export type CreateProgramBody = {
+  programName: string;
+  websiteUrl: string;
+  affiliateUrl: string;
+  tagline?: string;
+  description?: string;
+  category?: string;
+  country?: string;
+  xHandle?: string;
+  email?: string;
+  logoUrl?: string;
+  commissionRate?: number;
+  commissionDuration?: string;
+  cookieDuration?: number;
+  payoutMethod?: string;
+  minPayoutValue?: number;
+  avgOrderValue?: number;
+  targetAudience?: string;
+  additionalInfo?: string;
+  affiliatesCountRange?: string;
+  payoutsTotalRange?: string;
+  foundingDate?: string;
+  approvalTimeRange?: string;
+};
+
+export type NavigatorWithExtras = Navigator & {
+  deviceMemory?: number;
+};
+
+export type WindowWithWebkit = Window & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
+export type CountryCode = (typeof COUNTRIES)[number]["code"];

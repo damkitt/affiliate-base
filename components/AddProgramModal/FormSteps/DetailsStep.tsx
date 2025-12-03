@@ -5,7 +5,6 @@ import {
   HiChevronDown,
   HiSparkles,
 } from "react-icons/hi2";
-import { COUNTRIES } from "@/lib/countries";
 import { FormData } from "../types";
 import {
   MONTHS,
@@ -14,6 +13,7 @@ import {
   PAYOUT_RANGES,
   APPROVAL_TIMES,
 } from "../constants";
+import { COUNTRIES } from "@/constants";
 
 interface DetailsStepProps {
   formData: FormData;

@@ -1,6 +1,7 @@
 import { HiCurrencyDollar, HiClock, HiMapPin } from "react-icons/hi2";
-import { Program, CATEGORY_ICONS } from "@/types";
+import { CATEGORY_ICONS } from "@/constants";
 import { CategoryIcon } from "@/components/CategoryIcon";
+import { Program } from "@/types";
 
 interface ProgramHeroProps {
   readonly program: Program;
@@ -16,14 +17,20 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
   return (
     <div className="mb-10">
       {/* Hero Card */}
-      <div className="relative rounded-xl p-6 md:p-8 bg-[var(--bg-card)] border border-[var(--border)] transition-all duration-300 animate-fade-in-up" style={{ boxShadow: 'var(--shadow-card)' }}>
+      <div
+        className="relative rounded-xl p-6 md:p-8 bg-[var(--bg-card)] border border-[var(--border)] transition-all duration-300 animate-fade-in-up"
+        style={{ boxShadow: "var(--shadow-card)" }}
+      >
         {/* Ambient Glow */}
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[var(--accent-solid)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
         <div className="relative flex flex-col md:flex-row items-start gap-6 md:gap-8">
           {/* Logo */}
           <div className="shrink-0">
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] flex items-center justify-center overflow-hidden" style={{ boxShadow: 'var(--shadow-sm)' }}>
+            <div
+              className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] flex items-center justify-center overflow-hidden"
+              style={{ boxShadow: "var(--shadow-sm)" }}
+            >
               <img
                 src={logoSrc}
                 alt={program.programName}
@@ -110,7 +117,10 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
               <button
                 onClick={onApplyClick}
                 className="inline-flex items-center gap-2 px-6 py-2.5 text-[var(--accent-foreground)] rounded-lg font-medium transition-all hover:opacity-95"
-                style={{ background: 'var(--accent-gradient-dark)', boxShadow: 'var(--shadow-md)' }}
+                style={{
+                  background: "var(--accent-gradient-dark)",
+                  boxShadow: "var(--shadow-md)",
+                }}
               >
                 Apply Now
                 <svg
@@ -135,7 +145,7 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
                   }
                 }}
                 className="px-6 py-2.5 bg-[var(--bg-card)] text-[var(--text-primary)] rounded-lg font-medium border border-[var(--border)] hover:bg-[var(--bg-secondary)] hover:border-[var(--accent-solid)] transition-all"
-                style={{ boxShadow: 'var(--shadow-sm)' }}
+                style={{ boxShadow: "var(--shadow-sm)" }}
               >
                 Visit Website
               </button>

@@ -1,12 +1,12 @@
 /**
  * Click Tracking API
- * 
+ *
  * Records affiliate link clicks with Prometheus metrics tracking.
  */
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { clicksTotal } from "@/lib/metrics";
+import { clicksTotal, pushMetrics } from "@/lib/metrics";
 import type { Program } from "@prisma/client";
 
 // =============================================================================
@@ -28,7 +28,7 @@ interface ClickResponse {
 
 /**
  * POST /api/programs/[id]/click
- * 
+ *
  * Increments the click counter for a program and tracks in Prometheus.
  * Called when user clicks an affiliate link.
  */
@@ -62,6 +62,8 @@ export async function POST(
       })
       .inc();
 
+    await pushMetrics("clicks");
+
     const response: ClickResponse = {
       success: true,
       clicksCount: program.clicksCount,
@@ -76,10 +78,7 @@ export async function POST(
       error instanceof Error &&
       error.message.includes("Record to update not found")
     ) {
-      return NextResponse.json(
-        { error: "Program not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Program not found" }, { status: 404 });
     }
 
     return NextResponse.json(

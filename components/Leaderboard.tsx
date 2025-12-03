@@ -1,6 +1,7 @@
 "use client";
 
-import { Program, CATEGORY_ICONS } from "@/types";
+import { Program } from "@/types";
+import { CATEGORY_ICONS } from "@/constants";
 import { HiArrowUpRight, HiEye } from "react-icons/hi2";
 import Link from "next/link";
 
@@ -57,22 +58,27 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
               key={program.id}
               href={`/programs/${program.id}`}
               className="group flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--accent-solid)] transition-all duration-200 cursor-pointer"
-              style={{ boxShadow: 'var(--shadow-card)' }}
-              onMouseEnter={(e) => e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)'}
-              onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'var(--shadow-card)'}
+              style={{ boxShadow: "var(--shadow-card)" }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.boxShadow = "var(--shadow-card-hover)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.boxShadow = "var(--shadow-card)")
+              }
             >
               {/* Rank */}
               <div
                 className={`
                               w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border
-                              ${index === 0
-                    ? "text-amber-400 bg-amber-400/10 border-amber-400/20"
-                    : index === 1
-                      ? "text-slate-300 bg-slate-300/10 border-slate-300/20"
-                      : index === 2
-                        ? "text-amber-700 bg-amber-700/10 border-amber-700/20"
-                        : "text-[var(--text-tertiary)] bg-[var(--bg-secondary)] border-[var(--border)]"
-                  }
+                              ${
+                                index === 0
+                                  ? "text-amber-400 bg-amber-400/10 border-amber-400/20"
+                                  : index === 1
+                                  ? "text-slate-300 bg-slate-300/10 border-slate-300/20"
+                                  : index === 2
+                                  ? "text-amber-700 bg-amber-700/10 border-amber-700/20"
+                                  : "text-[var(--text-tertiary)] bg-[var(--bg-secondary)] border-[var(--border)]"
+                              }
                             `}
               >
                 {index + 1}
@@ -115,7 +121,7 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
                   <HiEye className="w-3.5 h-3.5" />
                   <span>{program.clicksCount || 0}</span>
                 </div>
-                
+
                 {/* Commission */}
                 <div className="px-2.5 py-1 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] text-xs font-medium border border-[var(--border)] tabular-nums">
                   {program.commissionRate}%

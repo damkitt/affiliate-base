@@ -120,8 +120,6 @@ export default function AddProgramModal({
     try {
       const payload = buildPayload(formData);
 
-      console.log("Submitting payload:", payload);
-
       const response = await fetch("/api/programs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -131,7 +129,6 @@ export default function AddProgramModal({
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Success:", data);
         onSuccess();
         setShowSuccess(true);
       } else {

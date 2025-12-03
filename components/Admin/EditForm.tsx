@@ -1,5 +1,5 @@
+import { CATEGORIES } from "@/constants";
 import type { Program } from "@/types";
-import { CATEGORIES } from "@/types";
 
 interface EditFormProps {
   program: Partial<Program>;

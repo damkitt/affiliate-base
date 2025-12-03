@@ -1,31 +1,14 @@
-/**
- * Program View Analytics API
- * 
- * POST: Track unique page views with anti-fraud protection
- * GET: Retrieve analytics data for charts
- */
-
 import { NextResponse } from "next/server";
 import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
-import { pageViewsTotal, fraudBlockedTotal } from "@/lib/metrics";
+import { pageViewsTotal, fraudBlockedTotal, pushMetrics } from "@/lib/metrics";
 
-// =============================================================================
-// Constants
-// =============================================================================
+export const runtime = "nodejs";
 
-/** Time window for duplicate detection (minutes) */
 const ANTI_FRAUD_WINDOW_MINUTES = 60;
-
-/** Minimum valid fingerprint length */
 const MIN_FINGERPRINT_LENGTH = 32;
 
-/** Days of the week for chart labels */
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
-
-// =============================================================================
-// Types
-// =============================================================================
 
 interface ViewRequestBody {
   fingerprint: string;
@@ -45,11 +28,8 @@ interface AnalyticsResponse {
   weeklyViews: number;
 }
 
+// в App Router params обычно не Promise, но если у тебя уже так — можно оставить
 type RouteContext = { params: Promise<{ id: string }> };
-
-// =============================================================================
-// Utility Functions
-// =============================================================================
 
 function hashIP(ip: string): string {
   const salt = process.env.IP_SALT || "affiliatebase-salt";
@@ -60,12 +40,7 @@ function hashIP(ip: string): string {
 }
 
 function getClientIP(request: Request): string {
-  // Check headers in order of reliability
-  const headers = [
-    "cf-connecting-ip",  // Cloudflare
-    "x-real-ip",         // Nginx
-    "x-forwarded-for",   // Standard proxy
-  ];
+  const headers = ["cf-connecting-ip", "x-real-ip", "x-forwarded-for"];
 
   for (const header of headers) {
     const value = request.headers.get(header);
@@ -89,10 +64,6 @@ function getTodayStart(): Date {
   return date;
 }
 
-// =============================================================================
-// POST: Track View
-// =============================================================================
-
 export async function POST(
   request: Request,
   { params }: RouteContext
@@ -100,10 +71,14 @@ export async function POST(
   try {
     const { id: programId } = await params;
 
-    // Parse and validate request body
-    const body = await request.json().catch(() => null) as ViewRequestBody | null;
-    
-    if (!body?.fingerprint || body.fingerprint.length < MIN_FINGERPRINT_LENGTH) {
+    const body = (await request
+      .json()
+      .catch(() => null)) as ViewRequestBody | null;
+
+    if (
+      !body?.fingerprint ||
+      body.fingerprint.length < MIN_FINGERPRINT_LENGTH
+    ) {
       return NextResponse.json(
         { error: "Valid fingerprint required" },
         { status: 400 }
@@ -115,9 +90,10 @@ export async function POST(
     const userAgent = request.headers.get("user-agent") ?? undefined;
     const referer = request.headers.get("referer") ?? undefined;
 
-    // Check for duplicate within time window
     const windowStart = new Date();
-    windowStart.setMinutes(windowStart.getMinutes() - ANTI_FRAUD_WINDOW_MINUTES);
+    windowStart.setMinutes(
+      windowStart.getMinutes() - ANTI_FRAUD_WINDOW_MINUTES
+    );
 
     const isDuplicate = await prisma.analyticsEvent.findFirst({
       where: {
@@ -130,8 +106,14 @@ export async function POST(
     });
 
     if (isDuplicate) {
-      // Track blocked attempt
-      fraudBlockedTotal.labels({ program_id: programId, reason: "duplicate" }).inc();
+      fraudBlockedTotal
+        .labels({ program_id: programId, reason: "duplicate" })
+        .inc();
+
+      await pushMetrics("views", {
+        outcome: "duplicate",
+        route: "/api/programs/[id]/view",
+      });
 
       const program = await prisma.program.findUnique({
         where: { id: programId },
@@ -146,7 +128,6 @@ export async function POST(
       });
     }
 
-    // Record new event and increment counter atomically
     const [, program] = await prisma.$transaction([
       prisma.analyticsEvent.create({
         data: {
@@ -164,10 +145,14 @@ export async function POST(
       }),
     ]);
 
-    // Track in Prometheus
     pageViewsTotal
       .labels({ program_id: programId, program_name: program.programName })
       .inc();
+
+    await pushMetrics("views", {
+      outcome: "ok",
+      route: "/api/programs/[id]/view",
+    });
 
     return NextResponse.json({
       success: true,
@@ -176,16 +161,19 @@ export async function POST(
     });
   } catch (error) {
     console.error("[Analytics] Error tracking view:", error);
+
+    // опционально можно ещё тут пушнуть метрику с outcome: "error"
+    await pushMetrics("views", {
+      outcome: "error",
+      route: "/api/programs/[id]/view",
+    }).catch(() => {});
+
     return NextResponse.json(
       { error: "Failed to track view" },
       { status: 500 }
     );
   }
 }
-
-// =============================================================================
-// GET: Fetch Analytics
-// =============================================================================
 
 export async function GET(
   _request: Request,
@@ -196,7 +184,6 @@ export async function GET(
     const sevenDaysAgo = getDateRangeStart(7);
     const todayStart = getTodayStart();
 
-    // Fetch all data in parallel
     const [weeklyEvents, totalViews, todayViews] = await Promise.all([
       prisma.analyticsEvent.findMany({
         where: {
@@ -219,7 +206,6 @@ export async function GET(
       }),
     ]);
 
-    // Initialize chart data for last 7 days
     const chartData: Array<{ day: string; clicks: number }> = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
@@ -230,7 +216,6 @@ export async function GET(
       });
     }
 
-    // Aggregate events by day
     weeklyEvents.forEach((event) => {
       const dayName = DAYS_OF_WEEK[event.createdAt.getDay()];
       const dayEntry = chartData.find((d) => d.day === dayName);

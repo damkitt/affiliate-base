@@ -1,8 +1,8 @@
 import { ChangeEvent, RefObject } from "react";
 import { HiPhoto, HiGlobeAlt, HiLink } from "react-icons/hi2";
-import { CATEGORIES, CATEGORY_ICONS } from "@/types";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import type { FormData } from "../types";
+import { CATEGORIES, CATEGORY_ICONS } from "@/constants";
 
 interface BasicInfoStepProps {
   formData: FormData;
