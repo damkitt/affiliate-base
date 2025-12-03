@@ -1,5 +1,9 @@
 import { HiPlus, HiMagnifyingGlass } from "react-icons/hi2";
 import { ThemeToggle } from "./ThemeToggle";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const ROTATING_WORDS = ["Premium", "High-Paying", "SaaS", "Transparent"];
 
 interface HeaderProps {
     onAddProgram: () => void;
@@ -8,6 +12,15 @@ interface HeaderProps {
 }
 
 export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % ROTATING_WORDS.length);
+        }, 2500);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <header className="relative pt-32 pb-12 px-6 animate-fade-in-up">
             {/* Theme Toggle - Fixed Position */}
@@ -15,7 +28,7 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
                 <ThemeToggle />
             </div>
 
-            <div className="relative max-w-[600px] mx-auto text-center">
+            <div className="relative max-w-[700px] mx-auto text-center">
                 {/* Logo - Simple text */}
                 <div className="mb-8">
                     <span className="text-xs font-medium tracking-[0.2em] uppercase text-[var(--text-tertiary)]">
@@ -23,14 +36,31 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
                     </span>
                 </div>
 
-                <h1 className="text-[48px] md:text-[64px] font-bold tracking-tight mb-6 leading-[1.1] bg-clip-text text-transparent bg-gradient-to-b from-[var(--text-primary)] to-[var(--text-secondary)]">
-                    Affiliate programs
+                <h1 className="text-[40px] md:text-[56px] font-serif tracking-tight mb-6 leading-[1.15] bg-gradient-to-b from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent">
+                    The Database of{" "}
+                    <span className="relative inline-flex justify-center h-[1.15em] overflow-hidden align-bottom min-w-[180px] sm:min-w-[240px] md:min-w-[300px]">
+                        <AnimatePresence mode="wait">
+                            <motion.span
+                                key={currentIndex}
+                                initial={{ y: 50, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: -50, opacity: 0 }}
+                                transition={{
+                                    duration: 0.5,
+                                    ease: [0.22, 1, 0.36, 1],
+                                }}
+                                className="absolute text-[var(--accent)] font-serif italic"
+                            >
+                                {ROTATING_WORDS[currentIndex]}
+                            </motion.span>
+                        </AnimatePresence>
+                    </span>
                     <br />
-                    that actually pay
+                    Affiliate Programs
                 </h1>
 
                 <p className="text-[var(--text-secondary)] mb-10 text-lg max-w-md mx-auto leading-relaxed font-light">
-                    Curated database of verified affiliate programs with transparent commissions.
+                    Curated directory of SaaS & Tech affiliate programs with transparent commissions.
                 </p>
 
                 {/* Search + Add */}

@@ -17,6 +17,9 @@ const config: Config = {
             },
         },
         extend: {
+            fontFamily: {
+                serif: ["var(--font-serif)", "Georgia", "serif"],
+            },
             colors: {
                 border: "var(--border)",
                 input: "var(--border)",
