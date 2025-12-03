@@ -7,7 +7,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { clicksTotal, pushMetrics } from "@/lib/metrics";
-import type { Program } from "@prisma/client";
 
 // =============================================================================
 // Types
@@ -19,7 +18,6 @@ type RouteContext = {
 
 interface ClickResponse {
   success: boolean;
-  clicksCount: number;
 }
 
 // =============================================================================
@@ -46,13 +44,15 @@ export async function POST(
       );
     }
 
-    // Atomic increment of clicks count
-    const program: Program = await prisma.program.update({
+    // Ensure program exists and get its name for metrics labels
+    const program = await prisma.program.findUnique({
       where: { id },
-      data: {
-        clicksCount: { increment: 1 },
-      },
+      select: { programName: true },
     });
+
+    if (!program) {
+      return NextResponse.json({ error: "Program not found" }, { status: 404 });
+    }
 
     // Track in Prometheus for monitoring
     clicksTotal
@@ -64,10 +64,7 @@ export async function POST(
 
     await pushMetrics("clicks", { instance: "api", program_id: id });
 
-    const response: ClickResponse = {
-      success: true,
-      clicksCount: program.clicksCount,
-    };
+    const response: ClickResponse = { success: true };
 
     return NextResponse.json(response);
   } catch (error) {

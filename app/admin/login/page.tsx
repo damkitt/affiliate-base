@@ -2,15 +2,19 @@
 
 /**
  * Admin Login Page
- * 
+ *
  * Secure login form for admin panel access.
  */
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { HiLockClosed, HiShieldCheck, HiExclamationTriangle } from "react-icons/hi2";
+import {
+  HiLockClosed,
+  HiShieldCheck,
+  HiExclamationTriangle,
+} from "react-icons/hi2";
 
-export default function AdminLoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/admin";
@@ -18,7 +22,9 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(null);
+  const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(
+    null
+  );
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -40,12 +46,17 @@ export default function AdminLoginPage() {
         router.refresh();
       } else if (response.status === 429) {
         setLockedUntil(data.retryAfter);
-        setError(`Too many attempts. Try again in ${Math.ceil(data.retryAfter / 60)} minutes.`);
+        setError(
+          `Too many attempts. Try again in ${Math.ceil(
+            data.retryAfter / 60
+          )} minutes.`
+        );
       } else if (response.status === 401) {
         setAttemptsRemaining(data.attemptsRemaining);
-        setError(data.attemptsRemaining > 0 
-          ? `Invalid password. ${data.attemptsRemaining} attempts remaining.`
-          : "Account locked. Try again later."
+        setError(
+          data.attemptsRemaining > 0
+            ? `Invalid password. ${data.attemptsRemaining} attempts remaining.`
+            : "Account locked. Try again later."
         );
       } else {
         setError(data.error || "Authentication failed");
@@ -74,7 +85,7 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Login Form */}
-        <form 
+        <form
           onSubmit={handleSubmit}
           className="p-6 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] shadow-lg"
         >
@@ -88,8 +99,8 @@ export default function AdminLoginPage() {
 
           {/* Password Input */}
           <div className="mb-6">
-            <label 
-              htmlFor="password" 
+            <label
+              htmlFor="password"
               className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2"
             >
               Password
@@ -115,7 +126,7 @@ export default function AdminLoginPage() {
             type="submit"
             disabled={isLoading || !password || lockedUntil !== null}
             className="w-full py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 shadow-lg"
-            style={{ background: 'var(--accent-gradient-dark)' }}
+            style={{ background: "var(--accent-gradient-dark)" }}
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
@@ -135,7 +146,7 @@ export default function AdminLoginPage() {
 
         {/* Back Link */}
         <div className="text-center mt-6">
-          <a 
+          <a
             href="/"
             className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-solid)] transition-colors font-medium"
           >
@@ -144,5 +155,19 @@ export default function AdminLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
