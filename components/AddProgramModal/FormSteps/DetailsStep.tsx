@@ -50,7 +50,7 @@ export function DetailsStep({
     <div className="space-y-5 animate-fadeIn">
       {/* Founding Date */}
       <div>
-        <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-3 uppercase tracking-wide">
+        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-3 uppercase tracking-wide">
           Founding Date
         </label>
         <div className="grid grid-cols-2 gap-4">
@@ -59,7 +59,7 @@ export function DetailsStep({
             <button
               type="button"
               onClick={onToggleMonthDropdown}
-              className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-center justify-between focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300"
+              className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-center justify-between focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
             >
               <span
                 className={
@@ -71,7 +71,7 @@ export function DetailsStep({
                 {formData.foundingMonth || "Select month"}
               </span>
               <HiChevronDown
-                className={`w-5 h-5 text-[var(--text-tertiary)] transition-transform duration-300 ${
+                className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${
                   monthDropdownOpen ? "rotate-180" : ""
                 }`}
               />
@@ -102,7 +102,7 @@ export function DetailsStep({
             <button
               type="button"
               onClick={onToggleYearDropdown}
-              className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-center justify-between focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300"
+              className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-center justify-between focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
             >
               <span
                 className={
@@ -114,7 +114,7 @@ export function DetailsStep({
                 {formData.foundingYear || "Select year"}
               </span>
               <HiChevronDown
-                className={`w-5 h-5 text-[var(--text-tertiary)] transition-transform duration-300 ${
+                className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${
                   yearDropdownOpen ? "rotate-180" : ""
                 }`}
               />
@@ -144,7 +144,7 @@ export function DetailsStep({
 
       {/* Commission Rate */}
       <div>
-        <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide">
+        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide">
           Commission Rate <span className="text-red-400">*</span>
         </label>
         <input
@@ -153,23 +153,23 @@ export function DetailsStep({
           value={formData.commissionRate}
           onChange={onFormChange}
           placeholder="e.g. 30% recurring, $50 per sale..."
-          className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300"
+          className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
         />
       </div>
 
       {/* Trust Booster */}
-      <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3">
-        <div className="p-1.5 rounded-full bg-blue-500/20 text-blue-400 mt-0.5">
+      <div className="p-4 rounded-xl bg-[var(--accent-dim)] border border-[var(--accent-solid)]/30 flex items-start gap-3">
+        <div className="p-1.5 rounded-full bg-[var(--accent-solid)]/20 text-[var(--accent-solid)] mt-0.5">
           <HiSparkles className="w-4 h-4" />
         </div>
         <div>
-          <h4 className="text-sm font-semibold text-blue-400 mb-1">
+          <h4 className="text-sm font-semibold text-[var(--accent-solid)] mb-1">
             Trust Booster
           </h4>
-          <p className="text-xs text-blue-300/80 leading-relaxed">
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
             Note: These fields are optional, but programs with complete details
             get{" "}
-            <span className="text-blue-200 font-medium">3x more referrals</span>{" "}
+            <span className="text-[var(--accent-solid)] font-semibold">3x more referrals</span>{" "}
             and higher trust from creators.
           </p>
         </div>
@@ -178,9 +178,9 @@ export function DetailsStep({
       {/* Optional Metrics */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiUsers className="w-3.5 h-3.5" /> Cookie Duration
-            <span className="text-[var(--text-tertiary)] font-normal normal-case">
+            <span className="text-[var(--text-secondary)] font-normal normal-case">
               (optional)
             </span>
           </label>
@@ -190,13 +190,13 @@ export function DetailsStep({
             value={formData.cookieDuration}
             onChange={onFormChange}
             placeholder="e.g. 90 Days"
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300"
+            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
           />
         </div>
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiBanknotes className="w-3.5 h-3.5" /> Avg Order Value
-            <span className="text-[var(--text-tertiary)] font-normal normal-case">
+            <span className="text-[var(--text-secondary)] font-normal normal-case">
               (optional)
             </span>
           </label>
@@ -206,13 +206,13 @@ export function DetailsStep({
             value={formData.avgOrderValue}
             onChange={onFormChange}
             placeholder="e.g. 120"
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300"
+            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
           />
         </div>
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiBanknotes className="w-3.5 h-3.5" /> Min Payout
-            <span className="text-[var(--text-tertiary)] font-normal normal-case">
+            <span className="text-[var(--text-secondary)] font-normal normal-case">
               (optional)
             </span>
           </label>
@@ -222,13 +222,13 @@ export function DetailsStep({
             value={formData.minPayoutValue}
             onChange={onFormChange}
             placeholder="e.g. 50"
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300"
+            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
           />
         </div>
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiBanknotes className="w-3.5 h-3.5" /> Payout Method
-            <span className="text-[var(--text-tertiary)] font-normal normal-case">
+            <span className="text-[var(--text-secondary)] font-normal normal-case">
               (optional)
             </span>
           </label>
@@ -238,13 +238,13 @@ export function DetailsStep({
             value={formData.payoutMethod}
             onChange={onFormChange}
             placeholder="e.g. PayPal, Wise"
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300"
+            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
           />
         </div>
         <div className="col-span-2">
-          <label className="flex text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiUsers className="w-3.5 h-3.5" /> Target Audience
-            <span className="text-[var(--text-tertiary)] font-normal normal-case">
+            <span className="text-[var(--text-secondary)] font-normal normal-case">
               (optional)
             </span>
           </label>
@@ -254,13 +254,13 @@ export function DetailsStep({
             value={formData.targetAudience}
             onChange={onFormChange}
             placeholder="e.g. SaaS Founders, Creators"
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300"
+            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
           />
         </div>
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiUsers className="w-3.5 h-3.5" /> Affiliates Count
-            <span className="text-[var(--text-tertiary)] font-normal normal-case">
+            <span className="text-[var(--text-secondary)] font-normal normal-case">
               (optional)
             </span>
           </label>
@@ -268,7 +268,7 @@ export function DetailsStep({
             name="affiliatesCountRange"
             value={formData.affiliatesCountRange}
             onChange={onFormChange}
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300 appearance-none"
+            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 appearance-none"
           >
             <option value="">Select range</option>
             {AFFILIATE_RANGES.map((range) => (
@@ -279,9 +279,9 @@ export function DetailsStep({
           </select>
         </div>
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiBanknotes className="w-3.5 h-3.5" /> Total Payouts
-            <span className="text-[var(--text-tertiary)] font-normal normal-case">
+            <span className="text-[var(--text-secondary)] font-normal normal-case">
               (optional)
             </span>
           </label>
@@ -289,7 +289,7 @@ export function DetailsStep({
             name="payoutsTotalRange"
             value={formData.payoutsTotalRange}
             onChange={onFormChange}
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300 appearance-none"
+            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 appearance-none"
           >
             <option value="">Select range</option>
             {PAYOUT_RANGES.map((range) => (
@@ -300,9 +300,9 @@ export function DetailsStep({
           </select>
         </div>
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             Approval Time
-            <span className="text-[var(--text-tertiary)] font-normal normal-case">
+            <span className="text-[var(--text-secondary)] font-normal normal-case">
               (optional)
             </span>
           </label>
@@ -311,7 +311,7 @@ export function DetailsStep({
               name="approvalTimeRange"
               value={formData.approvalTimeRange}
               onChange={onFormChange}
-              className="w-full h-11 px-4 pr-16 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300 appearance-none"
+              className="w-full h-11 px-4 pr-16 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 appearance-none"
             >
               <option value="">Select</option>
               {APPROVAL_TIMES.map((time) => (
@@ -320,7 +320,7 @@ export function DetailsStep({
                 </option>
               ))}
             </select>
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[var(--text-tertiary)]">
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[var(--text-secondary)] font-medium">
               days
             </span>
           </div>
@@ -329,13 +329,13 @@ export function DetailsStep({
 
       {/* Country/Region */}
       <div className="relative">
-        <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide">
+        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide">
           Country / Region
         </label>
         <button
           type="button"
           onClick={onToggleCountryDropdown}
-          className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-center justify-between focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300"
+          className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-center justify-between focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
         >
           <span
             className={
@@ -354,7 +354,7 @@ export function DetailsStep({
             )}
           </span>
           <HiChevronDown
-            className={`w-5 h-5 text-[var(--text-tertiary)] transition-transform duration-300 ${
+            className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${
               countryDropdownOpen ? "rotate-180" : ""
             }`}
           />

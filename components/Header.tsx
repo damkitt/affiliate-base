@@ -31,8 +31,8 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
             <div className="relative max-w-[700px] mx-auto text-center">
                 {/* Logo - Simple text */}
                 <div className="mb-8">
-                    <span className="text-xs font-medium tracking-[0.2em] uppercase text-[var(--text-tertiary)]">
-                        Affiliate <span className="text-[var(--accent)]">Base</span>
+                    <span className="text-xs font-semibold tracking-[0.2em] uppercase text-[var(--text-secondary)]">
+                        Affiliate <span className="text-[var(--accent-solid)]">Base</span>
                     </span>
                 </div>
 
@@ -66,7 +66,7 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
                 {/* Search + Add */}
                 <div className="flex items-center gap-2 max-w-md mx-auto p-1 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] shadow-sm focus-within:ring-2 ring-[var(--accent-dim)] transition-all duration-300">
                     <div className="flex-1 flex items-center h-10 px-3">
-                        <HiMagnifyingGlass className="w-4 h-4 text-[var(--text-tertiary)] mr-3" />
+                        <HiMagnifyingGlass className="w-4 h-4 text-[var(--text-secondary)] mr-3" />
                         <input
                             type="text"
                             value={search}
@@ -77,7 +77,7 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
                         {search && (
                             <button
                                 onClick={() => setSearch("")}
-                                className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+                                className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--accent-solid)] transition-colors px-2 py-1 rounded hover:bg-[var(--bg-secondary)]"
                             >
                                 Clear
                             </button>
@@ -85,7 +85,7 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
                     </div>
                     <button
                         onClick={onAddProgram}
-                        className="h-9 px-4 rounded-lg bg-[var(--accent)] text-[var(--bg)] text-sm font-medium flex items-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all duration-150 shadow-sm"
+                        className="h-9 px-4 rounded-lg bg-[var(--accent-solid)] text-white text-sm font-semibold flex items-center gap-2 hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all duration-150 shadow-md"
                     >
                         <HiPlus className="w-4 h-4" />
                         <span className="hidden sm:inline">Add</span>

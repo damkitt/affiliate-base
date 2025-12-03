@@ -177,13 +177,13 @@ export default function AddProgramModal({
             onClick={onClose}
             className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[var(--bg-secondary)] transition-all duration-300 hover:rotate-90"
           >
-            <HiXMark className="w-5 h-5 text-[var(--text-tertiary)]" />
+            <HiXMark className="w-5 h-5 text-[var(--text-secondary)]" />
           </button>
 
           <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--bg-secondary)] rounded-full mb-3">
-              <HiSparkles className="w-4 h-4 text-[var(--text-tertiary)]" />
-              <span className="text-xs font-medium text-[var(--text-secondary)]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--accent-dim)] rounded-full mb-3 border border-[var(--accent-solid)]/20">
+              <HiSparkles className="w-4 h-4 text-[var(--accent-solid)]" />
+              <span className="text-xs font-semibold text-[var(--accent-solid)]">
                 Add Program
               </span>
             </div>
@@ -287,10 +287,10 @@ export default function AddProgramModal({
               type="button"
               onClick={handleNext}
               disabled={!canProceedToStep(currentStep + 1, formData)}
-              className={`h-10 px-5 rounded-lg text-sm font-medium transition-colors duration-150 flex items-center gap-2 ${
+              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${
                 canProceedToStep(currentStep + 1, formData)
-                  ? "bg-[var(--accent)] text-[var(--bg)] hover:opacity-90"
-                  : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed"
+                  ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
+                  : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
               }`}
             >
               Continue
@@ -301,10 +301,10 @@ export default function AddProgramModal({
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting || !canSubmitForm(formData)}
-              className={`h-10 px-5 rounded-lg text-sm font-medium transition-colors duration-150 flex items-center gap-2 ${
+              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${
                 canSubmitForm(formData) && !isSubmitting
-                  ? "bg-[var(--accent)] text-[var(--bg)] hover:opacity-90"
-                  : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed"
+                  ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
+                  : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
               }`}
             >
               {isSubmitting ? (

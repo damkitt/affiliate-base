@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
           <div className="mb-6">
             <label 
               htmlFor="password" 
-              className="block text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wide mb-2"
+              className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2"
             >
               Password
             </label>
@@ -106,7 +106,7 @@ export default function AdminLoginPage() {
                 autoComplete="current-password"
                 autoFocus
               />
-              <HiLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+              <HiLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
             </div>
           </div>
 
@@ -114,7 +114,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={isLoading || !password || lockedUntil !== null}
-            className="w-full py-3 rounded-lg font-medium text-[var(--accent-foreground)] transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+            className="w-full py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 shadow-lg"
             style={{ background: 'var(--accent-gradient-dark)' }}
           >
             {isLoading ? (
@@ -128,7 +128,7 @@ export default function AdminLoginPage() {
           </button>
 
           {/* Security Notice */}
-          <p className="mt-4 text-center text-xs text-[var(--text-tertiary)]">
+          <p className="mt-4 text-center text-xs text-[var(--text-secondary)]">
             This area is protected. Unauthorized access attempts are logged.
           </p>
         </form>
@@ -137,7 +137,7 @@ export default function AdminLoginPage() {
         <div className="text-center mt-6">
           <a 
             href="/"
-            className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-solid)] transition-colors"
+            className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-solid)] transition-colors font-medium"
           >
             ← Back to home
           </a>

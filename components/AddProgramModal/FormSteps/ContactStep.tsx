@@ -19,13 +19,13 @@ export function ContactStep({
     <div className="space-y-5 animate-fadeIn">
       {/* Contact Info */}
       <div className="p-5 bg-[var(--bg-secondary)] rounded-2xl">
-        <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4 flex items-center gap-2">
-          <HiChatBubbleLeftRight className="w-4 h-4 text-[var(--text-tertiary)]" />
+        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+          <HiChatBubbleLeftRight className="w-4 h-4 text-[var(--accent-solid)]" />
           Contact Information
         </h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide">
               X (Twitter) Handle
             </label>
             <input
@@ -34,11 +34,11 @@ export function ContactStep({
               value={formData.xHandle}
               onChange={onFormChange}
               placeholder="@username"
-              className="w-full h-12 px-4 rounded-xl bg-[var(--bg-card)] border-2 border-transparent text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)] transition-all duration-300"
+              className="w-full h-12 px-4 rounded-xl bg-[var(--bg-card)] border-2 border-transparent text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent-solid)] transition-all duration-300"
             />
           </div>
           <div>
-            <label className="flex text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+            <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
               <HiEnvelope className="w-3.5 h-3.5" /> Email
             </label>
             <input
@@ -47,7 +47,7 @@ export function ContactStep({
               value={formData.email}
               onChange={onFormChange}
               placeholder="contact@company.com"
-              className="w-full h-12 px-4 rounded-xl bg-[var(--bg-card)] border-2 border-transparent text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)] transition-all duration-300"
+              className="w-full h-12 px-4 rounded-xl bg-[var(--bg-card)] border-2 border-transparent text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent-solid)] transition-all duration-300"
             />
           </div>
         </div>
@@ -55,10 +55,10 @@ export function ContactStep({
 
       {/* Additional Info */}
       <div>
-        <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-1.5 uppercase tracking-wide">
+        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide">
           Additional Information for Creators
         </label>
-        <p className="text-xs text-[var(--text-tertiary)] mb-2">
+        <p className="text-xs text-[var(--text-secondary)] mb-2">
           Share tips, requirements, or any helpful info for potential affiliates
         </p>
         <textarea
@@ -67,13 +67,13 @@ export function ContactStep({
           onChange={onFormChange}
           placeholder="e.g. We provide custom landing pages, marketing materials, dedicated affiliate manager..."
           rows={5}
-          className="w-full px-4 py-3 rounded-xl bg-[var(--bg-secondary)] border-2 border-transparent text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent)] transition-all duration-300 resize-none"
+          className="w-full px-4 py-3 rounded-xl bg-[var(--bg-secondary)] border-2 border-transparent text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 resize-none"
         />
       </div>
 
       {/* Preview */}
       <div className="p-4 bg-[var(--bg-secondary)] rounded-xl">
-        <h4 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
+        <h4 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wide mb-3">
           Preview
         </h4>
         <div className="flex items-center gap-3">
@@ -85,7 +85,7 @@ export function ContactStep({
             />
           ) : (
             <div className="w-12 h-12 rounded-xl bg-[var(--border)] flex items-center justify-center">
-              <HiPhoto className="w-6 h-6 text-[var(--text-tertiary)]" />
+              <HiPhoto className="w-6 h-6 text-[var(--text-secondary)]" />
             </div>
           )}
           <div>

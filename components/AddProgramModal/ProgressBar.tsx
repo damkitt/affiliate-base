@@ -23,10 +23,10 @@ export function ProgressBar({ steps, currentStep }: ProgressBarProps) {
                   rounded-full flex items-center justify-center transition-all duration-300
                   ${
                     isCompleted
-                      ? "w-10 h-10 bg-[var(--text-primary)]"
+                      ? "w-10 h-10 bg-[var(--accent-solid)]"
                       : isCurrent
-                      ? "w-10 h-10 bg-[var(--accent)] ring-2 ring-[var(--border)]"
-                      : "w-10 h-10 bg-[var(--bg-secondary)] border border-[var(--border)]"
+                      ? "w-10 h-10 bg-[var(--bg-card)] border-2 border-[var(--accent-solid)] ring-4 ring-[var(--accent-dim)]"
+                      : "w-10 h-10 bg-[var(--bg-secondary)] border-2 border-[var(--border)]"
                   }
                 `}
               >
@@ -36,8 +36,8 @@ export function ProgressBar({ steps, currentStep }: ProgressBarProps) {
                   <StepIcon
                     className={`w-5 h-5 transition-colors duration-300 ${
                       isCurrent
-                        ? "text-[var(--bg)]"
-                        : "text-[var(--text-tertiary)]"
+                        ? "text-[var(--accent-solid)]"
+                        : "text-[var(--text-secondary)]"
                     }`}
                   />
                 )}
@@ -48,7 +48,7 @@ export function ProgressBar({ steps, currentStep }: ProgressBarProps) {
             {index < steps.length - 1 && (
               <div className="w-12 h-[2px] mx-2 rounded-full overflow-hidden bg-[var(--border)]">
                 <div
-                  className={`h-full bg-[var(--text-primary)] transition-all duration-500 ease-out ${
+                  className={`h-full bg-[var(--accent-solid)] transition-all duration-500 ease-out ${
                     isCompleted ? "w-full" : "w-0"
                   }`}
                 />

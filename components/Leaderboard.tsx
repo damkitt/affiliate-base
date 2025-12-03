@@ -37,7 +37,7 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
   return (
     <div className="max-w-[800px] mx-auto px-6 pb-20">
       {/* Simple table header */}
-      <div className="flex items-center justify-between px-6 py-3 text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
+      <div className="flex items-center justify-between px-6 py-3 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
         <span>{programs.length} programs</span>
         <div className="flex items-center gap-6">
           <span className="hidden sm:inline">Interest</span>
@@ -67,21 +67,10 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
               }
             >
               {/* Rank */}
-              <div
-                className={`
-                              w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border
-                              ${
-                                index === 0
-                                  ? "text-amber-400 bg-amber-400/10 border-amber-400/20"
-                                  : index === 1
-                                  ? "text-slate-300 bg-slate-300/10 border-slate-300/20"
-                                  : index === 2
-                                  ? "text-amber-700 bg-amber-700/10 border-amber-700/20"
-                                  : "text-[var(--text-tertiary)] bg-[var(--bg-secondary)] border-[var(--border)]"
-                              }
-                            `}
-              >
-                {index + 1}
+              <div className="w-10 h-10 flex items-center justify-center">
+                {index === 0 ? <span className="text-2xl">🥇</span> : index === 1 ? <span className="text-2xl">🥈</span> : index === 2 ? <span className="text-2xl">🥉</span> : (
+                  <span className="text-base font-semibold text-[var(--text-secondary)]">{index + 1}</span>
+                )}
               </div>
 
               {/* Logo */}
@@ -117,19 +106,19 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
               {/* Metrics */}
               <div className="flex items-center gap-3">
                 {/* Interest/Views */}
-                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-secondary)] text-xs font-medium border border-[var(--border)] tabular-nums">
-                  <HiEye className="w-3.5 h-3.5" />
+                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] text-xs font-medium border border-[var(--border)] tabular-nums">
+                  <HiEye className="w-3.5 h-3.5 text-[var(--accent-solid)]" />
                   <span>{program.clicksCount || 0}</span>
                 </div>
 
                 {/* Commission */}
-                <div className="px-2.5 py-1 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] text-xs font-medium border border-[var(--border)] tabular-nums">
+                <div className="px-2.5 py-1 rounded-lg bg-[var(--accent-dim)] text-[var(--accent-solid)] text-xs font-bold border border-[var(--accent-solid)]/20 tabular-nums">
                   {program.commissionRate}%
                 </div>
               </div>
 
               {/* Arrow */}
-              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] group-hover:bg-[var(--bg-secondary)] transition-all duration-200">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--accent-solid)] group-hover:bg-[var(--accent-dim)] transition-all duration-200">
                 <HiArrowUpRight className="w-4 h-4" />
               </div>
             </Link>

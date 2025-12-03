@@ -11,7 +11,6 @@ import {
   ProgramStats,
   ProgramCTA,
   ProgramContacts,
-  ProgramFeatures,
   ProgramHowItWorks,
   InterestChart,
 } from "@/components/ProgramDetail";
@@ -109,11 +108,8 @@ export default function ProgramDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content Column */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Stats Cards */}
+            {/* Program Details */}
             <ProgramStats program={program} />
-
-            {/* Key Features */}
-            <ProgramFeatures />
 
             {/* About Program */}
             <div className="p-5 rounded-lg border border-[var(--border)]">
@@ -147,7 +143,7 @@ export default function ProgramDetailPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="lg:sticky lg:top-24 space-y-6 self-start">
             <ProgramCTA program={program} onApplyClick={handleApplyClick} />
             <ProgramContacts program={program} />
           </div>

@@ -12,9 +12,9 @@
   --bg-elevated: hsl(0, 0%, 100%);
 
   /* Elegant Text Hierarchy */
-  --text-primary: hsl(222, 26%, 14%);
-  --text-secondary: hsl(222, 16%, 45%);
-  --text-tertiary: hsl(222, 12%, 62%);
+  --text-primary: hsl(222, 26%, 12%);
+  --text-secondary: hsl(222, 16%, 40%);
+  --text-tertiary: hsl(222, 12%, 55%);
 
   /* Sophisticated Borders */
   --border: hsl(220, 14%, 92%);
@@ -62,9 +62,9 @@
   --bg-elevated: hsl(222, 20%, 14%);
 
   /* Refined Text Hierarchy */
-  --text-primary: hsl(220, 20%, 96%);
-  --text-secondary: hsl(220, 14%, 68%);
-  --text-tertiary: hsl(220, 12%, 45%);
+  --text-primary: hsl(220, 20%, 98%);
+  --text-secondary: hsl(220, 14%, 72%);
+  --text-tertiary: hsl(220, 12%, 55%);
 
   /* Elegant Dark Borders */
   --border: hsl(222, 18%, 22%);
@@ -137,8 +137,8 @@ body::before {
 }
 
 ::selection {
-  background: var(--accent);
-  color: var(--accent-foreground);
+  background: var(--accent-solid);
+  color: white;
 }
 
 /* Custom Scrollbar */
@@ -284,5 +284,4 @@ body::before {
   background: var(--bg-card);
   backdrop-filter: blur(8px);
   border: 1px solid var(--border);
-  opacity: 0.5;
 }

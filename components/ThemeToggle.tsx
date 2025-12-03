@@ -28,8 +28,8 @@ export function ThemeToggle() {
                 onClick={() => setTheme("light")}
                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
                     theme === "light" 
-                        ? "bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]" 
-                        : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                        ? "bg-[var(--accent-solid)] shadow-md text-white" 
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]"
                 }`}
                 title="Light mode"
             >
@@ -39,8 +39,8 @@ export function ThemeToggle() {
                 onClick={() => setTheme("dark")}
                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
                     theme === "dark" 
-                        ? "bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]" 
-                        : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                        ? "bg-[var(--accent-solid)] shadow-md text-white" 
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]"
                 }`}
                 title="Dark mode"
             >
@@ -50,8 +50,8 @@ export function ThemeToggle() {
                 onClick={() => setTheme("system")}
                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
                     theme === "system" 
-                        ? "bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]" 
-                        : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                        ? "bg-[var(--accent-solid)] shadow-md text-white" 
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]"
                 }`}
                 title="System theme"
             >

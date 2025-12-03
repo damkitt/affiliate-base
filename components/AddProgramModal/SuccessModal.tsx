@@ -20,7 +20,7 @@ export function SuccessModal({ onClose }: SuccessModalProps) {
         </p>
         <button
           onClick={onClose}
-          className="w-full h-11 rounded-xl bg-[var(--accent)] text-[var(--bg)] font-medium hover:opacity-90 transition-opacity"
+          className="w-full h-11 rounded-xl bg-[var(--accent-solid)] text-white font-semibold hover:bg-[var(--accent-hover)] transition-all shadow-lg"
         >
           Done
         </button>
