@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import { HiCheckCircle, HiInformationCircle } from "react-icons/hi2";
 import { Program } from "@/types";
@@ -12,13 +13,21 @@ import {
   ProgramContacts,
   ProgramFeatures,
   ProgramHowItWorks,
-  ProgramFAQ,
+  InterestChart,
 } from "@/components/ProgramDetail";
+import { 
+  generateFingerprint, 
+  wasViewedInSession, 
+  markViewedInSession 
+} from "@/lib/fingerprint";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ProgramDetailPage() {
   const params = useParams();
+  const viewTracked = useRef(false);
+  const [fingerprint, setFingerprint] = useState<string | null>(null);
+  
   const {
     data: program,
     error,
@@ -27,6 +36,33 @@ export default function ProgramDetailPage() {
     params?.id ? `/api/programs/${params.id}` : null,
     fetcher
   );
+
+  // Generate fingerprint on mount
+  useEffect(() => {
+    generateFingerprint().then(setFingerprint);
+  }, []);
+
+  // Track page view once with anti-fraud protection
+  useEffect(() => {
+    if (program && fingerprint && !viewTracked.current) {
+      // Check if already viewed in this session
+      if (wasViewedInSession(program.id)) {
+        viewTracked.current = true;
+        return;
+      }
+      
+      viewTracked.current = true;
+      markViewedInSession(program.id);
+      
+      fetch(`/api/programs/${program.id}/view`, { 
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fingerprint }),
+      });
+    }
+  }, [program, fingerprint]);
 
   const handleApplyClick = async () => {
     if (!program) return;
@@ -37,7 +73,7 @@ export default function ProgramDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[var(--accent-solid)] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -51,7 +87,7 @@ export default function ProgramDetailPage() {
           </p>
           <a
             href="/"
-            className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-solid)] transition-colors"
+            className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
           >
             ← Back to programs
           </a>
@@ -80,9 +116,9 @@ export default function ProgramDetailPage() {
             <ProgramFeatures />
 
             {/* About Program */}
-            <div className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)]" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <div className="p-5 rounded-lg border border-[var(--border)]">
               <h2 className="text-lg font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2">
-                <HiInformationCircle className="w-5 h-5 text-[var(--accent-solid)]" />
+                <HiInformationCircle className="w-5 h-5 text-[var(--accent)]" />
                 About This Program
               </h2>
               <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
@@ -93,14 +129,14 @@ export default function ProgramDetailPage() {
             {/* How It Works */}
             <ProgramHowItWorks />
 
-            {/* FAQ */}
-            <ProgramFAQ />
+            {/* Interest Analytics - instead of FAQ */}
+            <InterestChart programId={program.id} totalClicks={program.clicksCount || 0} />
 
             {/* Additional Info */}
             {program.additionalInfo && (
-              <div className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)]" style={{ boxShadow: 'var(--shadow-card)' }}>
+              <div className="p-5 rounded-lg border border-[var(--border)]">
                 <h2 className="text-lg font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2">
-                  <HiCheckCircle className="w-5 h-5 text-[var(--accent-solid)]" />
+                  <HiCheckCircle className="w-5 h-5 text-[var(--accent)]" />
                   Additional Details
                 </h2>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">
@@ -111,7 +147,7 @@ export default function ProgramDetailPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:sticky lg:top-24 lg:self-start space-y-6">
+          <div className="space-y-6">
             <ProgramCTA program={program} onApplyClick={handleApplyClick} />
             <ProgramContacts program={program} />
           </div>

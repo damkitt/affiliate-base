@@ -1,10 +1,25 @@
-import { Program } from "@/types";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { HiArrowRightOnRectangle } from "react-icons/hi2";
 
 interface AdminHeaderProps {
   pendingCount: number;
 }
 
 export function AdminHeader({ pendingCount }: AdminHeaderProps) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/login", { method: "DELETE" });
+      router.push("/admin/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <div className="border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md sticky top-0 z-10">
       <div className="max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between">
@@ -38,6 +53,15 @@ export function AdminHeader({ pendingCount }: AdminHeaderProps) {
             )}
           </h1>
         </div>
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-all"
+        >
+          <HiArrowRightOnRectangle className="w-4 h-4" />
+          Logout
+        </button>
       </div>
     </div>
   );

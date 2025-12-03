@@ -1,8 +1,8 @@
-# Trust Affiliate 🚀
+# AffiliateBase 🚀
 
 A modern, premium affiliate programs directory with powerful admin moderation panel. Built with Next.js 16, Prisma, and Tailwind CSS.
 
-![Trust Affiliate](https://img.shields.io/badge/Next.js-16.0-black?style=flat-square&logo=next.js)
+![AffiliateBase](https://img.shields.io/badge/Next.js-16.0-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)
 ![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma)
 
@@ -41,7 +41,7 @@ A modern, premium affiliate programs directory with powerful admin moderation pa
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd trust-affiliate
+cd affiliatebase
 
 # Install dependencies
 npm install
@@ -59,7 +59,7 @@ Visit `http://localhost:3000` to see the app.
 ## 📁 Project Structure
 
 ```
-trust-affiliate/
+affiliatebase/
 ├── app/
 │   ├── admin/              # Admin panel
 │   ├── api/                # API routes

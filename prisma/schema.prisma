@@ -87,3 +87,22 @@ enum Country {
   KE
   Other
 }
+
+// Analytics event for tracking unique views with anti-fraud
+model AnalyticsEvent {
+  id          String   @id @default(uuid())
+  programId   String   @map("program_id")
+  eventType   String   @default("view") @map("event_type") // "view" or "click"
+  fingerprint String   // Browser fingerprint hash
+  ipHash      String   @map("ip_hash") // Hashed IP for privacy
+  userAgent   String?  @map("user_agent")
+  referer     String?
+  country     String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([programId])
+  @@index([programId, fingerprint])
+  @@index([programId, createdAt])
+  @@index([fingerprint, ipHash, programId])
+  @@map("analytics_events")
+}

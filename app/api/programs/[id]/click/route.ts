@@ -1,37 +1,90 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-
-/** * Get a Program by ID
- * @param request
- * @param param1
- * @returns {Promise<NextResponse>} The requested program
+/**
+ * Click Tracking API
+ * 
+ * Records affiliate link clicks with Prometheus metrics tracking.
  */
 
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { clicksTotal } from "@/lib/metrics";
+import type { Program } from "@prisma/client";
+
+// =============================================================================
+// Types
+// =============================================================================
+
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
+interface ClickResponse {
+  success: boolean;
+  clicksCount: number;
+}
+
+// =============================================================================
+// Handler
+// =============================================================================
+
+/**
+ * POST /api/programs/[id]/click
+ * 
+ * Increments the click counter for a program and tracks in Prometheus.
+ * Called when user clicks an affiliate link.
+ */
 export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
+  _request: Request,
+  { params }: RouteContext
+): Promise<NextResponse> {
+  try {
+    const { id } = await params;
 
-  if (!id) {
-    return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
-  }
+    if (!id) {
+      return NextResponse.json(
+        { error: "Program ID is required" },
+        { status: 400 }
+      );
+    }
 
-  const program = await prisma.program.update({
-    where: { id: id },
-    data: {
-      clicksCount: {
-        increment: 1,
+    // Atomic increment of clicks count
+    const program: Program = await prisma.program.update({
+      where: { id },
+      data: {
+        clicksCount: { increment: 1 },
       },
-    },
-  });
+    });
 
-  if (!program) {
+    // Track in Prometheus for monitoring
+    clicksTotal
+      .labels({
+        program_id: id,
+        program_name: program.programName ?? "unknown",
+      })
+      .inc();
+
+    const response: ClickResponse = {
+      success: true,
+      clicksCount: program.clicksCount,
+    };
+
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error("[POST /api/programs/:id/click]", error);
+
+    // Check if it's a "not found" error
+    if (
+      error instanceof Error &&
+      error.message.includes("Record to update not found")
+    ) {
+      return NextResponse.json(
+        { error: "Program not found" },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(
-      { message: "Failed to update clicks count" },
+      { error: "Failed to track click" },
       { status: 500 }
     );
   }
-
-  return NextResponse.json(program);
 }

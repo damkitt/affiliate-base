@@ -49,7 +49,7 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
                                     duration: 0.5,
                                     ease: [0.22, 1, 0.36, 1],
                                 }}
-                                className="absolute left-0 text-[var(--accent-solid)] font-serif italic"
+                                className="absolute left-0 bg-gradient-to-b from-emerald-400 to-emerald-700 bg-clip-text text-transparent font-serif italic"
                             >
                                 {ROTATING_WORDS[currentIndex]}
                             </motion.span>
@@ -64,7 +64,7 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
                 </p>
 
                 {/* Search + Add */}
-                <div className="flex items-center gap-2 max-w-md mx-auto p-1 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] focus-within:ring-2 ring-[var(--accent-solid)] transition-all duration-300" style={{ boxShadow: 'var(--shadow-sm)' }}>
+                <div className="flex items-center gap-2 max-w-md mx-auto p-1 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] shadow-sm focus-within:ring-2 ring-[var(--accent-dim)] transition-all duration-300">
                     <div className="flex-1 flex items-center h-10 px-3">
                         <HiMagnifyingGlass className="w-4 h-4 text-[var(--text-tertiary)] mr-3" />
                         <input
@@ -85,8 +85,7 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
                     </div>
                     <button
                         onClick={onAddProgram}
-                        className="h-9 px-4 rounded-lg text-[var(--accent-foreground)] text-sm font-medium flex items-center gap-2 active:scale-[0.98] transition-all duration-150"
-                        style={{ background: 'var(--accent-gradient-dark)', boxShadow: 'var(--shadow-sm)' }}
+                        className="h-9 px-4 rounded-lg bg-[var(--accent)] text-[var(--bg)] text-sm font-medium flex items-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all duration-150 shadow-sm"
                     >
                         <HiPlus className="w-4 h-4" />
                         <span className="hidden sm:inline">Add</span>

@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-// Trigger rebuild
 
 const config: Config = {
     content: [

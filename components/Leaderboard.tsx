@@ -1,7 +1,7 @@
 "use client";
 
 import { Program, CATEGORY_ICONS } from "@/types";
-import { HiArrowUpRight } from "react-icons/hi2";
+import { HiArrowUpRight, HiEye } from "react-icons/hi2";
 import Link from "next/link";
 
 interface LeaderboardProps {
@@ -38,7 +38,10 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
       {/* Simple table header */}
       <div className="flex items-center justify-between px-6 py-3 text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
         <span>{programs.length} programs</span>
-        <span className="hidden sm:inline">Commission</span>
+        <div className="flex items-center gap-6">
+          <span className="hidden sm:inline">Interest</span>
+          <span className="hidden sm:inline">Commission</span>
+        </div>
       </div>
 
       {/* Programs List */}
@@ -106,7 +109,14 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
               </div>
 
               {/* Metrics */}
-              <div className="text-right flex flex-col items-end gap-1">
+              <div className="flex items-center gap-3">
+                {/* Interest/Views */}
+                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-secondary)] text-xs font-medium border border-[var(--border)] tabular-nums">
+                  <HiEye className="w-3.5 h-3.5" />
+                  <span>{program.clicksCount || 0}</span>
+                </div>
+                
+                {/* Commission */}
                 <div className="px-2.5 py-1 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] text-xs font-medium border border-[var(--border)] tabular-nums">
                   {program.commissionRate}%
                 </div>
