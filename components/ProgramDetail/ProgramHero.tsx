@@ -66,13 +66,6 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
                 >
                   <HiArrowTopRightOnSquare className="w-5 h-5 text-[var(--text-secondary)]" />
                 </button>
-                <button
-                  onClick={onApplyClick}
-                  className="px-5 py-2 text-white rounded-lg font-semibold transition-all hover:opacity-90"
-                  style={{ background: "var(--accent-gradient-dark)" }}
-                >
-                  Apply Now
-                </button>
               </div>
             </div>
 
@@ -82,29 +75,9 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
             </h1>
 
             {/* Tagline */}
-            <p className="text-[var(--text-secondary)] mb-4 line-clamp-2">
+            <p className="text-[var(--text-secondary)] line-clamp-2">
               {program.tagline}
             </p>
-
-            {/* Mobile Actions */}
-            <div className="flex md:hidden items-center gap-3">
-              <button
-                onClick={onApplyClick}
-                className="flex-1 py-2.5 text-white rounded-lg font-semibold transition-all hover:opacity-90"
-                style={{ background: "var(--accent-gradient-dark)" }}
-              >
-                Apply Now
-              </button>
-              <button
-                onClick={() =>
-                  program.websiteUrl &&
-                  window.open(program.websiteUrl, "_blank")
-                }
-                className="p-2.5 rounded-lg border border-[var(--border)] hover:border-[var(--accent-solid)] transition-all"
-              >
-                <HiArrowTopRightOnSquare className="w-5 h-5 text-[var(--text-secondary)]" />
-              </button>
-            </div>
           </div>
         </div>
       </div>
