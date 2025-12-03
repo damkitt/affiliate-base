@@ -22,9 +22,10 @@ export function SearchFilter({
                 <button
                     onClick={() => setSelectedCategory(null)}
                     className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 border ${selectedCategory === null
-                            ? "bg-[var(--text-primary)] text-[var(--bg)] border-transparent shadow-md scale-105"
-                            : "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                            ? "text-[var(--accent-foreground)] border-transparent scale-105"
+                            : "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--accent-solid)] hover:text-[var(--text-primary)]"
                         }`}
+                    style={selectedCategory === null ? { background: 'var(--accent-gradient-dark)', boxShadow: 'var(--shadow-md)' } : { boxShadow: 'var(--shadow-sm)' }}
                 >
                     All
                 </button>
@@ -36,9 +37,10 @@ export function SearchFilter({
                             key={category}
                             onClick={() => setSelectedCategory(isSelected ? null : category)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 border ${isSelected
-                                    ? "bg-[var(--text-primary)] text-[var(--bg)] border-transparent shadow-md scale-105"
-                                    : "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                                    ? "text-[var(--accent-foreground)] border-transparent scale-105"
+                                    : "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--accent-solid)] hover:text-[var(--text-primary)]"
                                 }`}
+                            style={isSelected ? { background: 'var(--accent-gradient-dark)', boxShadow: 'var(--shadow-md)' } : { boxShadow: 'var(--shadow-sm)' }}
                         >
                             <CategoryIcon iconName={iconName} className="w-3.5 h-3.5" />
                             <span>{category}</span>

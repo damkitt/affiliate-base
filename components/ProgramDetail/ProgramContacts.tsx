@@ -16,7 +16,7 @@ export function ProgramContacts({ program }: ProgramContactsProps) {
   if (!hasContacts) return null;
 
   return (
-    <div className="p-5 rounded-xl border border-[var(--border)] hover:border-[var(--accent)]/30 transition-colors">
+    <div className="p-5 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--accent-solid)]/30 transition-all" style={{ boxShadow: 'var(--shadow-card)' }}>
       <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">
         Contact & Links
       </h3>
@@ -28,7 +28,7 @@ export function ProgramContacts({ program }: ProgramContactsProps) {
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-2.5 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--border)] transition-colors group"
           >
-            <HiGlobeAlt className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-[var(--accent)] transition-colors" />
+            <HiGlobeAlt className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-[var(--accent-solid)] transition-colors" />
             <span className="text-xs font-medium text-[var(--text-secondary)] flex-1 truncate">
               {new URL(program.websiteUrl).hostname}
             </span>
@@ -42,7 +42,7 @@ export function ProgramContacts({ program }: ProgramContactsProps) {
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-2.5 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--border)] transition-colors group"
           >
-            <FaXTwitter className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-[var(--accent)] transition-colors" />
+            <FaXTwitter className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-[var(--accent-solid)] transition-colors" />
             <span className="text-xs font-medium text-[var(--text-secondary)] flex-1 truncate">
               {program.xHandle}
             </span>
@@ -54,7 +54,7 @@ export function ProgramContacts({ program }: ProgramContactsProps) {
             href={`mailto:${program.email}`}
             className="flex items-center gap-3 p-2.5 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--border)] transition-colors group"
           >
-            <HiEnvelope className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-[var(--accent)] transition-colors" />
+            <HiEnvelope className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-[var(--accent-solid)] transition-colors" />
             <span className="text-xs font-medium text-[var(--text-secondary)] flex-1 truncate">
               {program.email}
             </span>

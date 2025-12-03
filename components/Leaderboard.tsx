@@ -53,21 +53,23 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
             <Link
               key={program.id}
               href={`/programs/${program.id}`}
-              className="group flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--accent)] hover:shadow-sm transition-all duration-200 cursor-pointer"
+              className="group flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--accent-solid)] transition-all duration-200 cursor-pointer"
+              style={{ boxShadow: 'var(--shadow-card)' }}
+              onMouseEnter={(e) => e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)'}
+              onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'var(--shadow-card)'}
             >
               {/* Rank */}
               <div
                 className={`
                               w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border
-                              ${
-                                index === 0
-                                  ? "text-amber-400 bg-amber-400/10 border-amber-400/20"
-                                  : index === 1
-                                  ? "text-slate-300 bg-slate-300/10 border-slate-300/20"
-                                  : index === 2
-                                  ? "text-amber-700 bg-amber-700/10 border-amber-700/20"
-                                  : "text-[var(--text-tertiary)] bg-[var(--bg-secondary)] border-[var(--border)]"
-                              }
+                              ${index === 0
+                    ? "text-amber-400 bg-amber-400/10 border-amber-400/20"
+                    : index === 1
+                      ? "text-slate-300 bg-slate-300/10 border-slate-300/20"
+                      : index === 2
+                        ? "text-amber-700 bg-amber-700/10 border-amber-700/20"
+                        : "text-[var(--text-tertiary)] bg-[var(--bg-secondary)] border-[var(--border)]"
+                  }
                             `}
               >
                 {index + 1}
@@ -91,7 +93,7 @@ export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <h3 className="font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--accent)] transition-colors">
+                  <h3 className="font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--accent-solid)] transition-colors">
                     {program.programName}
                   </h3>
                   <span className="px-2 py-0.5 rounded-full bg-[var(--bg-secondary)] text-[10px] font-medium text-[var(--text-secondary)] border border-[var(--border)]">

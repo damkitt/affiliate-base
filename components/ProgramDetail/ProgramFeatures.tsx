@@ -66,15 +66,16 @@ export function ProgramFeatures() {
           return (
             <div
               key={index}
-              className="p-4 rounded-lg border border-[var(--border)] hover:border-[var(--accent)]/20 transition-colors"
+              className="p-4 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--accent-solid)]/30 transition-all"
+              style={{ boxShadow: 'var(--shadow-card)' }}
             >
               {/* Icon & Highlight */}
               <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-[var(--accent)]/10">
-                  <Icon className="w-5 h-5 text-[var(--accent)]" />
+                <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-[var(--accent-dim)] border border-[var(--accent-solid)]/20">
+                  <Icon className="w-5 h-5 text-[var(--accent-solid)]" />
                 </div>
                 {feature.highlight && (
-                  <span className="text-xs font-semibold text-[var(--accent)]">
+                  <span className="text-xs font-semibold text-[var(--accent-solid)]">
                     {feature.highlight}
                   </span>
                 )}

@@ -47,7 +47,7 @@ export function ProgramFAQ() {
   return (
     <div>
       <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-        <HiQuestionMarkCircle className="w-5 h-5 text-[var(--accent)]" />
+        <HiQuestionMarkCircle className="w-5 h-5 text-[var(--accent-solid)]" />
         Frequently Asked Questions
       </h2>
 
@@ -58,7 +58,8 @@ export function ProgramFAQ() {
           return (
             <div
               key={index}
-              className="rounded-lg border border-[var(--border)] overflow-hidden"
+              className="rounded-lg bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden"
+              style={{ boxShadow: 'var(--shadow-card)' }}
             >
               <button
                 onClick={() => setOpenIndex(isOpen ? null : index)}
@@ -68,16 +69,14 @@ export function ProgramFAQ() {
                   {faq.question}
                 </span>
                 <HiChevronDown
-                  className={`w-5 h-5 text-[var(--text-secondary)] shrink-0 transition-transform duration-300 ${
-                    isOpen ? "rotate-180" : ""
-                  }`}
+                  className={`w-5 h-5 text-[var(--text-secondary)] shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
               <div
-                className={`overflow-hidden transition-all duration-300 ${
-                  isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                }`}
+                className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                  }`}
               >
                 <div className="px-5 pb-3.5 text-sm text-[var(--text-secondary)] leading-relaxed">
                   {faq.answer}

@@ -14,11 +14,11 @@ interface ProgramCTAProps {
 
 export function ProgramCTA({ program, onApplyClick }: ProgramCTAProps) {
   return (
-    <div className="p-5 rounded-lg border border-[var(--border)] sticky top-24">
+    <div className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] sticky top-24" style={{ boxShadow: 'var(--shadow-card)' }}>
       {/* Status Badge */}
-      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent)]/10 mb-4">
-        <HiSparkles className="w-3.5 h-3.5 text-[var(--accent)]" />
-        <span className="text-xs font-medium text-[var(--accent)]">Active</span>
+      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent-dim)] border border-[var(--accent-solid)]/20 mb-4">
+        <HiSparkles className="w-3.5 h-3.5 text-[var(--accent-solid)]" />
+        <span className="text-xs font-medium text-[var(--accent-solid)]">Active</span>
       </div>
 
       {/* Main Content */}
@@ -34,8 +34,8 @@ export function ProgramCTA({ program, onApplyClick }: ProgramCTAProps) {
       </div>
 
       {/* Commission Highlight */}
-      <div className="mb-5 p-4 rounded-lg bg-[var(--accent)]/5">
-        <div className="text-2xl font-bold text-[var(--accent)] mb-0.5">
+      <div className="mb-5 p-4 rounded-lg bg-[var(--accent-dim)] border border-[var(--accent-solid)]/20">
+        <div className="text-2xl font-bold text-[var(--accent-solid)] mb-0.5">
           {program.commissionRate}%
         </div>
         <div className="text-xs text-[var(--text-secondary)]">
@@ -46,7 +46,8 @@ export function ProgramCTA({ program, onApplyClick }: ProgramCTAProps) {
       {/* CTA Button */}
       <button
         onClick={onApplyClick}
-        className="w-full inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[var(--accent)] text-white font-medium rounded-lg hover:opacity-90 transition-opacity mb-2"
+        className="w-full inline-flex items-center justify-center gap-2 px-6 py-2.5 text-[var(--accent-foreground)] font-medium rounded-lg transition-all mb-2 hover:opacity-95"
+        style={{ background: 'var(--accent-gradient-dark)', boxShadow: 'var(--shadow-md)' }}
       >
         Apply to Program
         <HiArrowTopRightOnSquare className="w-4 h-4" />

@@ -10,7 +10,7 @@ export function ProgramDetailHeader() {
       <div className="max-w-7xl mx-auto">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors group"
+          className="inline-flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent-solid)] transition-colors group"
         >
           <svg
             className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"

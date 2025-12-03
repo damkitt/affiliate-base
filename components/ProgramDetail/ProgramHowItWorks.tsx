@@ -70,7 +70,7 @@ export function ProgramHowItWorks() {
   return (
     <div>
       <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-        <HiLightBulb className="w-5 h-5 text-[var(--accent)]" />
+        <HiLightBulb className="w-5 h-5 text-[var(--accent-solid)]" />
         How It Works
       </h2>
 
@@ -91,12 +91,13 @@ export function ProgramHowItWorks() {
                   setActiveStep(isActive ? null : index);
                 }
               }}
-              className="p-5 rounded-lg border border-[var(--border)] hover:border-[var(--accent)]/20 cursor-pointer transition-colors"
+              className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--accent-solid)]/30 cursor-pointer transition-all"
+              style={{ boxShadow: 'var(--shadow-card)' }}
             >
               {/* Icon & Number */}
               <div className="flex items-center gap-3 mb-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[var(--accent)]/10">
-                  <Icon className="w-5 h-5 text-[var(--accent)]" />
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[var(--accent-dim)] border border-[var(--accent-solid)]/20">
+                  <Icon className="w-5 h-5 text-[var(--accent-solid)]" />
                 </div>
                 <span className="text-sm font-semibold text-[var(--text-secondary)]">
                   Step {step.number}
@@ -115,9 +116,8 @@ export function ProgramHowItWorks() {
 
               {/* Details - Expandable */}
               <div
-                className={`overflow-hidden transition-all duration-300 ${
-                  isActive ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
-                }`}
+                className={`overflow-hidden transition-all duration-300 ${isActive ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
+                  }`}
               >
                 <ul className="space-y-2 mt-4 pt-4 border-t border-[var(--border)]">
                   {step.details.map((detail, idx) => (
@@ -125,7 +125,7 @@ export function ProgramHowItWorks() {
                       key={idx}
                       className="flex items-start gap-2 text-xs text-[var(--text-secondary)]"
                     >
-                      <span className="text-[var(--accent)] mt-0.5">→</span>
+                      <span className="text-[var(--accent-solid)] mt-0.5">→</span>
                       <span>{detail}</span>
                     </li>
                   ))}
@@ -133,7 +133,7 @@ export function ProgramHowItWorks() {
               </div>
 
               {/* Expand indicator */}
-              <div className="mt-3 text-xs font-medium text-[var(--accent)] group-hover:underline">
+              <div className="mt-3 text-xs font-medium text-[var(--accent-solid)] group-hover:underline">
                 {isActive ? "Show less" : "Learn more"}
               </div>
             </div>

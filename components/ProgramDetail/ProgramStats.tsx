@@ -44,10 +44,11 @@ export function ProgramStats({ program }: ProgramStatsProps) {
           return (
             <div
               key={index}
-              className="p-5 rounded-lg border border-[var(--border)] hover:border-[var(--accent)]/20 transition-colors"
+              className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--accent-solid)]/30 transition-all"
+              style={{ boxShadow: 'var(--shadow-card)' }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <Icon className="w-5 h-5 text-[var(--accent)]" />
+                <Icon className="w-5 h-5 text-[var(--accent-solid)]" />
                 <span className="text-xs font-medium text-[var(--text-secondary)] uppercase">
                   {stat.label}
                 </span>

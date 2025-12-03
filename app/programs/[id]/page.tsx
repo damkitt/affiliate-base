@@ -37,7 +37,7 @@ export default function ProgramDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[var(--accent-solid)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -51,7 +51,7 @@ export default function ProgramDetailPage() {
           </p>
           <a
             href="/"
-            className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+            className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-solid)] transition-colors"
           >
             ← Back to programs
           </a>
@@ -80,9 +80,9 @@ export default function ProgramDetailPage() {
             <ProgramFeatures />
 
             {/* About Program */}
-            <div className="p-5 rounded-lg border border-[var(--border)]">
+            <div className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)]" style={{ boxShadow: 'var(--shadow-card)' }}>
               <h2 className="text-lg font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2">
-                <HiInformationCircle className="w-5 h-5 text-[var(--accent)]" />
+                <HiInformationCircle className="w-5 h-5 text-[var(--accent-solid)]" />
                 About This Program
               </h2>
               <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
@@ -98,9 +98,9 @@ export default function ProgramDetailPage() {
 
             {/* Additional Info */}
             {program.additionalInfo && (
-              <div className="p-5 rounded-lg border border-[var(--border)]">
+              <div className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)]" style={{ boxShadow: 'var(--shadow-card)' }}>
                 <h2 className="text-lg font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2">
-                  <HiCheckCircle className="w-5 h-5 text-[var(--accent)]" />
+                  <HiCheckCircle className="w-5 h-5 text-[var(--accent-solid)]" />
                   Additional Details
                 </h2>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">

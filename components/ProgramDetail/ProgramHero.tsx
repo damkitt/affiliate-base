@@ -16,14 +16,14 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
   return (
     <div className="mb-10">
       {/* Hero Card */}
-      <div className="relative rounded-xl p-6 md:p-8 bg-gradient-to-br from-[var(--accent)]/[0.02] to-transparent transition-all duration-300 animate-fade-in-up">
+      <div className="relative rounded-xl p-6 md:p-8 bg-[var(--bg-card)] border border-[var(--border)] transition-all duration-300 animate-fade-in-up" style={{ boxShadow: 'var(--shadow-card)' }}>
         {/* Ambient Glow */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[var(--accent)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[var(--accent-solid)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
         <div className="relative flex flex-col md:flex-row items-start gap-6 md:gap-8">
           {/* Logo */}
           <div className="shrink-0">
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center overflow-hidden">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] flex items-center justify-center overflow-hidden" style={{ boxShadow: 'var(--shadow-sm)' }}>
               <img
                 src={logoSrc}
                 alt={program.programName}
@@ -31,7 +31,7 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = "none";
-                  target.parentElement!.innerHTML = `<span class="text-3xl font-bold text-[var(--accent)]">${program.programName.charAt(
+                  target.parentElement!.innerHTML = `<span class="text-3xl font-bold text-[var(--accent-solid)]">${program.programName.charAt(
                     0
                   )}</span>`;
                 }}
@@ -42,12 +42,12 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
           {/* Info */}
           <div className="flex-1 min-w-0">
             {/* Category Badge */}
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent)]/5 mb-3">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent-dim)] border border-[var(--accent-solid)]/20 mb-3">
               <CategoryIcon
                 iconName={categoryIconName}
-                className="w-3.5 h-3.5 text-[var(--accent)]"
+                className="w-3.5 h-3.5 text-[var(--accent-solid)]"
               />
-              <span className="text-xs font-medium text-[var(--text-secondary)]">
+              <span className="text-xs font-medium text-[var(--accent-solid)]">
                 {program.category}
               </span>
             </div>
@@ -65,7 +65,7 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
               <div className="flex items-center gap-2.5">
-                <HiCurrencyDollar className="w-5 h-5 text-[var(--accent)]" />
+                <HiCurrencyDollar className="w-5 h-5 text-[var(--accent-solid)]" />
                 <div>
                   <div className="text-xs text-[var(--text-secondary)]">
                     Commission
@@ -78,7 +78,7 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
 
               {program.cookieDuration && (
                 <div className="flex items-center gap-2.5">
-                  <HiClock className="w-5 h-5 text-[var(--accent)]" />
+                  <HiClock className="w-5 h-5 text-[var(--accent-solid)]" />
                   <div>
                     <div className="text-xs text-[var(--text-secondary)]">
                       Cookie Life
@@ -92,7 +92,7 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
 
               {program.country && (
                 <div className="flex items-center gap-2.5">
-                  <HiMapPin className="w-5 h-5 text-[var(--accent)]" />
+                  <HiMapPin className="w-5 h-5 text-[var(--accent-solid)]" />
                   <div>
                     <div className="text-xs text-[var(--text-secondary)]">
                       Availability
@@ -109,7 +109,8 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={onApplyClick}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-[var(--accent)] text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-2 px-6 py-2.5 text-[var(--accent-foreground)] rounded-lg font-medium transition-all hover:opacity-95"
+                style={{ background: 'var(--accent-gradient-dark)', boxShadow: 'var(--shadow-md)' }}
               >
                 Apply Now
                 <svg
@@ -133,7 +134,8 @@ export function ProgramHero({ program, onApplyClick }: ProgramHeroProps) {
                     window.open(program.websiteUrl, "_blank");
                   }
                 }}
-                className="px-6 py-2.5 bg-[var(--bg)] text-[var(--text-primary)] rounded-lg font-medium border border-[var(--border)] hover:bg-[var(--bg-secondary)] transition-colors"
+                className="px-6 py-2.5 bg-[var(--bg-card)] text-[var(--text-primary)] rounded-lg font-medium border border-[var(--border)] hover:bg-[var(--bg-secondary)] hover:border-[var(--accent-solid)] transition-all"
+                style={{ boxShadow: 'var(--shadow-sm)' }}
               >
                 Visit Website
               </button>
