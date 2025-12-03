@@ -11,7 +11,35 @@ import { validateCountry, validateCreateBody } from "@/lib/utils";
 export async function GET(): Promise<NextResponse> {
   const programs = await prisma.program.findMany({
     where: { approvalStatus: true },
-    orderBy: { clicksCount: "desc" },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      programName: true,
+      tagline: true,
+      description: true,
+      category: true,
+      websiteUrl: true,
+      affiliateUrl: true,
+      country: true,
+      xHandle: true,
+      email: true,
+      logoUrl: true,
+      commissionRate: true,
+      commissionDuration: true,
+      cookieDuration: true,
+      payoutMethod: true,
+      minPayoutValue: true,
+      avgOrderValue: true,
+      targetAudience: true,
+      additionalInfo: true,
+      affiliatesCountRange: true,
+      payoutsTotalRange: true,
+      foundingDate: true,
+      approvalTimeRange: true,
+      approvalStatus: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
 
   activeProgramsGauge.set(programs.length);

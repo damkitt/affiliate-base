@@ -16,7 +16,6 @@ interface ViewRequestBody {
 
 interface ViewResponse {
   success: boolean;
-  clicksCount: number;
   duplicate: boolean;
   message?: string;
 }
@@ -115,20 +114,14 @@ export async function POST(
         route: "/api/programs/[id]/view",
       });
 
-      const program = await prisma.program.findUnique({
-        where: { id: programId },
-        select: { clicksCount: true },
-      });
-
       return NextResponse.json({
         success: true,
-        clicksCount: program?.clicksCount ?? 0,
         duplicate: true,
         message: "View already counted",
       });
     }
 
-    const [, program] = await prisma.$transaction([
+    await prisma.$transaction([
       prisma.analyticsEvent.create({
         data: {
           programId,
@@ -139,14 +132,11 @@ export async function POST(
           referer,
         },
       }),
-      prisma.program.update({
-        where: { id: programId },
-        data: { clicksCount: { increment: 1 } },
-      }),
     ]);
 
+    // Increment Prometheus page views metric
     pageViewsTotal
-      .labels({ program_id: programId, program_name: program.programName })
+      .labels({ program_id: programId, program_name: "unknown" })
       .inc();
 
     await pushMetrics("views", {
@@ -154,15 +144,10 @@ export async function POST(
       route: "/api/programs/[id]/view",
     });
 
-    return NextResponse.json({
-      success: true,
-      clicksCount: program.clicksCount,
-      duplicate: false,
-    });
+    return NextResponse.json({ success: true, duplicate: false });
   } catch (error) {
     console.error("[Analytics] Error tracking view:", error);
 
-    // опционально можно ещё тут пушнуть метрику с outcome: "error"
     await pushMetrics("views", {
       outcome: "error",
       route: "/api/programs/[id]/view",
