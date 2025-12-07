@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { HiArrowRightOnRectangle } from "react-icons/hi2";
 
 interface AdminHeaderProps {
@@ -24,7 +25,7 @@ export function AdminHeader({ pendingCount }: AdminHeaderProps) {
     <div className="border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md sticky top-0 z-10">
       <div className="max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           >
@@ -42,7 +43,7 @@ export function AdminHeader({ pendingCount }: AdminHeaderProps) {
               />
             </svg>
             Back to Home
-          </a>
+          </Link>
           <div className="h-6 w-px bg-[var(--border)]" />
           <h1 className="text-xl font-bold text-[var(--text-primary)]">
             Admin Panel

@@ -37,6 +37,8 @@ export async function GET(): Promise<NextResponse> {
       foundingDate: true,
       approvalTimeRange: true,
       approvalStatus: true,
+      isFeatured: true,
+      featuredExpiresAt: true,
       createdAt: true,
       updatedAt: true,
     },

@@ -26,7 +26,7 @@ import { ContactStep } from "./FormSteps/ContactStep";
 interface AddProgramModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 export default function AddProgramModal({
@@ -129,7 +129,7 @@ export default function AddProgramModal({
       const data = await response.json();
 
       if (response.ok) {
-        onSuccess();
+        onSuccess?.();
         setShowSuccess(true);
       } else {
         console.error("API Error:", response.status, data);

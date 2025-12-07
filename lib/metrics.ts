@@ -1,14 +1,18 @@
 // lib/metrics.ts
 import client from "prom-client";
 
-const globalAny = globalThis as any;
+interface GlobalWithMetrics {
+  __AFFILIATEBASE_PROM_REGISTER__?: client.Registry;
+}
+
+const globalWithMetrics = globalThis as GlobalWithMetrics;
 
 // Один общий реестр на процесс (для hot-reload)
 export const register: client.Registry =
-  globalAny.__AFFILIATEBASE_PROM_REGISTER__ || new client.Registry();
+  globalWithMetrics.__AFFILIATEBASE_PROM_REGISTER__ || new client.Registry();
 
-if (!globalAny.__AFFILIATEBASE_PROM_REGISTER__) {
-  globalAny.__AFFILIATEBASE_PROM_REGISTER__ = register;
+if (!globalWithMetrics.__AFFILIATEBASE_PROM_REGISTER__) {
+  globalWithMetrics.__AFFILIATEBASE_PROM_REGISTER__ = register;
 
   client.collectDefaultMetrics({
     register,

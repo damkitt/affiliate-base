@@ -6,7 +6,6 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { Program } from "@prisma/client";
 
 // =============================================================================
 // Types
@@ -71,8 +70,9 @@ export async function PATCH(
 
     const body = await request.json();
     
-    // Destructure to remove id from update payload
-    const { id: _id, createdAt: _createdAt, ...updateData } = body;
+    // Remove id and createdAt from update payload (only keep updateable fields)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _discardId, createdAt: _discardCreatedAt, ...updateData } = body;
 
     const program = await prisma.program.update({
       where: { id },

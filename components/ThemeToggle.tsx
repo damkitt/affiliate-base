@@ -1,16 +1,17 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
 import { HiSun, HiMoon, HiComputerDesktop } from "react-icons/hi2"
 
-export function ThemeToggle() {
-    const [mounted, setMounted] = useState(false)
-    const { theme, setTheme } = useTheme()
+// useSyncExternalStore pattern for hydration-safe mounting detection
+const emptySubscribe = () => () => {}
+const getSnapshot = () => true
+const getServerSnapshot = () => false
 
-    useEffect(() => {
-        setMounted(true)
-    }, [])
+export function ThemeToggle() {
+    const mounted = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot)
+    const { theme, setTheme } = useTheme()
 
     if (!mounted) {
         return (

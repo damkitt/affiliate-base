@@ -151,7 +151,7 @@ export async function POST(
     await pushMetrics("views", {
       outcome: "error",
       route: "/api/programs/[id]/view",
-    }).catch(() => {});
+    }).catch(() => { });
 
     return NextResponse.json(
       { error: "Failed to track view" },
@@ -173,19 +173,19 @@ export async function GET(
       prisma.analyticsEvent.findMany({
         where: {
           programId,
-          eventType: "view",
+          eventType: { in: ["view", "click"] },
           createdAt: { gte: sevenDaysAgo },
         },
         select: { createdAt: true },
         orderBy: { createdAt: "asc" },
       }),
       prisma.analyticsEvent.count({
-        where: { programId, eventType: "view" },
+        where: { programId, eventType: { in: ["view", "click"] } },
       }),
       prisma.analyticsEvent.count({
         where: {
           programId,
-          eventType: "view",
+          eventType: { in: ["view", "click"] },
           createdAt: { gte: todayStart },
         },
       }),

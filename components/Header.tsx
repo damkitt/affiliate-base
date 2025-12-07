@@ -1,3 +1,5 @@
+"use client";
+
 import { HiPlus, HiMagnifyingGlass } from "react-icons/hi2";
 import { ThemeToggle } from "./ThemeToggle";
 import { useState, useEffect } from "react";
@@ -6,9 +8,9 @@ import { motion, AnimatePresence } from "framer-motion";
 const ROTATING_WORDS = ["Premium", "High-Paying", "SaaS", "Transparent"];
 
 interface HeaderProps {
-  onAddProgram: () => void;
-  search: string;
-  setSearch: (value: string) => void;
+  onAddProgram?: () => void;
+  search?: string;
+  setSearch?: (value: string) => void;
 }
 
 export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
@@ -23,8 +25,8 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
 
   return (
     <header className="relative pt-32 pb-12 px-6 animate-fade-in-up">
-      {/* Theme Toggle - Fixed Position */}
-      <div className="absolute top-6 right-6 z-10">
+      {/* Theme Toggle - Fixed Position in viewport */}
+      <div className="fixed top-6 right-6 z-50">
         <ThemeToggle />
       </div>
 
@@ -65,33 +67,35 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
         </p>
 
         {/* Search + Add */}
-        <div className="flex items-center gap-2 max-w-md mx-auto p-1 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] shadow-sm focus-within:ring-2 ring-[var(--accent-dim)] transition-all duration-300">
-          <div className="flex-1 flex items-center h-10 px-3">
-            <HiMagnifyingGlass className="w-4 h-4 text-[var(--text-secondary)] mr-3" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search programs..."
-              className="flex-1 bg-transparent text-sm placeholder:text-[var(--text-tertiary)] focus:outline-none text-[var(--text-primary)]"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--accent-solid)] transition-colors px-2 py-1 rounded hover:bg-[var(--bg-secondary)]"
-              >
-                Clear
-              </button>
-            )}
+        {onAddProgram && setSearch && (
+          <div className="flex items-center gap-2 max-w-md mx-auto p-1 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] shadow-sm focus-within:ring-2 ring-[var(--accent-dim)] transition-all duration-300">
+            <div className="flex-1 flex items-center h-10 px-3">
+              <HiMagnifyingGlass className="w-4 h-4 text-[var(--text-secondary)] mr-3" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search programs..."
+                className="flex-1 bg-transparent text-sm placeholder:text-[var(--text-tertiary)] focus:outline-none text-[var(--text-primary)]"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--accent-solid)] transition-colors px-2 py-1 rounded hover:bg-[var(--bg-secondary)]"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <button
+              onClick={onAddProgram}
+              className="h-9 px-4 rounded-lg bg-[var(--accent-solid)] text-white text-sm font-semibold flex items-center gap-2 hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all duration-150 shadow-md"
+            >
+              <HiPlus className="w-4 h-4" />
+              <span className="hidden sm:inline">Add</span>
+            </button>
           </div>
-          <button
-            onClick={onAddProgram}
-            className="h-9 px-4 rounded-lg bg-[var(--accent-solid)] text-white text-sm font-semibold flex items-center gap-2 hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all duration-150 shadow-md"
-          >
-            <HiPlus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add</span>
-          </button>
-        </div>
+        )}
       </div>
     </header>
   );

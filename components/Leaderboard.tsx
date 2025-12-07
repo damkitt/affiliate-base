@@ -1,144 +1,206 @@
 "use client";
 
+import { useState, useMemo } from "react";
+import Image from "next/image";
 import { Program } from "@/types";
-import { CATEGORY_ICONS } from "@/constants";
-import { HiArrowUpRight, HiEye } from "react-icons/hi2";
+import { HiArrowUpRight, HiEye, HiStar } from "react-icons/hi2";
 import Link from "next/link";
 import useSWR from "swr";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface LeaderboardProps {
   programs: Program[];
-  isLoading: boolean;
 }
 
-export function Leaderboard({ programs, isLoading }: LeaderboardProps) {
+export function Leaderboard({ programs }: LeaderboardProps) {
+  const [visibleCount, setVisibleCount] = useState(12);
+
   const fetcher = (url: string) => fetch(url).then((r) => r.json());
   const { data: clicksMap } = useSWR<Record<string, number>>(
     "/api/metrics/clicks",
-    fetcher
+    fetcher,
+    { refreshInterval: 5000 }
   );
-  if (isLoading) {
-    return (
-      <div className="max-w-[800px] mx-auto px-6 py-8">
-        <div className="space-y-3">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="h-20 rounded-xl animate-pulse bg-[var(--bg-secondary)]"
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
 
-  if (programs.length === 0) {
-    return (
-      <div className="max-w-[800px] mx-auto px-6 py-20 text-center">
-        <p className="text-[var(--text-tertiary)]">No programs found</p>
-      </div>
-    );
-  }
+  // Split into featured and organic
+  const { featuredPrograms, organicPrograms } = useMemo(() => {
+    return sortPrograms(programs, clicksMap);
+  }, [programs, clicksMap]);
+
+  // Combine for display based on visibleCount, but keep structure
+  // Actually, we should render them in two blocks to ensure organic gets medals correctly
+
+  // Let's just merge them for the list but handle the index/medal logic carefully
+  const displayPrograms = [...featuredPrograms, ...organicPrograms].slice(0, visibleCount);
 
   return (
     <div className="max-w-[800px] mx-auto px-6 pb-20">
-      {/* Simple table header */}
-      <div className="flex items-center justify-between px-6 py-3 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
-        <span>{programs.length} programs</span>
-        <div className="flex items-center gap-6">
-          <span className="hidden sm:inline">Interest</span>
-          <span className="hidden sm:inline">Commission</span>
-        </div>
-      </div>
+      {/* ... Header ... */}
 
       {/* Programs List */}
-      <div className="space-y-3">
-        {programs.map((program, index) => {
-          const logoSrc =
-            program.logoUrl ||
-            `https://www.google.com/s2/favicons?domain=${program.websiteUrl}&sz=128`;
-          const categoryIconName = CATEGORY_ICONS[program.category] || "HiCube";
+      <div className="space-y-3 relative">
+        <AnimatePresence mode="popLayout">
+          {displayPrograms.map((program) => {
+            const clicks = clicksMap?.[program.id] ?? program.clicksCount ?? 0;
 
-          return (
-            <Link
-              key={program.id}
-              href={`/programs/${program.id}`}
-              className="group flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--accent-solid)] transition-all duration-200 cursor-pointer"
-              style={{ boxShadow: "var(--shadow-card)" }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.boxShadow = "var(--shadow-card-hover)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.boxShadow = "var(--shadow-card)")
-              }
-            >
-              {/* Rank */}
-              <div className="w-10 h-10 flex items-center justify-center">
-                {index === 0 ? (
-                  <span className="text-2xl">🥇</span>
-                ) : index === 1 ? (
-                  <span className="text-2xl">🥈</span>
-                ) : index === 2 ? (
-                  <span className="text-2xl">🥉</span>
-                ) : (
-                  <span className="text-base font-semibold text-[var(--text-secondary)]">
-                    {index + 1}
-                  </span>
-                )}
-              </div>
+            // Determine rank/medal only for organic programs
+            let rankDisplay = null;
+            if (!program.isFeatured) {
+              const organicIndex = organicPrograms.findIndex(p => p.id === program.id);
+              if (organicIndex === 0) rankDisplay = <span className="text-2xl">🥇</span>;
+              else if (organicIndex === 1) rankDisplay = <span className="text-2xl">🥈</span>;
+              else if (organicIndex === 2) rankDisplay = <span className="text-2xl">🥉</span>;
+              else rankDisplay = <span className="text-base font-semibold text-[var(--text-secondary)]">{organicIndex + 1}</span>;
+            } else {
+              // Featured icon/placeholder
+              rankDisplay = <HiStar className="w-5 h-5 text-amber-500" />;
+            }
 
-              {/* Logo */}
-              <div className="relative w-12 h-12 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
-                {program.logoUrl ? (
-                  <img
-                    src={program.logoUrl}
-                    alt={program.programName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-lg font-bold text-[var(--text-tertiary)]">
-                    {program.programName[0]}
+            return (
+              <motion.div
+                key={program.id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Link
+                  href={`/programs/${program.id}`}
+                  className={cn(
+                    "group flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 cursor-pointer relative overflow-hidden",
+                    !program.isFeatured && "bg-[var(--bg-card)] border-[var(--border)] hover:border-[var(--accent-solid)]"
+                  )}
+                  style={{
+                    boxShadow: program.isFeatured ? "0 4px 20px -2px rgba(16, 185, 129, 0.1)" : "var(--shadow-card)",
+                    backgroundColor: program.isFeatured ? "hsla(163, 72%, 38%, 0.03)" : undefined,
+                    borderColor: program.isFeatured ? "var(--accent-solid)" : undefined
+                  }}
+                  onMouseEnter={(e) =>
+                    !program.isFeatured && (e.currentTarget.style.boxShadow = "var(--shadow-card-hover)")
+                  }
+                  onMouseLeave={(e) =>
+                    !program.isFeatured && (e.currentTarget.style.boxShadow = "var(--shadow-card)")
+                  }
+                >
+                  {/* Rank / Featured Icon */}
+                  <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    {program.isFeatured ? (
+                      <span className="text-lg drop-shadow-sm">📌</span>
+                    ) : (
+                      rankDisplay
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <h3 className="font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--accent-solid)] transition-colors">
-                    {program.programName}
-                  </h3>
-                  <span className="px-2 py-0.5 rounded-full bg-[var(--bg-secondary)] text-[10px] font-medium text-[var(--text-secondary)] border border-[var(--border)]">
-                    {program.category}
-                  </span>
-                </div>
-                <p className="text-sm text-[var(--text-secondary)] truncate">
-                  {program.tagline}
-                </p>
-              </div>
+                  {/* Logo */}
+                  <div className="relative w-10 h-10 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+                    {program.logoUrl ? (
+                      <Image
+                        src={program.logoUrl}
+                        alt={program.programName}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-sm font-bold text-[var(--text-tertiary)]">
+                        {program.programName[0]}
+                      </div>
+                    )}
+                  </div>
 
-              {/* Metrics */}
-              <div className="flex items-center gap-3">
-                {/* Interest/Views */}
-                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] text-xs font-medium border border-[var(--border)] tabular-nums">
-                  <HiEye className="w-3.5 h-3.5 text-[var(--accent-solid)]" />
-                  <span>{clicksMap?.[program.id] ?? 0}</span>
-                </div>
+                  {/* ... Rest of content ... */}
 
-                {/* Commission */}
-                <div className="px-2.5 py-1 rounded-lg bg-[var(--accent-dim)] text-[var(--accent-solid)] text-xs font-bold border border-[var(--accent-solid)]/20 tabular-nums">
-                  {program.commissionRate}%
-                </div>
-              </div>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h3 className="font-medium text-sm text-[var(--text-primary)] truncate group-hover:text-[var(--accent-solid)] transition-colors">
+                        {program.programName}
+                      </h3>
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-medium text-[var(--text-secondary)] bg-[var(--bg-secondary)] border border-[var(--border)]">
+                        {program.category}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)] truncate">
+                      {program.tagline}
+                    </p>
+                  </div>
 
-              {/* Arrow */}
-              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--accent-solid)] group-hover:bg-[var(--accent-dim)] transition-all duration-200">
-                <HiArrowUpRight className="w-4 h-4" />
-              </div>
-            </Link>
-          );
-        })}
+                  {/* Metrics */}
+                  <div className="flex items-center gap-2">
+                    {/* Interest/Views */}
+                    {!program.isFeatured && (
+                      <div className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] text-[10px] font-medium border border-[var(--border)] tabular-nums">
+                        <HiEye className="w-3 h-3 text-[var(--accent-solid)]" />
+                        <span>{clicks}</span>
+                      </div>
+                    )}
+
+                    {/* Commission */}
+                    <div className="px-2 py-0.5 rounded-md bg-[var(--accent-dim)] text-[var(--accent-solid)] text-[10px] font-bold border border-[var(--accent-solid)]/20 tabular-nums">
+                      {program.commissionRate}%
+                    </div>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--accent-solid)] group-hover:bg-[var(--accent-dim)] transition-all duration-200">
+                    <HiArrowUpRight className="w-3 h-3" />
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+
+        {/* Fog Effect */}
+        {visibleCount < (featuredPrograms.length + organicPrograms.length) && (
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--bg-background)] to-transparent pointer-events-none z-10" />
+        )}
       </div>
+
+      {/* See More Button */}
+      {visibleCount < (featuredPrograms.length + organicPrograms.length) && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => setVisibleCount((prev) => prev + 12)}
+            className="px-8 py-3 rounded-full bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-primary)] font-medium shadow-lg hover:border-[var(--accent-solid)] hover:shadow-xl transition-all duration-200 flex items-center gap-2 group"
+          >
+            See more programs
+            <HiArrowUpRight className="w-4 h-4 rotate-45 group-hover:translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
+      )}
     </div>
   );
+}
+
+function sortPrograms(programs: Program[], clicksMap?: Record<string, number>) {
+  const featured: Program[] = [];
+  const organic: Program[] = [];
+
+  programs.forEach((p) => {
+    if (p.isFeatured) {
+      featured.push(p);
+    } else {
+      organic.push(p);
+    }
+  });
+
+  // Sort organic by clicks
+  organic.sort((a, b) => {
+    const clicksA = clicksMap?.[a.id] ?? a.clicksCount ?? 0;
+    const clicksB = clicksMap?.[b.id] ?? b.clicksCount ?? 0;
+    if (clicksA !== clicksB) return clicksB - clicksA;
+    return a.programName.localeCompare(b.programName);
+  });
+
+  // Sort featured by clicks (descending)
+  featured.sort((a, b) => {
+    const clicksA = clicksMap?.[a.id] ?? a.clicksCount ?? 0;
+    const clicksB = clicksMap?.[b.id] ?? b.clicksCount ?? 0;
+    return clicksB - clicksA;
+  });
+
+  return { featuredPrograms: featured, organicPrograms: organic };
 }

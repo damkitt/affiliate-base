@@ -8,6 +8,7 @@
 
 import { useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   HiLockClosed,
   HiShieldCheck,
@@ -22,9 +23,6 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(
-    null
-  );
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -52,7 +50,6 @@ function LoginContent() {
           )} minutes.`
         );
       } else if (response.status === 401) {
-        setAttemptsRemaining(data.attemptsRemaining);
         setError(
           data.attemptsRemaining > 0
             ? `Invalid password. ${data.attemptsRemaining} attempts remaining.`
@@ -146,12 +143,12 @@ function LoginContent() {
 
         {/* Back Link */}
         <div className="text-center mt-6">
-          <a
+          <Link
             href="/"
             className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-solid)] transition-colors font-medium"
           >
             ← Back to home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

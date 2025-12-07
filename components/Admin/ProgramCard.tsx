@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Program } from "@/types";
 
 interface ProgramCardProps {
@@ -18,12 +19,14 @@ export function ProgramCard({
   return (
     <div className="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] shadow-lg">
       <div className="flex items-start gap-6 mb-6">
-        <div className="w-20 h-20 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] flex items-center justify-center overflow-hidden flex-shrink-0">
+        <div className="relative w-20 h-20 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] flex items-center justify-center overflow-hidden flex-shrink-0">
           {program.logoUrl ? (
-            <img
+            <Image
               src={program.logoUrl}
               alt={program.programName}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              unoptimized
             />
           ) : (
             <span className="text-2xl font-bold text-[var(--text-tertiary)]">

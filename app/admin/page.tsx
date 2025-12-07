@@ -8,11 +8,17 @@ import { SearchBar } from "@/components/Admin/SearchBar";
 import { Tabs } from "@/components/Admin/Tabs";
 import { ProgramCard } from "@/components/Admin/ProgramCard";
 import { EditForm } from "@/components/Admin/EditForm";
+import { ReportsList } from "@/components/Admin/ReportsList";
+
+interface ProgramReport {
+  id: string;
+  status: string;
+}
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"pending" | "all">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "all" | "reports">("pending");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Program>>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,6 +31,12 @@ export default function AdminPage() {
     "/api/admin/programs",
     fetcher,
     { refreshInterval: 3000 }
+  );
+
+  const { data: pendingReports = [] } = useSWR<ProgramReport[]>(
+    "/api/admin/reports?status=pending",
+    fetcher,
+    { refreshInterval: 5000 }
   );
 
   const handleApprove = async (id: string) => {
@@ -87,25 +99,31 @@ export default function AdminPage() {
       <AdminHeader pendingCount={pendingPrograms.length} />
 
       <div className="max-w-[1400px] mx-auto px-6 py-8">
-        <div className="mb-6">
-          <SearchBar value={searchQuery} onChange={setSearchQuery} />
-        </div>
+        {activeTab !== "reports" && (
+          <div className="mb-6">
+            <SearchBar value={searchQuery} onChange={setSearchQuery} />
+          </div>
+        )}
 
         <div className="mb-8">
           <Tabs
             activeTab={activeTab}
             pendingCount={pendingPrograms.length}
             allCount={allPrograms.length}
+            reportsCount={pendingReports.length}
             onTabChange={setActiveTab}
           />
         </div>
 
-        <div className="space-y-6">
-          {programs.map((program) => (
-            <div
-              key={program.id}
-              className="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] shadow-lg"
-            >
+        {activeTab === "reports" ? (
+          <ReportsList />
+        ) : (
+          <div className="space-y-6">
+            {programs.map((program) => (
+              <div
+                key={program.id}
+                className="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] shadow-lg"
+              >
               {editingId === program.id ? (
                 <EditForm
                   program={editForm}
@@ -137,6 +155,7 @@ export default function AdminPage() {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );

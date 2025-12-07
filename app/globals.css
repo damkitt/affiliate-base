@@ -57,9 +57,9 @@
 .dark {
   /* Rich Dark Backgrounds with Blue-Gray Undertones */
   --bg: hsl(222, 24%, 8%);
-  --bg-secondary: hsl(222, 22%, 11%);
-  --bg-card: hsl(222, 24%, 10%);
-  --bg-elevated: hsl(222, 20%, 14%);
+  --bg-secondary: hsl(222, 22%, 10%);
+  --bg-card: hsl(222, 24%, 9%);
+  --bg-elevated: hsl(222, 22%, 11%);
 
   /* Refined Text Hierarchy */
   --text-primary: hsl(220, 20%, 98%);
@@ -139,6 +139,13 @@ body::before {
 ::selection {
   background: var(--accent-solid);
   color: white;
+}
+
+/* Card with isolated background - blocks spotlight effect from showing through */
+.card-solid {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--bg-elevated);
 }
 
 /* Custom Scrollbar */

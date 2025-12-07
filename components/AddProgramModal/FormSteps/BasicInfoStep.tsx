@@ -1,4 +1,5 @@
 import { ChangeEvent, RefObject } from "react";
+import Image from "next/image";
 import { HiPhoto, HiGlobeAlt, HiLink } from "react-icons/hi2";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import type { FormData } from "../types";
@@ -38,10 +39,12 @@ export function BasicInfoStep({
           }`}
         >
           {logoPreview ? (
-            <img
+            <Image
               src={logoPreview}
               alt="Logo"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              unoptimized
             />
           ) : (
             <div className="text-center">

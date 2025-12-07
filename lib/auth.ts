@@ -104,3 +104,36 @@ export async function isAuthenticated(): Promise<boolean> {
   const payload = await verifyToken(token);
   return payload !== null;
 }
+
+/**
+ * Verify authentication from request headers (for API routes)
+ * Checks Authorization header or cookie
+ */
+export async function verifyAuth(request: Request): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Try Authorization header first
+    const authHeader = request.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      const payload = await verifyToken(token);
+      if (payload) {
+        return { success: true };
+      }
+    }
+
+    // Fall back to cookie
+    const token = await getAuthCookie();
+    if (!token) {
+      return { success: false, error: "Not authenticated" };
+    }
+
+    const payload = await verifyToken(token);
+    if (!payload) {
+      return { success: false, error: "Invalid token" };
+    }
+
+    return { success: true };
+  } catch {
+    return { success: false, error: "Authentication failed" };
+  }
+}

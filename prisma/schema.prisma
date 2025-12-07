@@ -50,8 +50,41 @@ model Program {
   foundingDate         DateTime? @map("founding_date")
   approvalTimeRange    String?   @map("approval_time_range")
   approvalStatus       Boolean   @default(true) @map("approval_status")
+  isFeatured           Boolean   @default(false) @map("is_featured")
+  featuredExpiresAt    DateTime? @map("featured_expires_at")
   createdAt            DateTime  @default(now()) @map("created_at")
   updatedAt            DateTime  @updatedAt
+
+  reports              ProgramReport[]
+}
+
+model ProgramReport {
+  id          String       @id @default(uuid())
+  programId   String       @map("program_id")
+  program     Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
+  type        ReportType   @default(EDIT)
+  reason      String?      // For reports: "broken_link", "scam", "misleading", "other"
+  message     String       @db.Text
+  email       String?
+  isFounder   Boolean      @default(false) @map("is_founder")
+  status      ReportStatus @default(PENDING)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  resolvedAt  DateTime?    @map("resolved_at")
+
+  @@index([programId])
+  @@index([status])
+  @@map("program_reports")
+}
+
+enum ReportType {
+  EDIT
+  REPORT
+}
+
+enum ReportStatus {
+  PENDING
+  RESOLVED
+  DISMISSED
 }
 
 enum Country {

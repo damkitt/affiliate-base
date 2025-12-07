@@ -1,4 +1,5 @@
 import { ChangeEvent } from "react";
+import Image from "next/image";
 import { HiChatBubbleLeftRight, HiEnvelope, HiPhoto } from "react-icons/hi2";
 import type { FormData } from "../types";
 
@@ -78,11 +79,15 @@ export function ContactStep({
         </h4>
         <div className="flex items-center gap-3">
           {logoPreview ? (
-            <img
-              src={logoPreview}
-              alt="Logo"
-              className="w-12 h-12 rounded-xl object-cover"
-            />
+            <div className="relative w-12 h-12 rounded-xl overflow-hidden">
+              <Image
+                src={logoPreview}
+                alt="Logo"
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
           ) : (
             <div className="w-12 h-12 rounded-xl bg-[var(--border)] flex items-center justify-center">
               <HiPhoto className="w-6 h-6 text-[var(--text-secondary)]" />

@@ -27,6 +27,8 @@ export type Program = {
   readonly approvalTimeRange?: string | null;
   readonly clicksCount: number;
   readonly approvalStatus: boolean;
+  readonly isFeatured?: boolean;
+  readonly featuredExpiresAt?: Date | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 };

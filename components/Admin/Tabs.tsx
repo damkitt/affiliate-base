@@ -1,14 +1,16 @@
 interface TabsProps {
-  activeTab: "pending" | "all";
+  activeTab: "pending" | "all" | "reports";
   pendingCount: number;
   allCount: number;
-  onTabChange: (tab: "pending" | "all") => void;
+  reportsCount?: number;
+  onTabChange: (tab: "pending" | "all" | "reports") => void;
 }
 
 export function Tabs({
   activeTab,
   pendingCount,
   allCount,
+  reportsCount = 0,
   onTabChange,
 }: TabsProps) {
   return (
@@ -32,6 +34,16 @@ export function Tabs({
         }`}
       >
         All Programs ({allCount})
+      </button>
+      <button
+        onClick={() => onTabChange("reports")}
+        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          activeTab === "reports"
+            ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm"
+            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+        }`}
+      >
+        Edits & Reports {reportsCount > 0 && `(${reportsCount})`}
       </button>
     </div>
   );

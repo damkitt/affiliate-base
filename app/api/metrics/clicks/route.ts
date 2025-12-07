@@ -1,18 +1,45 @@
 import { NextResponse } from "next/server";
-import { clicksTotal } from "@/lib/metrics";
+import { prisma } from "@/lib/prisma";
 
 /**
  * GET /api/metrics/clicks
  * Returns a mapping of program_id -> click count from Prometheus registry.
  */
-export async function GET(): Promise<NextResponse> {
-  const data = await clicksTotal.get();
-  const result: Record<string, number> = {};
+export async function GET(request: Request): Promise<NextResponse> {
+  const { searchParams } = new URL(request.url);
+  const period = searchParams.get("period") || "week"; // Default to week
 
-  for (const v of data.values) {
-    const pid = v.labels.program_id as string | undefined;
-    if (!pid) continue;
-    result[pid] = (result[pid] ?? 0) + v.value;
+  const now = new Date();
+  const startDate = new Date();
+
+  if (period === "day") {
+    // Start of today (00:00:00)
+    startDate.setHours(0, 0, 0, 0);
+  } else {
+    // Start of this week (Sunday 00:00:00)
+    const day = now.getDay(); // 0 is Sunday
+    const diff = now.getDate() - day;
+    startDate.setDate(diff);
+    startDate.setHours(0, 0, 0, 0);
+  }
+
+  // Aggregate clicks from Database
+  const aggregations = await prisma.analyticsEvent.groupBy({
+    by: ["programId"],
+    where: {
+      eventType: "click",
+      createdAt: {
+        gte: startDate,
+      },
+    },
+    _count: {
+      _all: true,
+    },
+  });
+
+  const result: Record<string, number> = {};
+  for (const agg of aggregations) {
+    result[agg.programId] = agg._count._all;
   }
 
   return NextResponse.json(result);
