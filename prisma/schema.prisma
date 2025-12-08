@@ -7,27 +7,55 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EventName {
+  VIEW
+  CLICK
+  OUTBOUND
+}
+
 model AnalyticsEvent {
-  id          String   @id @default(uuid())
-  programId   String   @map("program_id")
-  eventType   String   @default("view") @map("event_type")
+  id          String    @id @default(uuid())
+  programId   String?   @map("program_id")
+  sessionId   String    @default("legacy") @map("session_id")
+  eventName   EventName @default(VIEW) @map("event_name")
+  eventType   String    @default("view") @map("event_type") // Legacy field
   fingerprint String
-  ipHash      String   @map("ip_hash")
-  userAgent   String?  @map("user_agent")
+  ipHash      String    @map("ip_hash")
+  userAgent   String?   @map("user_agent")
   referer     String?
   country     String?
-  createdAt   DateTime @default(now()) @map("created_at")
+  url         String?   // Current page URL
+  targetUrl   String?   @map("target_url") // For outbound clicks
+  createdAt   DateTime  @default(now()) @map("created_at")
 
+  // Performance indexes for dashboard queries
   @@index([programId])
   @@index([programId, fingerprint])
   @@index([programId, createdAt])
   @@index([fingerprint, ipHash, programId])
+  @@index([createdAt])
+  @@index([sessionId])
+  @@index([country])
   @@map("analytics_events")
+}
+
+model SearchLog {
+  id           String   @id @default(uuid())
+  query        String
+  resultsCount Int      @map("results_count")
+  sessionId    String   @default("anonymous") @map("session_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([query])
+  @@index([createdAt])
+  @@index([resultsCount])
+  @@map("search_logs")
 }
 
 model Program {
   id                   String    @id @default(uuid())
   programName          String    @unique @default("N/A") @map("program_name")
+  slug                 String?   @unique
   tagline              String    @default("No tagline provided.")
   description          String    @default("No description provided.")
   category             String    @default("Not specified")
@@ -49,6 +77,9 @@ model Program {
   payoutsTotalRange    String?   @map("payouts_total_range")
   foundingDate         DateTime? @map("founding_date")
   approvalTimeRange    String?   @map("approval_time_range")
+  qualityScore         Int       @default(0) @map("quality_score")
+  trendingScore        Float     @default(0) @map("trending_score")
+  totalViews           Int       @default(0) @map("total_views")
   approvalStatus       Boolean   @default(true) @map("approval_status")
   isFeatured           Boolean   @default(false) @map("is_featured")
   featuredExpiresAt    DateTime? @map("featured_expires_at")

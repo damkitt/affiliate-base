@@ -42,6 +42,7 @@ export const canProceedToStep = (step: number, formData: FormData): boolean => {
   if (step === 2) {
     return !!(
       formData.programName &&
+      formData.logoUrl &&
       formData.websiteUrl &&
       validateUrl(formData.websiteUrl) &&
       formData.affiliateUrl &&
@@ -51,6 +52,7 @@ export const canProceedToStep = (step: number, formData: FormData): boolean => {
   if (step === 3) {
     return !!(
       formData.programName &&
+      formData.logoUrl &&
       formData.websiteUrl &&
       validateUrl(formData.websiteUrl) &&
       formData.affiliateUrl &&
@@ -65,6 +67,7 @@ export const canProceedToStep = (step: number, formData: FormData): boolean => {
 export const canSubmitForm = (formData: FormData): boolean => {
   return !!(
     formData.programName &&
+    formData.logoUrl &&
     formData.websiteUrl &&
     validateUrl(formData.websiteUrl) &&
     formData.affiliateUrl &&

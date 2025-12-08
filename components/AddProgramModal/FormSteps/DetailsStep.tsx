@@ -71,9 +71,8 @@ export function DetailsStep({
                 {formData.foundingMonth || "Select month"}
               </span>
               <HiChevronDown
-                className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${
-                  monthDropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${monthDropdownOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
@@ -84,11 +83,10 @@ export function DetailsStep({
                     key={month}
                     type="button"
                     onClick={() => onSetMonth(month)}
-                    className={`w-full px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)] ${
-                      formData.foundingMonth === month
+                    className={`w-full px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)] ${formData.foundingMonth === month
                         ? "bg-[var(--bg-secondary)] font-medium"
                         : ""
-                    }`}
+                      }`}
                   >
                     {month}
                   </button>
@@ -114,9 +112,8 @@ export function DetailsStep({
                 {formData.foundingYear || "Select year"}
               </span>
               <HiChevronDown
-                className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${
-                  yearDropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${yearDropdownOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
@@ -127,11 +124,10 @@ export function DetailsStep({
                     key={year}
                     type="button"
                     onClick={() => onSetYear(year.toString())}
-                    className={`w-full px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)] ${
-                      formData.foundingYear === year.toString()
+                    className={`w-full px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)] ${formData.foundingYear === year.toString()
                         ? "bg-[var(--bg-secondary)] font-medium"
                         : ""
-                    }`}
+                      }`}
                   >
                     {year}
                   </button>
@@ -147,14 +143,63 @@ export function DetailsStep({
         <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide">
           Commission Rate <span className="text-red-400">*</span>
         </label>
-        <input
-          type="text"
-          name="commissionRate"
-          value={formData.commissionRate}
-          onChange={onFormChange}
-          placeholder="e.g. 30% recurring, $50 per sale..."
-          className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
-        />
+        <div className="flex items-center gap-3">
+          {/* Numeric input with % sign */}
+          <div className="relative w-20">
+            <input
+              type="text"
+              name="commissionRate"
+              value={formData.commissionRate}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Only allow digits, max 2 characters
+                if (/^\d{0,2}$/.test(value)) {
+                  onFormChange(e);
+                }
+              }}
+              placeholder="30"
+              maxLength={2}
+              className="w-full h-11 px-3 pr-7 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 text-center"
+            />
+            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] font-medium pointer-events-none">
+              %
+            </span>
+          </div>
+
+          {/* Commission Type Toggle */}
+          <div className="flex items-center h-11 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] p-1">
+            <button
+              type="button"
+              onClick={() => {
+                const syntheticEvent = {
+                  target: { name: "commissionDuration", value: "One-time" },
+                } as React.ChangeEvent<HTMLInputElement>;
+                onFormChange(syntheticEvent);
+              }}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${formData.commissionDuration === "One-time" || !formData.commissionDuration
+                  ? "bg-[var(--accent-solid)] text-white shadow-sm"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+            >
+              One-time
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const syntheticEvent = {
+                  target: { name: "commissionDuration", value: "Recurring" },
+                } as React.ChangeEvent<HTMLInputElement>;
+                onFormChange(syntheticEvent);
+              }}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${formData.commissionDuration === "Recurring"
+                  ? "bg-[var(--accent-solid)] text-white shadow-sm"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+            >
+              Recurring
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Trust Booster */}
@@ -354,9 +399,8 @@ export function DetailsStep({
             )}
           </span>
           <HiChevronDown
-            className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${
-              countryDropdownOpen ? "rotate-180" : ""
-            }`}
+            className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${countryDropdownOpen ? "rotate-180" : ""
+              }`}
           />
         </button>
 
@@ -367,11 +411,10 @@ export function DetailsStep({
                 key={country.code}
                 type="button"
                 onClick={() => onSetCountry(country.name)}
-                className={`w-full px-4 py-2.5 text-sm text-left flex items-center gap-3 hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)] ${
-                  formData.country === country.name
+                className={`w-full px-4 py-2.5 text-sm text-left flex items-center gap-3 hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)] ${formData.country === country.name
                     ? "bg-[var(--bg-secondary)] font-medium"
                     : ""
-                }`}
+                  }`}
               >
                 <span className="text-lg">{country.flag}</span>
                 <span>{country.name}</span>

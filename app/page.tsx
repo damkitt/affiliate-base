@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import useSWR from "swr";
 import { Header } from "@/components/Header";
 import { Leaderboard } from "@/components/Leaderboard";
 import { Program } from "@/types";
 import AddProgramModal from "@/components/AddProgramModal";
-import { generateFakePrograms } from "@/lib/fakePrograms";
 import { Footer } from "@/components/Footer";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { CATEGORIES, CATEGORY_ICONS } from "@/constants";
@@ -14,21 +13,49 @@ import { CATEGORIES, CATEGORY_ICONS } from "@/constants";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function Home() {
+  // Fetch programs sorted by trendingScore (featured first)
   const { data, error, mutate } = useSWR<Program[]>(
     "/api/programs",
     fetcher
   );
 
-  // Ensure programs is always an array and add fake programs
+  // Ensure programs is always an array
   const programs = useMemo(() => {
-    const realPrograms = Array.isArray(data) ? data : [];
-    const fakePrograms = generateFakePrograms(30);
-    return [...realPrograms, ...fakePrograms];
+    return Array.isArray(data) ? data : [];
   }, [data]);
 
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const lastTrackedSearch = useRef<string>("");
+
+  // Track search queries with debounce (1 second)
+  useEffect(() => {
+    if (!search.trim() || search === lastTrackedSearch.current) return;
+
+    const timer = setTimeout(() => {
+      // Count results for this search
+      const results = programs.filter((p) =>
+        p.programName.toLowerCase().includes(search.toLowerCase()) ||
+        p.tagline.toLowerCase().includes(search.toLowerCase()) ||
+        p.description.toLowerCase().includes(search.toLowerCase())
+      );
+
+      // Track the search
+      fetch("/api/track/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: search.trim(),
+          resultsCount: results.length,
+        }),
+      }).catch(() => { }); // Silently fail
+
+      lastTrackedSearch.current = search;
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [search, programs]);
 
   // Derive available categories from data (sorted for consistent hydration)
   const availableCategories = useMemo(() => {
@@ -39,7 +66,7 @@ export default function Home() {
     return Array.from(categories).sort();
   }, [programs]);
 
-  // Filter programs
+  // Filter programs by search and category
   const filteredPrograms = useMemo(() => {
     return programs.filter((p) => {
       const matchesSearch =
@@ -68,7 +95,7 @@ export default function Home() {
       />
 
       <main className="animate-fade-in-up delay-100">
-        {/* Search Filter Inlined */}
+        {/* Category Filter */}
         {visibleCategories.length > 0 && (
           <div className="max-w-[800px] mx-auto px-6 mb-8">
             <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -118,6 +145,7 @@ export default function Home() {
           </div>
         )}
 
+        {/* Program List (sorted by trendingScore, featured first) */}
         <Leaderboard programs={filteredPrograms} />
       </main>
 

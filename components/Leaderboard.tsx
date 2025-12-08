@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Program } from "@/types";
-import { HiArrowUpRight, HiEye, HiStar } from "react-icons/hi2";
+import { HiArrowUpRight, HiStar } from "react-icons/hi2";
 import Link from "next/link";
-import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -16,45 +15,35 @@ interface LeaderboardProps {
 export function Leaderboard({ programs }: LeaderboardProps) {
   const [visibleCount, setVisibleCount] = useState(12);
 
-  const fetcher = (url: string) => fetch(url).then((r) => r.json());
-  const { data: clicksMap } = useSWR<Record<string, number>>(
-    "/api/metrics/clicks",
-    fetcher,
-    { refreshInterval: 5000 }
-  );
-
-  // Split into featured and organic
-  const { featuredPrograms, organicPrograms } = useMemo(() => {
-    return sortPrograms(programs, clicksMap);
-  }, [programs, clicksMap]);
-
-  // Combine for display based on visibleCount, but keep structure
-  // Actually, we should render them in two blocks to ensure organic gets medals correctly
-
-  // Let's just merge them for the list but handle the index/medal logic carefully
-  const displayPrograms = [...featuredPrograms, ...organicPrograms].slice(0, visibleCount);
+  // Programs are already sorted by API (featured first, then by trendingScore)
+  const displayPrograms = programs.slice(0, visibleCount);
 
   return (
     <div className="max-w-[800px] mx-auto px-6 pb-20">
-      {/* ... Header ... */}
-
       {/* Programs List */}
       <div className="space-y-3 relative">
         <AnimatePresence mode="popLayout">
-          {displayPrograms.map((program) => {
-            const clicks = clicksMap?.[program.id] ?? program.clicksCount ?? 0;
+          {displayPrograms.map((program, index) => {
+            const isFeatured = program.isFeatured && program.featuredExpiresAt && new Date(program.featuredExpiresAt) > new Date();
+            
+            // Check if program is new (less than 24 hours old)
+            const isNew = program.createdAt && (new Date().getTime() - new Date(program.createdAt).getTime()) < 24 * 60 * 60 * 1000;
 
-            // Determine rank/medal only for organic programs
-            let rankDisplay = null;
-            if (!program.isFeatured) {
-              const organicIndex = organicPrograms.findIndex(p => p.id === program.id);
+            // Rank display - medals for top 3 organic, star for featured
+            let rankDisplay;
+            if (isFeatured) {
+              rankDisplay = <HiStar className="w-5 h-5 text-amber-500" />;
+            } else {
+              // Count non-featured programs before this one for organic rank
+              const organicIndex = displayPrograms
+                .slice(0, index)
+                .filter(p => !(p.isFeatured && p.featuredExpiresAt && new Date(p.featuredExpiresAt) > new Date()))
+                .length;
+              
               if (organicIndex === 0) rankDisplay = <span className="text-2xl">🥇</span>;
               else if (organicIndex === 1) rankDisplay = <span className="text-2xl">🥈</span>;
               else if (organicIndex === 2) rankDisplay = <span className="text-2xl">🥉</span>;
               else rankDisplay = <span className="text-base font-semibold text-[var(--text-secondary)]">{organicIndex + 1}</span>;
-            } else {
-              // Featured icon/placeholder
-              rankDisplay = <HiStar className="w-5 h-5 text-amber-500" />;
             }
 
             return (
@@ -65,32 +54,40 @@ export function Leaderboard({ programs }: LeaderboardProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3 }}
+                className="relative"
               >
+                {/* NEW Badge - floating above the card */}
+                {isNew && !isFeatured && (
+                  <div className="absolute -top-2 right-3 z-10">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30">
+                      New
+                    </span>
+                  </div>
+                )}
+                
                 <Link
-                  href={`/programs/${program.id}`}
+                  href={`/programs/${program.slug || program.id}`}
                   className={cn(
                     "group flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 cursor-pointer relative overflow-hidden",
-                    !program.isFeatured && "bg-[var(--bg-card)] border-[var(--border)] hover:border-[var(--accent-solid)]"
+                    isFeatured 
+                      ? "bg-gradient-to-r from-amber-500/5 to-transparent border-amber-500/30 hover:border-amber-500/50"
+                      : isNew
+                        ? "bg-gradient-to-r from-emerald-500/5 to-transparent border-emerald-500/30 hover:border-emerald-500/50"
+                        : "bg-[var(--bg-card)] border-[var(--border)] hover:border-[var(--accent-solid)]"
                   )}
-                  style={{
-                    boxShadow: program.isFeatured ? "0 4px 20px -2px rgba(16, 185, 129, 0.1)" : "var(--shadow-card)",
-                    backgroundColor: program.isFeatured ? "hsla(163, 72%, 38%, 0.03)" : undefined,
-                    borderColor: program.isFeatured ? "var(--accent-solid)" : undefined
+                  style={{ 
+                    boxShadow: isFeatured 
+                      ? "0 4px 20px -2px rgba(245, 158, 11, 0.1)" 
+                      : isNew
+                        ? "0 4px 20px -2px rgba(16, 185, 129, 0.15)"
+                        : "var(--shadow-card)" 
                   }}
-                  onMouseEnter={(e) =>
-                    !program.isFeatured && (e.currentTarget.style.boxShadow = "var(--shadow-card-hover)")
-                  }
-                  onMouseLeave={(e) =>
-                    !program.isFeatured && (e.currentTarget.style.boxShadow = "var(--shadow-card)")
-                  }
+                  onMouseEnter={(e) => !isFeatured && !isNew && (e.currentTarget.style.boxShadow = "var(--shadow-card-hover)")}
+                  onMouseLeave={(e) => !isFeatured && !isNew && (e.currentTarget.style.boxShadow = "var(--shadow-card)")}
                 >
-                  {/* Rank / Featured Icon */}
+                  {/* Rank */}
                   <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    {program.isFeatured ? (
-                      <span className="text-lg drop-shadow-sm">📌</span>
-                    ) : (
-                      rankDisplay
-                    )}
+                    {rankDisplay}
                   </div>
 
                   {/* Logo */}
@@ -110,41 +107,48 @@ export function Leaderboard({ programs }: LeaderboardProps) {
                     )}
                   </div>
 
-                  {/* ... Rest of content ... */}
-
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <h3 className="font-medium text-sm text-[var(--text-primary)] truncate group-hover:text-[var(--accent-solid)] transition-colors">
+                      <h3 className={cn(
+                        "font-medium text-sm truncate transition-colors",
+                        isFeatured 
+                          ? "text-[var(--text-primary)] group-hover:text-amber-500"
+                          : "text-[var(--text-primary)] group-hover:text-[var(--accent-solid)]"
+                      )}>
                         {program.programName}
                       </h3>
                       <span className="px-1.5 py-0.5 rounded text-[9px] font-medium text-[var(--text-secondary)] bg-[var(--bg-secondary)] border border-[var(--border)]">
                         {program.category}
                       </span>
+                      {isFeatured && (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-medium text-amber-500 bg-amber-500/10 border border-amber-500/20">
+                          Sponsored
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-[var(--text-secondary)] truncate">
                       {program.tagline}
                     </p>
                   </div>
 
-                  {/* Metrics */}
+                  {/* Commission */}
                   <div className="flex items-center gap-2">
-                    {/* Interest/Views */}
-                    {!program.isFeatured && (
-                      <div className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] text-[10px] font-medium border border-[var(--border)] tabular-nums">
-                        <HiEye className="w-3 h-3 text-[var(--accent-solid)]" />
-                        <span>{clicks}</span>
-                      </div>
-                    )}
-
-                    {/* Commission */}
-                    <div className="px-2 py-0.5 rounded-md bg-[var(--accent-dim)] text-[var(--accent-solid)] text-[10px] font-bold border border-[var(--accent-solid)]/20 tabular-nums">
-                      {program.commissionRate}%
+                    <div className="px-2 py-0.5 rounded-md bg-[var(--accent-dim)] text-[var(--accent-solid)] text-[10px] font-bold border border-[var(--accent-solid)]/20 tabular-nums whitespace-nowrap">
+                      {program.commissionRate}%{" "}
+                      <span className="font-medium opacity-80">
+                        {program.commissionDuration === "Recurring" ? "recurring" : "one-time"}
+                      </span>
                     </div>
                   </div>
 
                   {/* Arrow */}
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--accent-solid)] group-hover:bg-[var(--accent-dim)] transition-all duration-200">
+                  <div className={cn(
+                    "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200",
+                    isFeatured
+                      ? "text-[var(--text-secondary)] group-hover:text-amber-500 group-hover:bg-amber-500/10"
+                      : "text-[var(--text-secondary)] group-hover:text-[var(--accent-solid)] group-hover:bg-[var(--accent-dim)]"
+                  )}>
                     <HiArrowUpRight className="w-3 h-3" />
                   </div>
                 </Link>
@@ -154,13 +158,13 @@ export function Leaderboard({ programs }: LeaderboardProps) {
         </AnimatePresence>
 
         {/* Fog Effect */}
-        {visibleCount < (featuredPrograms.length + organicPrograms.length) && (
+        {visibleCount < programs.length && (
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--bg-background)] to-transparent pointer-events-none z-10" />
         )}
       </div>
 
       {/* See More Button */}
-      {visibleCount < (featuredPrograms.length + organicPrograms.length) && (
+      {visibleCount < programs.length && (
         <div className="mt-8 flex justify-center">
           <button
             onClick={() => setVisibleCount((prev) => prev + 12)}
@@ -173,34 +177,4 @@ export function Leaderboard({ programs }: LeaderboardProps) {
       )}
     </div>
   );
-}
-
-function sortPrograms(programs: Program[], clicksMap?: Record<string, number>) {
-  const featured: Program[] = [];
-  const organic: Program[] = [];
-
-  programs.forEach((p) => {
-    if (p.isFeatured) {
-      featured.push(p);
-    } else {
-      organic.push(p);
-    }
-  });
-
-  // Sort organic by clicks
-  organic.sort((a, b) => {
-    const clicksA = clicksMap?.[a.id] ?? a.clicksCount ?? 0;
-    const clicksB = clicksMap?.[b.id] ?? b.clicksCount ?? 0;
-    if (clicksA !== clicksB) return clicksB - clicksA;
-    return a.programName.localeCompare(b.programName);
-  });
-
-  // Sort featured by clicks (descending)
-  featured.sort((a, b) => {
-    const clicksA = clicksMap?.[a.id] ?? a.clicksCount ?? 0;
-    const clicksB = clicksMap?.[b.id] ?? b.clicksCount ?? 0;
-    return clicksB - clicksA;
-  });
-
-  return { featuredPrograms: featured, organicPrograms: organic };
 }

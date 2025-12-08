@@ -32,11 +32,10 @@ export function BasicInfoStep({
       <div className="flex items-start gap-5">
         <div
           onClick={() => !isUploading && fileInputRef.current?.click()}
-          className={`group relative w-20 h-20 rounded-lg bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border)] flex items-center justify-center overflow-hidden transition-all duration-200 flex-shrink-0 ${
-            isUploading
+          className={`group relative w-20 h-20 rounded-lg bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border)] flex items-center justify-center overflow-hidden transition-all duration-200 flex-shrink-0 ${isUploading
               ? "opacity-50 cursor-wait"
               : "hover:border-[var(--accent-solid)] hover:bg-[var(--accent-dim)] cursor-pointer"
-          }`}
+            }`}
         >
           {logoPreview ? (
             <Image
@@ -49,12 +48,17 @@ export function BasicInfoStep({
           ) : (
             <div className="text-center">
               <HiPhoto
-                className={`w-8 h-8 mx-auto text-[var(--text-secondary)] transition-colors duration-300 ${
-                  !isUploading && "group-hover:text-[var(--accent-solid)]"
-                }`}
+                className={`w-8 h-8 mx-auto text-[var(--text-secondary)] transition-colors duration-300 ${!isUploading && "group-hover:text-[var(--accent-solid)]"
+                  }`}
               />
               <span className="text-[10px] text-[var(--text-secondary)] mt-1 block font-medium">
-                {isUploading ? "Uploading..." : "Upload"}
+                {isUploading ? (
+                  "Uploading..."
+                ) : (
+                  <>
+                    Upload <span className="text-red-500">*</span>
+                  </>
+                )}
               </span>
             </div>
           )}
@@ -112,11 +116,10 @@ export function BasicInfoStep({
                 key={cat}
                 type="button"
                 onClick={() => onCategorySelect(cat)}
-                className={`px-3 py-2 rounded-md text-xs font-semibold transition-colors duration-150 flex items-center gap-1.5 ${
-                  isSelected
+                className={`px-3 py-2 rounded-md text-xs font-semibold transition-colors duration-150 flex items-center gap-1.5 ${isSelected
                     ? "bg-[var(--accent-solid)] text-white shadow-md"
                     : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--accent-solid)]"
-                }`}
+                  }`}
               >
                 <CategoryIcon iconName={iconName} className="w-4 h-4" />
                 {cat}

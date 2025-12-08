@@ -3,6 +3,7 @@ import { type JWTPayload } from "jose";
 
 export type Program = {
   readonly id: string;
+  readonly slug?: string | null;
   readonly programName: string;
   readonly tagline: string;
   readonly description: string;
@@ -25,6 +26,9 @@ export type Program = {
   readonly payoutsTotalRange?: string | null;
   readonly foundingDate?: Date | null;
   readonly approvalTimeRange?: string | null;
+  readonly qualityScore?: number;
+  readonly trendingScore?: number;
+  readonly totalViews?: number;
   readonly clicksCount: number;
   readonly approvalStatus: boolean;
   readonly isFeatured?: boolean;

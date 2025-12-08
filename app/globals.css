@@ -292,3 +292,8 @@ body::before {
   backdrop-filter: blur(8px);
   border: 1px solid var(--border);
 }
+
+/* Override spotlight for specific pages */
+.no-spotlight::before {
+  display: none !important;
+}

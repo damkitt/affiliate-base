@@ -113,6 +113,39 @@ export function ProgramCard({
         )}
       </div>
 
+      {/* Scoring Info - Admin Only */}
+      <div className="p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] mb-6">
+        <h3 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
+          📊 Ranking Score Breakdown
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <p className="text-xs text-[var(--text-tertiary)] mb-0.5">Trending Score</p>
+            <p className="text-lg font-bold text-[var(--accent-solid)]">
+              {program.trendingScore?.toFixed(0) || 0}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-[var(--text-tertiary)] mb-0.5">Quality Score</p>
+            <p className="text-lg font-bold text-emerald-500">
+              {program.qualityScore || 0}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-[var(--text-tertiary)] mb-0.5">Total Views</p>
+            <p className="text-lg font-bold text-blue-500">
+              {program.totalViews || 0}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-[var(--text-tertiary)] mb-0.5">Created</p>
+            <p className="text-sm font-medium text-[var(--text-primary)]">
+              {program.createdAt ? new Date(program.createdAt).toLocaleDateString() : 'N/A'}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Action Buttons */}
       <div className="flex items-center gap-3">
         {isPending && (

@@ -38,7 +38,7 @@ export function Footer({ onAddProgram }: FooterProps) {
                                 </li>
                                 {onAddProgram && (
                                     <li>
-                                        <button 
+                                        <button
                                             onClick={onAddProgram}
                                             className="hover:text-[var(--accent-solid)] transition-colors text-left"
                                         >
@@ -46,6 +46,16 @@ export function Footer({ onAddProgram }: FooterProps) {
                                         </button>
                                     </li>
                                 )}
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-[var(--text-primary)] mb-4 text-sm uppercase tracking-wider">Legal</h3>
+                            <ul className="space-y-3 text-sm text-[var(--text-secondary)]">
+                                <li>
+                                    <Link href="/terms" className="hover:text-[var(--accent-solid)] transition-colors">
+                                        Terms & Privacy
+                                    </Link>
+                                </li>
                             </ul>
                         </div>
                     </div>

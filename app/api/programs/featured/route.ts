@@ -7,6 +7,42 @@ interface FeaturedProgramRequest {
   programData?: Prisma.ProgramCreateInput;
 }
 
+/**
+ * GET /api/programs/featured
+ * Returns all active featured programs (isFeatured=true AND featuredExpiresAt > now)
+ */
+export async function GET() {
+  const now = new Date();
+
+  const featuredPrograms = await prisma.program.findMany({
+    where: {
+      approvalStatus: true,
+      isFeatured: true,
+      featuredExpiresAt: { gt: now },
+    },
+    select: {
+      id: true,
+      slug: true,
+      programName: true,
+      tagline: true,
+      description: true,
+      category: true,
+      websiteUrl: true,
+      affiliateUrl: true,
+      country: true,
+      logoUrl: true,
+      commissionRate: true,
+      commissionDuration: true,
+      isFeatured: true,
+      featuredExpiresAt: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json(featuredPrograms);
+}
+
 export async function POST(request: Request) {
     try {
         const body: FeaturedProgramRequest = await request.json();

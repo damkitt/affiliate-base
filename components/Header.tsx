@@ -68,9 +68,10 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
 
         {/* Search + Add */}
         {onAddProgram && setSearch && (
-          <div className="flex items-center gap-2 max-w-md mx-auto p-1 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] shadow-sm focus-within:ring-2 ring-[var(--accent-dim)] transition-all duration-300">
-            <div className="flex-1 flex items-center h-10 px-3">
-              <HiMagnifyingGlass className="w-4 h-4 text-[var(--text-secondary)] mr-3" />
+          <div className="flex items-center gap-3 max-w-xl mx-auto">
+            {/* Search Input */}
+            <div className="flex-1 flex items-center h-10 px-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] focus-within:border-[var(--accent-solid)] transition-all duration-300">
+              <HiMagnifyingGlass className="w-5 h-5 text-[var(--text-tertiary)] mr-3 shrink-0" />
               <input
                 type="text"
                 value={search}
@@ -87,9 +88,10 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
                 </button>
               )}
             </div>
+            {/* Add Button */}
             <button
               onClick={onAddProgram}
-              className="h-9 px-4 rounded-lg bg-[var(--accent-solid)] text-white text-sm font-semibold flex items-center gap-2 hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all duration-150 shadow-md"
+              className="h-10 px-5 rounded-xl bg-[var(--accent-solid)] text-white text-sm font-semibold flex items-center gap-2 hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all duration-150 shadow-md shrink-0"
             >
               <HiPlus className="w-4 h-4" />
               <span className="hidden sm:inline">Add</span>
