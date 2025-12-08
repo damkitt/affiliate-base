@@ -26,6 +26,7 @@ async function main() {
     // Build lookup map for 14-day stats
     const engagementMap = new Map<string, { views: number; clicks: number }>();
     for (const stat of stats) {
+        if (!stat.programId) continue;
         const entry = engagementMap.get(stat.programId) || { views: 0, clicks: 0 };
         if (stat.eventType === "view") entry.views = stat._count;
         if (stat.eventType === "click") entry.clicks = stat._count;
@@ -34,10 +35,10 @@ async function main() {
 
     for (const program of programs) {
         const engagement = engagementMap.get(program.id) || { views: 0, clicks: 0 };
-        
+
         // Calculate new quality score (in case formula changed)
         const qualityScore = calculateQualityScore(program);
-        
+
         // Calculate trending score with all components
         const trendingScore = calculateTrendingScore(
             { ...program, createdAt: program.createdAt },
@@ -47,7 +48,7 @@ async function main() {
 
         await prisma.program.update({
             where: { id: program.id },
-            data: { 
+            data: {
                 qualityScore,
                 trendingScore,
             },

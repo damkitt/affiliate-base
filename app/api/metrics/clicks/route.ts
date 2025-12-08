@@ -39,7 +39,9 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   const result: Record<string, number> = {};
   for (const agg of aggregations) {
-    result[agg.programId] = agg._count._all;
+    if (agg.programId) {
+      result[agg.programId] = agg._count._all;
+    }
   }
 
   return NextResponse.json(result);
