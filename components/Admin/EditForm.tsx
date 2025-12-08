@@ -100,7 +100,7 @@ export function EditForm({
           <input
             type="number"
             className="w-full px-4 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)]"
-            value={program.commissionRate || ""}
+            value={program.commissionRate ?? ""}
             onChange={(e) =>
               onChange("commissionRate", Number.parseInt(e.target.value))
             }
@@ -114,7 +114,7 @@ export function EditForm({
           <input
             type="number"
             className="w-full px-4 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)]"
-            value={program.cookieDuration || ""}
+            value={program.cookieDuration ?? ""}
             onChange={(e) =>
               onChange("cookieDuration", Number.parseInt(e.target.value))
             }

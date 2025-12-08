@@ -127,16 +127,16 @@ export default function ProgramDetailPage() {
   const logoSrc = p!.logoUrl || `https://www.google.com/s2/favicons?domain=${p!.websiteUrl}&sz=128`;
 
   const programDetails = [
-    { icon: HiBanknotes, label: "Commission", value: `${p!.commissionRate}%` },
-    { icon: HiClock, label: "Cookie Duration", value: p!.cookieDuration ? `${p!.cookieDuration} days` : null },
-    { icon: HiMapPin, label: "Region", value: p!.country },
-    { icon: HiUserGroup, label: "Affiliates", value: p!.affiliatesCountRange },
-    { icon: HiCurrencyDollar, label: "Min Payout", value: p!.minPayoutValue ? `$${p!.minPayoutValue}` : null },
-    { icon: HiBolt, label: "Approval Time", value: p!.approvalTimeRange },
-    { icon: HiUserGroup, label: "Target Audience", value: p!.targetAudience },
+    { icon: HiBanknotes, label: "Commission", value: p!.commissionRate != null ? `${p!.commissionRate}%` : null },
+    { icon: HiClock, label: "Cookie Duration", value: p!.cookieDuration != null ? `${p!.cookieDuration} days` : null },
+    { icon: HiMapPin, label: "Region", value: p!.country ?? null },
+    { icon: HiUserGroup, label: "Affiliates", value: p!.affiliatesCountRange ?? null },
+    { icon: HiCurrencyDollar, label: "Min Payout", value: p!.minPayoutValue != null ? `$${p!.minPayoutValue}` : null },
+    { icon: HiBolt, label: "Approval Time", value: p!.approvalTimeRange ?? null },
+    { icon: HiUserGroup, label: "Target Audience", value: p!.targetAudience ?? null },
     { icon: HiCalendar, label: "Founded", value: p!.foundingDate ? new Date(p!.foundingDate).getFullYear() : null },
-    { icon: HiChartBar, label: "Avg Order", value: p!.avgOrderValue ? `$${p!.avgOrderValue}` : null },
-  ].filter(item => item.value);
+    { icon: HiChartBar, label: "Avg Order", value: p!.avgOrderValue != null ? `$${p!.avgOrderValue}` : null },
+  ].filter(item => item.value != null);
 
   const howItWorks = [
     {
@@ -213,7 +213,7 @@ export default function ProgramDetailPage() {
                       </span>
                     </div>
                     <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">{p!.programName}</h1>
-                    <p className="text-sm text-[var(--text-secondary)]">{p!.tagline}</p>
+                    <p className="text-sm text-[var(--text-secondary)]">{p!.tagline ?? ''}</p>
                   </div>
                 </div>
                 <a
@@ -259,7 +259,7 @@ export default function ProgramDetailPage() {
                 <h2 className="text-sm font-semibold text-[var(--text-primary)]">About This Program</h2>
               </div>
               <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                {p!.description || p!.tagline}
+                {p!.description ?? p!.tagline ?? ''}
               </p>
               {p!.additionalInfo && (
                 <div className="mt-6 pt-6 border-t border-[var(--border)]">
@@ -331,7 +331,7 @@ export default function ProgramDetailPage() {
             <div className="card-solid p-8 rounded-3xl bg-[var(--bg-elevated)] border border-[var(--border)]">
               {/* Commission Box */}
               <div className="p-4 rounded-xl border border-emerald-600/30 bg-emerald-600/5 mb-5">
-                <p className="text-3xl font-bold text-emerald-500">{p!.commissionRate}%</p>
+                <p className="text-3xl font-bold text-emerald-500">{p!.commissionRate ?? 0}%</p>
                 <p className="text-sm text-[var(--text-secondary)]">Commission on every sale</p>
               </div>
 

@@ -73,7 +73,7 @@ function ProgramCard({ program }: { program: SimilarProgram }) {
         </div>
 
         {/* Commission */}
-        {program.commissionRate && (
+        {program.commissionRate != null && (
           <div className="text-right flex-shrink-0">
             <div className="text-sm font-bold text-[var(--accent-solid)]">
               {program.commissionRate}%
