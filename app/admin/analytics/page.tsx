@@ -14,6 +14,7 @@ import {
     Cell,
 } from "recharts";
 import Link from "next/link";
+import Image from "next/image";
 import type { DashboardStats, FunnelData } from "@/lib/analytics";
 
 const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then((res) => res.json());
@@ -642,7 +643,23 @@ export default function AnalyticsPage() {
                                 ) : (
                                     data?.referrerCTR?.map((ref, i) => (
                                         <tr key={i} className="border-b border-white/5 last:border-0">
-                                            <td className="py-3">{ref.source}</td>
+                                            <td className="py-3 flex items-center gap-2">
+                                                {/* Favicon */}
+                                                <div className="w-4 h-4 relative flex-shrink-0 rounded-full overflow-hidden bg-white/5 flex items-center justify-center">
+                                                    {ref.domain ? (
+                                                        <Image
+                                                            src={`https://www.google.com/s2/favicons?domain=${ref.domain}&sz=64`}
+                                                            alt={ref.source}
+                                                            fill
+                                                            className="object-cover"
+                                                            unoptimized
+                                                        />
+                                                    ) : (
+                                                        <span className="text-[8px] text-white/40">#</span>
+                                                    )}
+                                                </div>
+                                                <span className="truncate">{ref.source}</span>
+                                            </td>
                                             <td className="py-3 text-right tabular-nums text-white/70">
                                                 {ref.visitors.toLocaleString()}
                                             </td>

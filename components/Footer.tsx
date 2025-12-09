@@ -6,7 +6,7 @@ interface FooterProps {
 
 export function Footer({ onAddProgram }: FooterProps) {
     return (
-        <footer className="w-full border-t border-[var(--border)] bg-[var(--bg-card)] mt-auto">
+        <footer className="w-full border-t border-[var(--border)] bg-[var(--bg-secondary)] mt-auto relative z-10">
             <div className="max-w-7xl mx-auto px-6 py-12">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     {/* Brand */}

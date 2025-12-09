@@ -56,10 +56,10 @@
 
 .dark {
   /* Rich Dark Backgrounds with Blue-Gray Undertones */
-  --bg: hsl(222, 24%, 8%);
-  --bg-secondary: hsl(222, 22%, 10%);
-  --bg-card: hsl(222, 24%, 9%);
-  --bg-elevated: hsl(222, 22%, 11%);
+  --bg: #000000;
+  --bg-secondary: #050505;
+  --bg-card: #0A0A0A;
+  --bg-elevated: #111111;
 
   /* Refined Text Hierarchy */
   --text-primary: hsl(220, 20%, 98%);

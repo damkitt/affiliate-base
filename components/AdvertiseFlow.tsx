@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { HiCheck, HiStar, HiSparkles } from "react-icons/hi2";
+import { HiCheck, HiStar, HiSparkles, HiMagnifyingGlass } from "react-icons/hi2";
 import { Program } from "@/types";
 import useSWR from "swr";
 import Confetti from "react-confetti";
@@ -81,6 +81,11 @@ export function AdvertiseFlow() {
 }
 
 function PricingStep({ onSelect }: { onSelect: () => void }) {
+    const { data: availability } = useSWR("/api/featured/availability", (url) => fetch(url).then(r => r.json()));
+
+    const isFull = availability?.isFull;
+    const nextDate = availability?.nextAvailable ? new Date(availability.nextAvailable).toLocaleDateString() : 'soon';
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -128,20 +133,49 @@ function PricingStep({ onSelect }: { onSelect: () => void }) {
                     </li>
                 </ul>
 
-                <button
-                    onClick={onSelect}
-                    className="w-full py-3 rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all duration-200 shadow-lg shadow-emerald-600/20"
-                >
-                    Select Plan
-                </button>
+                {isFull ? (
+                    <div className="text-center space-y-3">
+                        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-medium">
+                            Slots are currently full
+                        </div>
+                        <p className="text-xs text-[var(--text-tertiary)]">
+                            Next slot available on {nextDate}
+                        </p>
+                        <button
+                            disabled
+                            className="w-full py-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-secondary)] font-medium cursor-not-allowed opacity-70"
+                        >
+                            Sold Out
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        onClick={onSelect}
+                        className="w-full py-3 rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all duration-200 shadow-lg shadow-emerald-600/20"
+                    >
+                        Select Plan
+                        {availability && <span className="ml-2 text-xs font-normal opacity-80">({6 - availability.count} slots left)</span>}
+                    </button>
+                )}
             </div>
         </motion.div>
     );
 }
 
 function SelectionStep({ onSelect }: { onSelect: (p: Program) => void }) {
-    // Mock data for now
+    // Mock data for now (in real app this would be checking `isFeatured` properly)
+    // We assume the API returns the updated `isFeatured` status
     const { data: programs } = useSWR<Program[]>("/api/programs", (url: string) => fetch(url).then(r => r.json()));
+    const [search, setSearch] = useState("");
+
+    // Filter logic:
+    // 1. Must match search query
+    // 2. Must NOT be currently featured (check isFeatured + expiry date)
+    const filteredPrograms = programs?.filter(p => {
+        const matchesSearch = p.programName.toLowerCase().includes(search.toLowerCase());
+        const isAlreadyFeatured = p.isFeatured && p.featuredExpiresAt && new Date(p.featuredExpiresAt) > new Date();
+        return matchesSearch && !isAlreadyFeatured;
+    });
 
     return (
         <motion.div
@@ -152,22 +186,47 @@ function SelectionStep({ onSelect }: { onSelect: (p: Program) => void }) {
         >
             <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6">Select Your Program</h2>
 
-            <div className="flex-1 overflow-y-auto pr-2 space-y-3 max-h-[400px]">
-                {programs?.map(program => (
-                    <div
-                        key={program.id}
-                        onClick={() => onSelect(program)}
-                        className="flex items-center gap-4 p-4 rounded-xl border border-[var(--border)] hover:border-[var(--accent-solid)] hover:bg-[var(--bg-secondary)] cursor-pointer transition-all"
-                    >
-                        <div className="w-10 h-10 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center font-bold text-[var(--text-secondary)]">
-                            {program.programName[0]}
-                        </div>
-                        <div>
-                            <h3 className="font-semibold text-[var(--text-primary)]">{program.programName}</h3>
-                            <p className="text-xs text-[var(--text-secondary)]">{program.websiteUrl}</p>
-                        </div>
+            {/* Search Input */}
+            <div className="relative mb-4">
+                <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-tertiary)]" />
+                <input
+                    type="text"
+                    placeholder="Search your program..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-solid)] transition-colors placeholder:text-[var(--text-tertiary)]"
+                />
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-2 space-y-3 max-h-[340px]">
+                {!programs ? (
+                    <div className="text-center py-8 text-[var(--text-secondary)]">Loading programs...</div>
+                ) : filteredPrograms?.length === 0 ? (
+                    <div className="text-center py-8 text-[var(--text-secondary)]">
+                        {search ? "No programs found matching your search." : "No eligible programs found."}
                     </div>
-                ))}
+                ) : (
+                    filteredPrograms?.map(program => (
+                        <div
+                            key={program.id}
+                            onClick={() => onSelect(program)}
+                            className="flex items-center gap-4 p-4 rounded-xl border border-[var(--border)] hover:border-[var(--accent-solid)] hover:bg-[var(--bg-secondary)] cursor-pointer transition-all"
+                        >
+                            <div className="w-10 h-10 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center font-bold text-[var(--text-secondary)] overflow-hidden relative border border-[var(--border)]">
+                                {program.logoUrl ? (
+                                    // Use simple img for simplicity in this small view or Next Image unoptimized
+                                    <img src={program.logoUrl} alt={program.programName} className="object-cover w-full h-full" />
+                                ) : (
+                                    program.programName[0]
+                                )}
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-[var(--text-primary)]">{program.programName}</h3>
+                                <p className="text-xs text-[var(--text-secondary)] truncate max-w-[200px]">{program.websiteUrl}</p>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
         </motion.div>
     );

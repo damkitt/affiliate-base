@@ -50,6 +50,7 @@ interface CategoryTrend {
 
 interface ReferrerCTR {
     source: string;
+    domain: string | null;
     visitors: number;
     clicks: number;
     ctr: number;
@@ -237,23 +238,23 @@ export async function getDashboardStats(
         data.sessions.add(event.fingerprint);
 
         const referrer = parseReferrer(event.referer);
-        data.referrers.set(referrer, (data.referrers.get(referrer) || 0) + 1);
+        data.referrers.set(referrer.name, (data.referrers.get(referrer.name) || 0) + 1);
     }
 
     const geoReferrerStats: GeoReferrerStat[] = Array.from(countryData.entries())
         .map(([country, data]) => {
-            let topSource = "Direct";
+            let topSource = { name: "Direct", domain: null as string | null };
             let maxCount = 0;
             for (const [source, count] of data.referrers.entries()) {
                 if (count > maxCount) {
                     maxCount = count;
-                    topSource = source;
+                    topSource = { name: source, domain: null }; // Simplified for geo-stats for now, or could store domain in map keys
                 }
             }
             return {
                 country,
                 users: data.sessions.size,
-                topSource,
+                topSource: topSource.name,
             };
         })
         .sort((a, b) => b.users - a.users)
@@ -448,13 +449,22 @@ export async function getDashboardStats(
         select: { referer: true, fingerprint: true, eventType: true },
     });
 
-    const referrerData = new Map<string, { visitors: Set<string>; clicks: number }>();
+    const referrerData = new Map<string, { name: string; domain: string | null; visitors: Set<string>; clicks: number }>();
     for (const event of referrerEvents) {
-        const source = parseReferrer(event.referer);
-        if (!referrerData.has(source)) {
-            referrerData.set(source, { visitors: new Set(), clicks: 0 });
+        const { name, domain } = parseReferrer(event.referer);
+        // Use name as key to aggregate different subdomains if needed, or keep separate. 
+        // For simplicity let's use name as key. 
+        // Note: This means if google.com and google.co.uk both map to "Google", we pick one domain.
+        // Or we can use name as key and update domain if it's currently null.
+        if (!referrerData.has(name)) {
+            referrerData.set(name, { name, domain, visitors: new Set(), clicks: 0 });
         }
-        const data = referrerData.get(source)!;
+        const data = referrerData.get(name)!;
+        // If we have a domain now but didn't before (or want to overwrite), update it.
+        if (domain && !data.domain) {
+            data.domain = domain;
+        }
+
         data.visitors.add(event.fingerprint);
         if (event.eventType === "click" || event.eventType === "outbound") {
             data.clicks++;
@@ -462,8 +472,9 @@ export async function getDashboardStats(
     }
 
     const referrerCTR: ReferrerCTR[] = Array.from(referrerData.entries())
-        .map(([source, data]) => ({
-            source,
+        .map(([key, data]) => ({
+            source: data.name,
+            domain: data.domain,
             visitors: data.visitors.size,
             clicks: data.clicks,
             ctr: data.visitors.size > 0 ? Math.round((data.clicks / data.visitors.size) * 100 * 10) / 10 : 0,
@@ -527,29 +538,30 @@ export async function getDashboardStats(
     };
 }
 
-// Parse referrer URL to readable source name
-function parseReferrer(referer: string | null): string {
-    if (!referer) return "Direct";
+// Parse referrer URL to readable source name + domain
+function parseReferrer(referer: string | null): { name: string; domain: string | null } {
+    if (!referer) return { name: "Direct", domain: null };
     try {
         const url = new URL(referer);
         const host = url.hostname.replace("www.", "");
+        const domain = url.hostname; // Keep original hostname for favicon
 
-        if (host.includes("google")) return "Google";
-        if (host.includes("twitter") || host.includes("t.co")) return "Twitter";
-        if (host.includes("facebook") || host.includes("fb.com")) return "Facebook";
-        if (host.includes("linkedin")) return "LinkedIn";
-        if (host.includes("reddit")) return "Reddit";
-        if (host.includes("youtube")) return "YouTube";
-        if (host.includes("instagram")) return "Instagram";
-        if (host.includes("tiktok")) return "TikTok";
-        if (host.includes("bing")) return "Bing";
-        if (host.includes("duckduckgo")) return "DuckDuckGo";
+        if (host.includes("google")) return { name: "Google", domain };
+        if (host.includes("twitter") || host.includes("t.co")) return { name: "Twitter", domain };
+        if (host.includes("facebook") || host.includes("fb.com")) return { name: "Facebook", domain };
+        if (host.includes("linkedin")) return { name: "LinkedIn", domain };
+        if (host.includes("reddit")) return { name: "Reddit", domain };
+        if (host.includes("youtube")) return { name: "YouTube", domain };
+        if (host.includes("instagram")) return { name: "Instagram", domain };
+        if (host.includes("tiktok")) return { name: "TikTok", domain };
+        if (host.includes("bing")) return { name: "Bing", domain };
+        if (host.includes("duckduckgo")) return { name: "DuckDuckGo", domain };
+        if (host.includes("yandex")) return { name: "Yandex", domain };
 
-        return (
-            host.split(".")[0].charAt(0).toUpperCase() + host.split(".")[0].slice(1)
-        );
+        const name = host.split(".")[0].charAt(0).toUpperCase() + host.split(".")[0].slice(1);
+        return { name, domain };
     } catch {
-        return "Direct";
+        return { name: "Direct", domain: null };
     }
 }
 
