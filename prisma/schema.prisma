@@ -87,6 +87,9 @@ model Program {
   updatedAt            DateTime  @updatedAt
 
   reports              ProgramReport[]
+
+  @@index([approvalStatus, trendingScore, createdAt])
+  @@index([isFeatured, featuredExpiresAt])
 }
 
 model ProgramReport {

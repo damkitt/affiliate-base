@@ -49,11 +49,10 @@ export function ProgramCard({
               {program.commissionRate}%
             </span>
             <span
-              className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
-                program.approvalStatus
+              className={`px-2.5 py-1 rounded-full text-xs font-medium border ${program.approvalStatus
                   ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                   : "bg-amber-500/10 text-amber-500 border-amber-500/20"
-              }`}
+                }`}
             >
               {program.approvalStatus ? "Approved" : "Pending"}
             </span>
@@ -74,7 +73,7 @@ export function ProgramCard({
             <a
               href={program.websiteUrl}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="nofollow sponsored noopener noreferrer"
               className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] truncate block"
             >
               {new URL(program.websiteUrl).hostname}

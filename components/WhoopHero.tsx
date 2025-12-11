@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 export function WhoopHero() {
+    const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     // Self-manage the clean up of the global spotlight
@@ -15,22 +16,24 @@ export function WhoopHero() {
     }, []);
 
     useEffect(() => {
+        const container = containerRef.current;
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        if (!container || !canvas) return;
 
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
         let animationFrameId: number;
-        // Use window inner dimensions for fixed background
-        let width = window.innerWidth;
-        let height = window.innerHeight;
+        let width = container.clientWidth;
+        let height = container.clientHeight;
 
         canvas.width = width;
         canvas.height = height;
 
         const particles: Particle[] = [];
-        const particleCount = 50; // Reduced for performance
+        // Scale particle count with height to maintain density
+        // Base 50 for 1000px height
+        const particleCount = Math.min(100, Math.floor(50 * (height / 1000)));
 
         class Particle {
             x: number;
@@ -53,8 +56,8 @@ export function WhoopHero() {
                 this.y += this.speedY;
                 this.opacity -= this.fadeSpeed;
 
-                // Reset when invisible or off screen (allow falling deeper)
-                if (this.opacity <= 0 || this.y > height + 100) {
+                // Reset when invisible or off screen
+                if (this.opacity <= 0 || this.y > height + 20) {
                     this.y = -20;
                     this.x = Math.random() * width;
                     this.opacity = Math.random() * 0.6 + 0.3; // Reset to visible
@@ -91,23 +94,27 @@ export function WhoopHero() {
         render();
 
         const handleResize = () => {
-            width = window.innerWidth;
-            height = window.innerHeight;
+            if (!container || !canvas) return;
+            width = container.clientWidth;
+            height = container.clientHeight;
             canvas.width = width;
             canvas.height = height;
         };
 
         window.addEventListener("resize", handleResize);
+        const resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(container);
 
         return () => {
             cancelAnimationFrame(animationFrameId);
             window.removeEventListener("resize", handleResize);
+            resizeObserver.disconnect();
         };
     }, []);
 
-    // Use absolute positioning so it stays at the top of the page (not fixed to viewport)
+    // Absolute positioning covering the full scrollable area of the parent
     return (
-        <div className="absolute top-0 left-0 w-full h-[100vh] pointer-events-none overflow-hidden z-0 bg-[var(--bg)] transition-colors duration-300">
+        <div ref={containerRef} className="absolute inset-0 w-full min-h-full pointer-events-none overflow-hidden z-0 bg-[var(--bg)]">
             {/* Top Green Glow - "Horizon" effect */}
             <div
                 className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[100vw] h-[70vh] opacity-30 blur-[100px]"

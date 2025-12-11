@@ -31,74 +31,41 @@
   --accent-glow: hsla(163, 72%, 42%, 0.25);
   --accent-foreground: hsl(0, 0%, 100%);
 
-  /* Accent Gradients - Green to Dark */
+  /* Accent Gradients */
   --accent-gradient-dark: linear-gradient(180deg, var(--accent-solid), var(--accent-dark));
-  --accent-gradient-black: linear-gradient(180deg, var(--accent-solid), hsl(163, 40%, 15%));
-  --accent-gradient-fade: linear-gradient(180deg, var(--accent-solid), hsla(163, 72%, 38%, 0.6));
-
-  /* Elegant Spotlight Effect */
-  --spotlight: radial-gradient(ellipse 100% 70% at 50% 0%,
-      hsla(163, 65%, 45%, 0.12),
-      hsla(163, 60%, 40%, 0.06) 40%,
-      transparent 70%);
 
   /* Refined Shadows */
   --shadow-sm: 0 1px 2px hsla(220, 16%, 20%, 0.04);
   --shadow-md: 0 4px 12px hsla(220, 16%, 20%, 0.06), 0 2px 4px hsla(220, 16%, 20%, 0.04);
-  --shadow-lg: 0 12px 24px hsla(220, 16%, 20%, 0.08), 0 4px 8px hsla(220, 16%, 20%, 0.04);
-  --shadow-card: 0 2px 8px hsla(220, 16%, 20%, 0.04), 0 1px 3px hsla(220, 16%, 20%, 0.02);
-  --shadow-card-hover: 0 8px 16px hsla(220, 16%, 20%, 0.08), 0 2px 6px hsla(220, 16%, 20%, 0.04);
 
-  /* Legacy Variables for Compatibility */
+  /* Legacy Variables */
   --background: var(--bg);
   --foreground: var(--text-primary);
 }
 
 .dark {
-  /* Rich Dark Backgrounds with Blue-Gray Undertones */
-  --bg: #000000;
-  --bg-secondary: #050505;
-  --bg-card: #0A0A0A;
-  --bg-elevated: #111111;
+  /* Ultra Premium Dark Mode - "Dark Glass" Aesthetic */
+  --bg: #030303;
+  /* Deepest black */
+  --bg-secondary: #080808;
+  --bg-card: rgba(20, 20, 20, 0.4);
+  /* Glass base */
+  --bg-elevated: rgba(30, 30, 30, 0.4);
+  /* Elevanted glass */
 
-  /* Refined Text Hierarchy */
-  --text-primary: hsl(220, 20%, 98%);
-  --text-secondary: hsl(220, 14%, 72%);
-  --text-tertiary: hsl(220, 12%, 55%);
+  /* Text - Crisp and Bright against dark */
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.4);
 
-  /* Elegant Dark Borders */
-  --border: hsl(222, 18%, 22%);
-  --border-light: hsl(222, 18%, 18%);
+  /* Subtle Borders */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.05);
 
-  /* Vibrant Accent System - Darker Enhanced for Dark Mode */
-  --accent-from: hsl(158, 72%, 45%);
-  --accent-to: hsl(168, 76%, 38%);
-  --accent: linear-gradient(135deg, var(--accent-from), var(--accent-to));
-  --accent-solid: hsl(163, 75%, 42%);
-  --accent-hover: hsl(163, 75%, 48%);
-  --accent-dark: hsl(163, 70%, 32%);
-  --accent-dim: hsla(163, 75%, 42%, 0.12);
-  --accent-glow: hsla(163, 75%, 45%, 0.35);
-  --accent-foreground: hsl(222, 24%, 8%);
-
-  /* Accent Gradients - Green to Dark */
-  --accent-gradient-dark: linear-gradient(180deg, var(--accent-solid), var(--accent-dark));
-  --accent-gradient-black: linear-gradient(180deg, var(--accent-solid), hsl(163, 50%, 18%));
-  --accent-gradient-fade: linear-gradient(180deg, var(--accent-solid), hsla(163, 75%, 42%, 0.5));
-
-  /* Dramatic Spotlight Effect */
-  --spotlight: radial-gradient(ellipse 100% 60% at 50% 0%,
-      hsla(163, 70%, 42%, 0.18),
-      hsla(163, 65%, 38%, 0.10) 35%,
-      hsla(163, 60%, 35%, 0.04) 55%,
-      transparent 75%);
-
-  /* Rich Dark Shadows with Glow */
-  --shadow-sm: 0 1px 2px hsla(0, 0%, 0%, 0.3);
-  --shadow-md: 0 4px 12px hsla(0, 0%, 0%, 0.4), 0 2px 4px hsla(0, 0%, 0%, 0.2);
-  --shadow-lg: 0 12px 24px hsla(0, 0%, 0%, 0.5), 0 4px 8px hsla(0, 0%, 0%, 0.3);
-  --shadow-card: 0 2px 8px hsla(0, 0%, 0%, 0.25), 0 1px 3px hsla(0, 0%, 0%, 0.15);
-  --shadow-card-hover: 0 8px 20px hsla(0, 0%, 0%, 0.35), 0 2px 8px hsla(163, 75%, 42%, 0.15);
+  /* Vivid Accents that pop */
+  --accent-from: #10B981;
+  --accent-to: #059669;
+  --accent-solid: #10B981;
 
   /* Legacy Variables */
   --background: var(--bg);
@@ -110,71 +77,42 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   background: var(--bg);
   color: var(--text-primary);
   min-height: 100vh;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  position: relative;
-  overflow-x: hidden;
 }
 
-/* Spotlight Effect */
-body::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--spotlight);
-  pointer-events: none;
-  z-index: 0;
+/* Premium Card Styles */
+/* Premium Card Styles */
+.card-premium {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+  /* Softer shadow for light mode */
+  transition: all 0.3s ease;
 }
 
-::selection {
-  background: var(--accent-solid);
-  color: white;
+.dark .card-premium {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }
 
-/* Card with isolated background - blocks spotlight effect from showing through */
-.card-solid {
-  position: relative;
-  isolation: isolate;
-  background-color: var(--bg-elevated);
+.card-premium:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 12px 40px -8px rgba(16, 185, 129, 0.1);
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--text-tertiary);
-  border-radius: 10px;
-  opacity: 0.3;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  opacity: 0.5;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.dark .card-premium:hover {
+  border-color: rgba(16, 185, 129, 0.2);
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.5);
 }
 
 /* Animations */
@@ -190,71 +128,11 @@ body::before {
   }
 }
 
-@keyframes shimmer {
-  from {
-    background-position: 0 0;
-  }
-
-  to {
-    background-position: -200% 0;
-  }
-}
-
-@keyframes glow {
-
-  0%,
-  100% {
-    opacity: 0.5;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 .animate-fade-in-up {
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
-  transform: translateY(20px);
 }
 
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Staggered delays */
 .delay-100 {
   animation-delay: 100ms;
 }
@@ -267,33 +145,41 @@ body::before {
   animation-delay: 300ms;
 }
 
-.delay-500 {
-  animation-delay: 500ms;
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-.delay-700 {
-  animation-delay: 700ms;
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
 }
 
-/* Utilities */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Glass Utility */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .dark .glass {
-  background: rgba(10, 10, 10, 0.7);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .glass-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Override spotlight for specific pages */
-.no-spotlight::before {
-  display: none !important;
+.dark .glass-card {
+  background: rgba(20, 20, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }

@@ -41,7 +41,7 @@ async function ensureBucketExists(): Promise<void> {
   if (exists) return;
 
   await minioClient.makeBucket(AVATAR_BUCKET, "us-east-1");
-  
+
   // Set bucket policy to public read
   const policy = {
     Version: "2012-10-17",
@@ -100,7 +100,8 @@ export async function POST(
       "Content-Type": file.type,
     });
 
-    const publicUrl = `${MINIO_PUBLIC_URL}/${AVATAR_BUCKET}/${filename}`;
+    const baseUrl = MINIO_PUBLIC_URL.replace(/\/$/, "");
+    const publicUrl = `${baseUrl}/${AVATAR_BUCKET}/${filename}`;
 
     return NextResponse.json({ url: publicUrl });
   } catch (error) {

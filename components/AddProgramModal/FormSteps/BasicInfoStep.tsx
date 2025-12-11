@@ -4,6 +4,7 @@ import { HiPhoto, HiGlobeAlt, HiLink } from "react-icons/hi2";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import type { FormData } from "../types";
 import { CATEGORIES, CATEGORY_ICONS } from "@/constants";
+import { getUrlValidationError } from "../error-utils";
 
 interface BasicInfoStepProps {
   formData: FormData;
@@ -26,6 +27,9 @@ export function BasicInfoStep({
   onLogoUpload,
   onCategorySelect,
 }: BasicInfoStepProps) {
+  const websiteError = getUrlValidationError(formData.websiteUrl);
+  const affiliateError = getUrlValidationError(formData.affiliateUrl);
+
   return (
     <div className="space-y-5 animate-fadeIn">
       {/* Logo & Name */}
@@ -33,8 +37,8 @@ export function BasicInfoStep({
         <div
           onClick={() => !isUploading && fileInputRef.current?.click()}
           className={`group relative w-20 h-20 rounded-lg bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border)] flex items-center justify-center overflow-hidden transition-all duration-200 flex-shrink-0 ${isUploading
-              ? "opacity-50 cursor-wait"
-              : "hover:border-[var(--accent-solid)] hover:bg-[var(--accent-dim)] cursor-pointer"
+            ? "opacity-50 cursor-wait"
+            : "hover:border-[var(--accent-solid)] hover:bg-[var(--accent-dim)] cursor-pointer"
             }`}
         >
           {logoPreview ? (
@@ -117,8 +121,8 @@ export function BasicInfoStep({
                 type="button"
                 onClick={() => onCategorySelect(cat)}
                 className={`px-3 py-2 rounded-md text-xs font-semibold transition-colors duration-150 flex items-center gap-1.5 ${isSelected
-                    ? "bg-[var(--accent-solid)] text-white shadow-md"
-                    : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--accent-solid)]"
+                  ? "bg-[var(--accent-solid)] text-white shadow-md"
+                  : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--accent-solid)]"
                   }`}
               >
                 <CategoryIcon iconName={iconName} className="w-4 h-4" />
@@ -157,8 +161,16 @@ export function BasicInfoStep({
             value={formData.websiteUrl}
             onChange={onFormChange}
             placeholder="https://..."
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
+            className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${websiteError
+                ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+                : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
+              }`}
           />
+          {websiteError && (
+            <p className="text-xs text-red-500 mt-1.5 font-medium animate-fadeIn">
+              {websiteError}
+            </p>
+          )}
         </div>
         <div>
           <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
@@ -171,8 +183,16 @@ export function BasicInfoStep({
             value={formData.affiliateUrl}
             onChange={onFormChange}
             placeholder="https://..."
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
+            className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${affiliateError
+                ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+                : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
+              }`}
           />
+          {affiliateError && (
+            <p className="text-xs text-red-500 mt-1.5 font-medium animate-fadeIn">
+              {affiliateError}
+            </p>
+          )}
         </div>
       </div>
     </div>

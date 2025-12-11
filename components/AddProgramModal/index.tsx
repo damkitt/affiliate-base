@@ -126,7 +126,15 @@ export default function AddProgramModal({
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data;
+      try {
+        // Attempt to parse JSON
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("JSON Parse Error. Raw Response:", responseText);
+        throw new Error(`Server returned non-JSON response (Status: ${response.status}). Please check console.`);
+      }
 
       if (response.ok) {
         onSuccess?.();
@@ -136,9 +144,15 @@ export default function AddProgramModal({
         alert(`Error: ${data.error || "Failed to create program"}`);
         setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error("Network Error:", error);
-      alert("Network error. Please try again.");
+    } catch (error: any) {
+      console.error("Submission Error:", error);
+      const message = error.message || "Network error. Please try again.";
+      // Check if it looks like a validation error from our validator
+      if (message.includes("not allowed") || message.includes("Invalid")) {
+        alert(message);
+      } else {
+        alert(`Error: ${message}`);
+      }
       setIsSubmitting(false);
     }
   };
@@ -170,7 +184,7 @@ export default function AddProgramModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-[var(--bg-card)] rounded-xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-scaleIn border border-[var(--border)]">
+      <div className="relative w-full max-w-2xl bg-[#111111]/95 backdrop-blur-2xl rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-scaleIn border border-white/10">
         {/* Header */}
         <div className="relative px-6 pt-6 pb-4">
           <button
@@ -201,11 +215,10 @@ export default function AddProgramModal({
         {/* Form Content */}
         <div className="flex-1 overflow-auto">
           <div
-            className={`h-full overflow-y-auto px-6 py-4 transition-all duration-500 ease-out ${
-              slideDirection === "right"
-                ? "animate-slideInRight"
-                : "animate-slideInLeft"
-            }`}
+            className={`h-full overflow-y-auto px-6 py-4 transition-all duration-500 ease-out ${slideDirection === "right"
+              ? "animate-slideInRight"
+              : "animate-slideInLeft"
+              }`}
             key={currentStep}
           >
             {currentStep === 1 && (
@@ -287,11 +300,10 @@ export default function AddProgramModal({
               type="button"
               onClick={handleNext}
               disabled={!canProceedToStep(currentStep + 1, formData)}
-              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${
-                canProceedToStep(currentStep + 1, formData)
-                  ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
-                  : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
-              }`}
+              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${canProceedToStep(currentStep + 1, formData)
+                ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
+                : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
+                }`}
             >
               Continue
               <HiArrowRight className="w-4 h-4" />
@@ -301,11 +313,10 @@ export default function AddProgramModal({
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting || !canSubmitForm(formData)}
-              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${
-                canSubmitForm(formData) && !isSubmitting
-                  ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
-                  : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
-              }`}
+              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${canSubmitForm(formData) && !isSubmitting
+                ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
+                : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
+                }`}
             >
               {isSubmitting ? (
                 <>

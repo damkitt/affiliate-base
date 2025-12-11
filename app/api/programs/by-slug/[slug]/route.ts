@@ -1,22 +1,43 @@
-import { NextRequest, NextResponse } from "next/server";
+
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
-    _request: NextRequest,
-    { params }: { params: Promise<{ slug: string }> }
+    request: Request,
+    props: { params: Promise<{ slug: string }> }
 ) {
-    const { slug } = await params;
+    const params = await props.params;
+    try {
+        const slug = params.slug;
 
-    const program = await prisma.program.findFirst({
-        where: {
-            slug: slug,
-            approvalStatus: true,
-        },
-    });
+        if (!slug) {
+            return NextResponse.json({ error: "Slug is required" }, { status: 400 });
+        }
 
-    if (!program) {
-        return NextResponse.json({ error: "Program not found" }, { status: 404 });
+        const program = await prisma.program.findFirst({
+            where: {
+                slug: slug,
+                approvalStatus: true, // Only show approved programs
+            },
+            select: {
+                programName: true,
+                logoUrl: true,
+                commissionRate: true,
+                commissionDuration: true,
+                websiteUrl: true,
+            },
+        });
+
+        if (!program) {
+            return NextResponse.json({ error: "Program not found" }, { status: 404 });
+        }
+
+        return NextResponse.json(program);
+    } catch (error) {
+        console.error("[API] Get Program By Slug Error:", error);
+        return NextResponse.json(
+            { error: "Internal Server Error" },
+            { status: 500 }
+        );
     }
-
-    return NextResponse.json(program);
 }

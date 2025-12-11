@@ -1,4 +1,5 @@
 import { FormData } from "./types";
+import { cleanAndValidateUrl } from "@/lib/url-validator";
 
 export const validateEnglishInput = (value: string): boolean => {
   const regex = /^[a-zA-Z0-9\s.,!?'"@#$%^&*()_+\-=[\]{};:|\\/<>]*$/;
@@ -8,8 +9,8 @@ export const validateEnglishInput = (value: string): boolean => {
 export const validateUrl = (url: string): boolean => {
   if (!url) return true; // Empty is valid (optional fields)
   try {
-    const urlObj = new URL(url);
-    return urlObj.protocol === "http:" || urlObj.protocol === "https:";
+    cleanAndValidateUrl(url);
+    return true;
   } catch {
     return false;
   }

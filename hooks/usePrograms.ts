@@ -5,8 +5,12 @@ import { CATEGORIES } from "@/constants";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export function usePrograms() {
-    const { data, error, mutate } = useSWR<Program[]>("/api/programs", fetcher);
+export function usePrograms(initialData?: Program[]) {
+    const { data, error, mutate } = useSWR<Program[]>("/api/programs", fetcher, {
+        fallbackData: initialData,
+        revalidateOnFocus: false,
+        keepPreviousData: true
+    });
 
     const programs = useMemo(() => (Array.isArray(data) ? data : []), [data]);
 
