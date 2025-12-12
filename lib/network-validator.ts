@@ -6,23 +6,36 @@
 
 export async function validateUrlReachability(url: string, context: "Website" | "Affiliate Link"): Promise<void> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout (increased from 5s)
 
     try {
-        const response = await fetch(url, {
-            method: "GET", // GET is more reliable than HEAD for SPAs
+        // Try HEAD first (faster), fallback to GET if HEAD fails
+        let response = await fetch(url, {
+            method: "HEAD",
             headers: {
                 "User-Agent": "Mozilla/5.0 (compatible; AffiliateBaseBot/1.0; +http://affiliatebase.co)",
             },
             signal: controller.signal,
-        });
+            redirect: "follow",
+        }).catch(() => null);
+
+        // If HEAD failed or returned 405, try GET
+        if (!response || response.status === 405) {
+            response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    "User-Agent": "Mozilla/5.0 (compatible; AffiliateBaseBot/1.0; +http://affiliatebase.co)",
+                },
+                signal: controller.signal,
+                redirect: "follow",
+            });
+        }
 
         clearTimeout(timeoutId);
 
         const status = response.status;
 
-        // PASS: 2xx (Success), 3xx (Redirect - fetch follows automatically usually), 401/403 (Protected/Forbidden)
-        // We explicitly allow 401/403 because many valid sites block bots, but providing a 403 proves the server exists.
+        // PASS: 2xx (Success), 3xx (Redirect), 401/403 (Protected/Forbidden)
         if (response.ok || (status >= 300 && status < 400) || status === 401 || status === 403) {
             return;
         }
@@ -37,37 +50,26 @@ export async function validateUrlReachability(url: string, context: "Website" | 
             throw new Error(`The ${context} destination server is returning an error (${status}). Is the site down?`);
         }
 
-        // Catch-all for other 4xx? (e.g. 410 Gone, 400 Bad Request)
-        // For now, let's treat other 4xx as suspicious but maybe allow? 
-        // User requested specifically blocking 404 and 500+.
-        // Let's block 410 as well if possible, but strict compliance to prompt:
-        // Prompt only specified 404 and 500+ as FAIL.
-        // 400 Bad Request might be due to bot User-Agent? Let's safeguard.
-        // If not explicitly failed above, we let it pass?
-        // "FAIL (Block Save): Status 404... Status 500+"
-        // Implies others pass.
-
-        // Explicitly handling the weird ones just in case?
-        // If we get here, it's not ok, not 3xx, not 401/403, not 404, not 5xx.
-        // E.g. 418 I'm a teapot.
-        // Let's assume pass unless 404 or 5xx.
+        // Other status codes - allow through
         return;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         clearTimeout(timeoutId);
 
+        const errorMessage = error instanceof Error ? error.message : "Unknown Error";
+
         // If it was our manual error (404/5xx), rethrow.
-        if (error.message.includes(context)) {
-            throw error;
+        if (errorMessage.includes(context)) {
+            if (error instanceof Error) throw error;
+            throw new Error(errorMessage);
         }
 
-        // Network Errors
-        if (error.name === "AbortError") {
-            throw new Error(`We couldn't reach the ${context} in time (Timeout). Is the site valid?`);
+        // Network Errors - Abort/Timeout
+        if (error instanceof Error && error.name === "AbortError") {
+            throw new Error(`We couldn't reach the ${context} in time (Timeout). The site may be slow or blocking automated requests.`);
         }
 
         // DNS / Connection Refused
-        // precise error messages vary by runtime, but usually contain "fetch failed" or "ENOTFOUND"
         throw new Error(`We couldn't reach this domain (${context}). Please check if the website address is correct.`);
     }
 }

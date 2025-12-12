@@ -5,7 +5,6 @@ import { programsCreatedTotal, activeProgramsGauge } from "@/lib/metrics";
 import { validateCountry, validateCreateBody } from "@/lib/utils";
 import { calculateQualityScore, calculateTrendingScore, calculateTrustScore, calculateRecencyBoost } from "@/lib/scoring";
 import { cleanAndValidateUrl } from "@/lib/url-validator";
-import { validateUrlReachability } from "@/lib/network-validator";
 
 /**
  * GET /api/programs
@@ -86,21 +85,14 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     const body = await request.json();
 
-    // Strict URL Validation & Cleaning
+    // URL Cleaning & Format Validation (non-blocking)
     try {
       if (body.websiteUrl) body.websiteUrl = cleanAndValidateUrl(body.websiteUrl);
       if (body.affiliateUrl) body.affiliateUrl = cleanAndValidateUrl(body.affiliateUrl);
 
-      // Smart Ping: Verify URLs are reachable
-      // We run checks in parallel to minimize latency
-      await Promise.all([
-        body.websiteUrl
-          ? validateUrlReachability(body.websiteUrl, "Website")
-          : Promise.resolve(),
-        body.affiliateUrl
-          ? validateUrlReachability(body.affiliateUrl, "Affiliate Link")
-          : Promise.resolve(),
-      ]);
+      // NOTE: Network reachability validation removed - many legitimate sites 
+      // block automated server requests (Cloudflare, WAF, etc.)
+      // The URL format validation above is sufficient for data quality
 
     } catch (error: any) {
       return NextResponse.json(

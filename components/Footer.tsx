@@ -61,7 +61,7 @@ export function Footer({ onAddProgram }: FooterProps) {
                     </div>
                 </div>
 
-                <div className="mt-12 pt-8 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[var(--text-tertiary)]">
+                <div className="mt-12 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[var(--text-tertiary)]">
                     <p>© {new Date().getFullYear()} Affiliate Base. All rights reserved.</p>
                 </div>
             </div>

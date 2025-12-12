@@ -472,7 +472,7 @@ export async function getDashboardStats(
     }
 
     const referrerCTR: ReferrerCTR[] = Array.from(referrerData.entries())
-        .map(([key, data]) => ({
+        .map(([, data]) => ({
             source: data.name,
             domain: data.domain,
             visitors: data.visitors.size,

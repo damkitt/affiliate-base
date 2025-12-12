@@ -9,6 +9,8 @@ export function usePrograms(initialData?: Program[]) {
     const { data, error, mutate } = useSWR<Program[]>("/api/programs", fetcher, {
         fallbackData: initialData,
         revalidateOnFocus: false,
+        revalidateOnMount: false, // Don't refetch on mount since we have SSR data
+        dedupingInterval: 60000, // Prevent duplicate requests for 60 seconds
         keepPreviousData: true
     });
 
@@ -23,10 +25,11 @@ export function usePrograms(initialData?: Program[]) {
         if (!search.trim() || search === lastTrackedSearch.current) return;
 
         const timer = setTimeout(() => {
+            const searchLower = search.toLowerCase();
             const resultsCount = programs.filter((p) =>
-                p.programName.toLowerCase().includes(search.toLowerCase()) ||
-                p.tagline.toLowerCase().includes(search.toLowerCase()) ||
-                p.description.toLowerCase().includes(search.toLowerCase())
+                p.programName.toLowerCase().includes(searchLower) ||
+                (p.tagline?.toLowerCase().includes(searchLower) ?? false) ||
+                (p.description?.toLowerCase().includes(searchLower) ?? false)
             ).length;
 
             fetch("/api/track/search", {
@@ -58,11 +61,12 @@ export function usePrograms(initialData?: Program[]) {
     );
 
     const filteredPrograms = useMemo(() => {
+        const searchLower = search.toLowerCase();
         return programs.filter((p) => {
             const matchesSearch =
-                p.programName.toLowerCase().includes(search.toLowerCase()) ||
-                p.tagline.toLowerCase().includes(search.toLowerCase()) ||
-                p.description.toLowerCase().includes(search.toLowerCase());
+                p.programName.toLowerCase().includes(searchLower) ||
+                (p.tagline?.toLowerCase().includes(searchLower) ?? false) ||
+                (p.description?.toLowerCase().includes(searchLower) ?? false);
 
             const matchesCategory = selectedCategory
                 ? p.category === selectedCategory

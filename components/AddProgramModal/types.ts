@@ -1,4 +1,5 @@
 export interface FormData {
+  slug?: string;
   programName: string;
   tagline: string;
   description: string;

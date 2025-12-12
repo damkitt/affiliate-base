@@ -1,6 +1,5 @@
 import { LeaderboardSkeleton } from "@/components/skeletons/LeaderboardSkeleton";
-import { Header } from "@/components/Header";
-import { NavBar } from "@/components/NavBar";
+
 
 export default function Loading() {
     return (

@@ -18,6 +18,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${program.programName} Affiliate Program Review | Affiliate Base`,
     description: program.tagline || `Learn about the ${program.programName} affiliate program commissions, cookie duration, and more.`,
+    openGraph: {
+      title: `${program.programName} Affiliate Program Review | Affiliate Base`,
+      description: program.tagline || `Learn about the ${program.programName} affiliate program commissions, cookie duration, and more.`,
+      images: [
+        {
+          url: `/programs/${slug}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: `${program.programName} Program Details`,
+        },
+      ],
+    },
   };
 }
 

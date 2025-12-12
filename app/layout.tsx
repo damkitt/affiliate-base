@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, DM_Serif_Display } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { WhoopHero } from "@/components/WhoopHero";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -35,8 +34,7 @@ export default function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
-                    <WhoopHero />
-                    <main className="min-h-screen relative z-10">
+                    <main className="min-h-screen relative">
                         {children}
                     </main>
                 </ThemeProvider>

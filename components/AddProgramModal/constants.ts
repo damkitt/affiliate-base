@@ -42,7 +42,8 @@ export const MONTHS = [
 ];
 
 export const currentYear = new Date().getFullYear();
-export const YEARS = Array.from({ length: 25 }, (_, i) => currentYear - i);
+export const startYear = 1980;
+export const YEARS = Array.from({ length: currentYear - startYear + 1 }, (_, i) => currentYear - i);
 
 export const AFFILIATE_RANGES = [
   "0-100",
@@ -61,7 +62,24 @@ export const PAYOUT_RANGES = [
   "$100k+",
 ];
 
-export const APPROVAL_TIMES = ["1", "2-3", "3-5", "5-7", "7-14", "14+"];
+export const APPROVAL_TIMES = [
+  "< 24 hours",
+  "1-3 days",
+  "3-7 days",
+  "Weekly",
+  "Bi-weekly",
+  "Monthly"
+];
+
+export const PAYOUT_METHODS = [
+  "PayPal",
+  "Wise",
+  "Bank Transfer",
+  "Stripe",
+  "Payoneer",
+  "Crypto",
+  "Check",
+];
 
 export const INITIAL_FORM_DATA: FormData = {
   programName: "",

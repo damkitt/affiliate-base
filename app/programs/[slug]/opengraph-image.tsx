@@ -14,11 +14,9 @@ export const size = {
 export const contentType = 'image/png';
 
 export default async function Image(props: { params: Promise<{ slug: string }> }) {
-    console.log('[OG] Starting generation...');
     try {
         const params = await props.params;
         const { slug } = params;
-        console.log(`[OG] Slug: ${slug}`);
 
         // 1. Fetch Data directly from DB
         const program = await prisma.program.findFirst({
@@ -32,7 +30,6 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
         });
 
         if (!program) {
-            console.log('[OG] Program not found');
             return new ImageResponse(
                 (
                     <div
@@ -64,7 +61,6 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
         let logoSrc = null;
         if (program.logoUrl) {
             try {
-                console.log(`[OG] Fetching logo: ${program.logoUrl}`);
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s Timeout
 
@@ -92,12 +88,9 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
 
                     const base64 = optimizedBuffer.toString('base64');
                     logoSrc = `data:image/png;base64,${base64}`;
-                    console.log('[OG] Logo optimized & converted to PNG');
-                } else {
-                    console.warn(`[OG] Logo fetch failed status: ${logoRes.status}`);
                 }
             } catch (e) {
-                console.error('[OG] Logo processing error:', e);
+                // Silent catch for OG image generation to prevent crash
             }
         }
 
@@ -106,135 +99,164 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
             (
                 <div
                     style={{
-                        background: '#0a0a0a',
-                        backgroundImage: 'linear-gradient(to bottom right, #0a0a0a, #111, #0a0a0a)',
+                        background: '#050505',
                         width: '100%',
                         height: '100%',
                         display: 'flex',
-                        flexDirection: 'row',
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '80px',
+                        justifyContent: 'center',
                         fontFamily: 'sans-serif',
+                        position: 'relative',
+                        overflow: 'hidden',
                     }}
                 >
-                    {/* Background Glows */}
-                    <div style={{
-                        position: 'absolute',
-                        top: '-200px',
-                        left: '-200px',
-                        width: '600px',
-                        height: '600px',
-                        borderRadius: '50%',
-                        background: 'rgba(16, 185, 129, 0.1)',
-                    }} />
+                    {/* Background Gradients (Combined) */}
+                    <div style={{ position: 'absolute', top: '-300px', left: '-100px', width: '1000px', height: '1000px', background: 'radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(0,0,0,0) 70%)' }} />
+                    <div style={{ position: 'absolute', bottom: '-300px', right: '-100px', width: '1000px', height: '1000px', background: 'radial-gradient(circle, rgba(52, 211, 153, 0.05) 0%, rgba(0,0,0,0) 70%)' }} />
 
-                    {/* Left Side: Logo */}
-                    <div style={{ display: 'flex', zIndex: 10 }}>
-                        {logoSrc ? (
-                            // lint-disable-next-line @next/next/no-img-element
-                            <img
-                                src={logoSrc}
-                                alt={program.programName}
-                                style={{
-                                    width: '320px',
-                                    height: '320px',
-                                    borderRadius: '60px',
-                                    objectFit: 'cover',
-                                    boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-                                }}
-                            />
-                        ) : (
-                            <div
-                                style={{
-                                    width: '320px',
-                                    height: '320px',
-                                    borderRadius: '60px',
-                                    background: '#18181b',
-                                    color: '#52525b',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '120px',
-                                    fontWeight: 900,
-                                    boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-                                    border: '1px solid #27272a',
-                                }}
-                            >
-                                {program.programName?.charAt(0) || '?'}
+                    {/* Main Content Container */}
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '1000px', height: '420px', zIndex: 10 }}>
+                        {/* Left: Program Logo */}
+                        <div style={{
+                            display: 'flex',
+                            width: '400px',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}>
+                            <div style={{
+                                width: '320px',
+                                height: '320px',
+                                borderRadius: '64px',
+                                padding: '10px',
+                                background: 'linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                            }}>
+                                {logoSrc ? (
+                                    // lint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={logoSrc}
+                                        alt={program.programName}
+                                        style={{
+                                            width: '300px',
+                                            height: '300px',
+                                            borderRadius: '54px',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+                                ) : (
+                                    <div
+                                        style={{
+                                            width: '300px',
+                                            height: '300px',
+                                            borderRadius: '54px',
+                                            background: '#18181b',
+                                            color: '#52525b',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '120px',
+                                            fontWeight: 900,
+                                        }}
+                                    >
+                                        {program.programName?.charAt(0) || '?'}
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </div>
 
-                    {/* Right Side: Details */}
-                    <div
-                        style={{
+                        {/* Right: Details */}
+                        <div style={{
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'flex-start',
                             justifyContent: 'center',
-                            maxWidth: '650px',
-                            zIndex: 10,
-                            marginLeft: '60px',
                             flex: 1,
-                        }}
-                    >
-                        {/* Commission Badge */}
-                        <div
-                            style={{
+                            paddingLeft: '40px',
+                        }}>
+                            {/* Commission Pill */}
+                            <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                fontSize: '32px',
-                                fontWeight: 700,
-                                color: '#34d399', // Emerald-400
-                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                                padding: '12px 28px',
+                                padding: '12px 24px',
+                                background: 'rgba(16, 185, 129, 0.1)',
                                 borderRadius: '100px',
                                 border: '1px solid rgba(16, 185, 129, 0.2)',
-                                marginBottom: '32px',
-                            }}
-                        >
-                            {program.commissionRate}% {program.commissionDuration === 'Recurring' ? 'Recurring' : 'Commission'}
-                        </div>
-
-                        {/* Title */}
-                        <div
-                            style={{
-                                fontSize: '90px',
-                                fontWeight: 900,
-                                color: 'white',
-                                lineHeight: '1.05',
                                 marginBottom: '24px',
-                                display: 'flex',
-                                textShadow: '0 4px 20px rgba(0,0,0,0.8)',
-                            }}
-                        >
-                            {program.programName}
-                        </div>
-
-                        {/* Footer Brand */}
-                        <div style={{
-                            marginTop: '40px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px'
-                        }}>
-                            <div style={{
-                                width: '24px',
-                                height: '24px',
-                                background: '#10b981',
-                                borderRadius: '6px'
-                            }} />
-                            <div style={{
-                                color: '#a1a1aa',
-                                fontSize: '28px',
-                                fontWeight: 600,
-                                letterSpacing: '-0.02em',
                             }}>
-                                Affiliate Base
+                                <span style={{ color: '#34d399', fontSize: '28px', fontWeight: 700, marginRight: '8px' }}>
+                                    {program.commissionRate}%
+                                </span>
+                                <span style={{ color: '#a1a1aa', fontSize: '24px', fontWeight: 500 }}>
+                                    {program.commissionDuration === 'Recurring' ? 'Recurring' : 'Commission'}
+                                </span>
+                            </div>
+
+                            {/* Program Name */}
+                            <div style={{
+                                fontSize: '80px',
+                                fontWeight: 800,
+                                color: 'white',
+                                lineHeight: '1.1',
+                                marginBottom: '40px',
+                                textShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                                letterSpacing: '-0.02em',
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                            }}>
+                                {program.programName}
+                            </div>
+
+                            {/* Trust Badge (Simulated) */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                    background: '#10b981',
+                                    color: 'black',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                }}>✓</div>
+                                <span style={{ color: '#71717a', fontSize: '20px', fontWeight: 500 }}>Verified Program</span>
                             </div>
                         </div>
                     </div>
+
+                    {/* Footer / Branding Layer */}
+                    <div style={{
+                        position: 'absolute',
+                        bottom: '50px',
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        letterSpacing: '0.25em',
+                        fontSize: '24px',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                    }}>
+                        <span style={{ color: '#a1a1aa', marginRight: '12px' }}>AFFILIATE</span>
+                        <span style={{ color: '#10b981' }}>BASE</span>
+                    </div>
+
+                    {/* Top Right Decorative Element */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '40px',
+                        right: '40px',
+                        width: '80px',
+                        height: '4px',
+                        background: 'linear-gradient(90deg, #10b981, transparent)',
+                        borderRadius: '2px',
+                    }} />
                 </div>
             ),
             { ...size }

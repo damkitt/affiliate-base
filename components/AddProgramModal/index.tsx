@@ -38,12 +38,7 @@ export default function AddProgramModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
-  const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
-  const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
-  const [slideDirection, setSlideDirection] = useState<"left" | "right">(
-    "right"
-  );
+  const [slideDirection, setSlideDirection] = useState<"left" | "right">("right");
   const [showSuccess, setShowSuccess] = useState(false);
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
 
@@ -131,12 +126,13 @@ export default function AddProgramModal({
       try {
         // Attempt to parse JSON
         data = JSON.parse(responseText);
-      } catch (parseError) {
+      } catch {
         console.error("JSON Parse Error. Raw Response:", responseText);
         throw new Error(`Server returned non-JSON response (Status: ${response.status}). Please check console.`);
       }
 
       if (response.ok) {
+        setFormData(prev => ({ ...prev, slug: data.slug })); // Store slug for success modal
         onSuccess?.();
         setShowSuccess(true);
       } else {
@@ -172,7 +168,14 @@ export default function AddProgramModal({
   if (!isOpen) return null;
 
   if (showSuccess) {
-    return <SuccessModal onClose={handleSuccessClose} />;
+    return (
+      <SuccessModal
+        onClose={handleSuccessClose}
+        programName={formData.programName}
+        slug={formData.slug}
+        logoUrl={formData.logoUrl}
+      />
+    );
   }
 
   return (
@@ -238,32 +241,15 @@ export default function AddProgramModal({
             {currentStep === 2 && (
               <DetailsStep
                 formData={formData}
-                monthDropdownOpen={monthDropdownOpen}
-                yearDropdownOpen={yearDropdownOpen}
-                countryDropdownOpen={countryDropdownOpen}
                 onFormChange={handleChange}
-                onSetMonth={(month) => {
-                  setFormData((prev) => ({ ...prev, foundingMonth: month }));
-                  setMonthDropdownOpen(false);
-                }}
-                onSetYear={(year) => {
-                  setFormData((prev) => ({ ...prev, foundingYear: year }));
-                  setYearDropdownOpen(false);
-                }}
-                onSetCountry={(country) => {
-                  setFormData((prev) => ({ ...prev, country }));
-                  setCountryDropdownOpen(false);
-                }}
-                onToggleMonthDropdown={() => {
-                  setMonthDropdownOpen(!monthDropdownOpen);
-                  setYearDropdownOpen(false);
-                }}
-                onToggleYearDropdown={() => {
-                  setYearDropdownOpen(!yearDropdownOpen);
-                  setMonthDropdownOpen(false);
-                }}
-                onToggleCountryDropdown={() =>
-                  setCountryDropdownOpen(!countryDropdownOpen)
+                onSetMonth={(month) =>
+                  setFormData((prev) => ({ ...prev, foundingMonth: month }))
+                }
+                onSetYear={(year) =>
+                  setFormData((prev) => ({ ...prev, foundingYear: year }))
+                }
+                onSetCountry={(country) =>
+                  setFormData((prev) => ({ ...prev, country }))
                 }
               />
             )}

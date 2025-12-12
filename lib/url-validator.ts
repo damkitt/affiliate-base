@@ -26,12 +26,6 @@ export function cleanAndValidateUrl(inputUrl: string): string {
         }
 
         // Rule D: No Referral Paths
-        const referralSegments = [
-            '/ref/', '/r/', '/invite/', '/referral/', '/join/', '/affiliate/',
-            '/partners/', '/program/' // Maybe 'program' is dangerous if it's just 'program/123'?
-            // User list: ['/ref/', '/r/', '/invite/', '/referral/', '/join/']
-        ];
-
         // Strict user list
         const blockedSegments = ['/ref/', '/r/', '/invite/', '/referral/', '/join/'];
 
@@ -68,13 +62,16 @@ export function cleanAndValidateUrl(inputUrl: string): string {
 
         return url.toString();
 
-    } catch (error: any) {
-        if (error.message.includes("not allowed")) {
-            throw error;
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Invalid URL format";
+
+        if (message.includes("not allowed")) {
+            if (error instanceof Error) throw error;
+            throw new Error(message);
         }
         // If invalid URL, let it pass (or fail) standard validation? 
         // If it's not a valid URL, new URL() throws. 
         // We should probably re-throw strict validation errors.
-        throw new Error(error.message || "Invalid URL format");
+        throw new Error(message || "Invalid URL format");
     }
 }

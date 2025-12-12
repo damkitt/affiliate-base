@@ -1,9 +1,10 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState, useRef, useEffect } from "react";
 import {
   HiUsers,
   HiBanknotes,
   HiChevronDown,
   HiSparkles,
+  HiCheck,
 } from "react-icons/hi2";
 import { FormData } from "../types";
 import {
@@ -11,40 +12,58 @@ import {
   YEARS,
   AFFILIATE_RANGES,
   PAYOUT_RANGES,
-  APPROVAL_TIMES,
+  PAYOUT_METHODS,
 } from "../constants";
 import { COUNTRIES } from "@/constants";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 interface DetailsStepProps {
   formData: FormData;
-  monthDropdownOpen: boolean;
-  yearDropdownOpen: boolean;
-  countryDropdownOpen: boolean;
   onFormChange: (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => void;
   onSetMonth: (month: string) => void;
   onSetYear: (year: string) => void;
   onSetCountry: (country: string) => void;
-  onToggleMonthDropdown: () => void;
-  onToggleYearDropdown: () => void;
-  onToggleCountryDropdown: () => void;
 }
 
 export function DetailsStep({
   formData,
-  monthDropdownOpen,
-  yearDropdownOpen,
-  countryDropdownOpen,
   onFormChange,
   onSetMonth,
   onSetYear,
   onSetCountry,
-  onToggleMonthDropdown,
-  onToggleYearDropdown,
-  onToggleCountryDropdown,
 }: DetailsStepProps) {
-  const selectedCountry = COUNTRIES.find((c) => c.name === formData.country);
+
+  // Local state for Payout Method dropdown (kept custom due to multi-select nature)
+  const [payoutDropdownOpen, setPayoutDropdownOpen] = useState(false);
+  const payoutDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside for local dropdowns
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (payoutDropdownRef.current && !payoutDropdownRef.current.contains(event.target as Node)) {
+        setPayoutDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handlePayoutMethodToggle = (method: string) => {
+    const currentMethods = formData.payoutMethod ? formData.payoutMethod.split(",").map(s => s.trim()).filter(Boolean) : [];
+    let newMethods;
+    if (currentMethods.includes(method)) {
+      newMethods = currentMethods.filter(m => m !== method);
+    } else {
+      newMethods = [...currentMethods, method];
+    }
+
+    const syntheticEvent = {
+      target: { name: "payoutMethod", value: newMethods.join(", ") },
+    } as ChangeEvent<HTMLInputElement>;
+    onFormChange(syntheticEvent);
+  };
 
   return (
     <div className="space-y-5 animate-fadeIn">
@@ -54,87 +73,18 @@ export function DetailsStep({
           Founding Date
         </label>
         <div className="grid grid-cols-2 gap-4">
-          {/* Month Dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={onToggleMonthDropdown}
-              className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-center justify-between focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
-            >
-              <span
-                className={
-                  formData.foundingMonth
-                    ? "text-[var(--text-primary)]"
-                    : "text-[var(--text-tertiary)]"
-                }
-              >
-                {formData.foundingMonth || "Select month"}
-              </span>
-              <HiChevronDown
-                className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${monthDropdownOpen ? "rotate-180" : ""
-                  }`}
-              />
-            </button>
-
-            {monthDropdownOpen && (
-              <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl shadow-xl max-h-48 overflow-y-auto animate-fadeIn">
-                {MONTHS.map((month) => (
-                  <button
-                    key={month}
-                    type="button"
-                    onClick={() => onSetMonth(month)}
-                    className={`w-full px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)] ${formData.foundingMonth === month
-                        ? "bg-[var(--bg-secondary)] font-medium"
-                        : ""
-                      }`}
-                  >
-                    {month}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Year Dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={onToggleYearDropdown}
-              className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-center justify-between focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
-            >
-              <span
-                className={
-                  formData.foundingYear
-                    ? "text-[var(--text-primary)]"
-                    : "text-[var(--text-tertiary)]"
-                }
-              >
-                {formData.foundingYear || "Select year"}
-              </span>
-              <HiChevronDown
-                className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${yearDropdownOpen ? "rotate-180" : ""
-                  }`}
-              />
-            </button>
-
-            {yearDropdownOpen && (
-              <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl shadow-xl max-h-48 overflow-y-auto animate-fadeIn">
-                {YEARS.map((year) => (
-                  <button
-                    key={year}
-                    type="button"
-                    onClick={() => onSetYear(year.toString())}
-                    className={`w-full px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)] ${formData.foundingYear === year.toString()
-                        ? "bg-[var(--bg-secondary)] font-medium"
-                        : ""
-                      }`}
-                  >
-                    {year}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <CustomSelect
+            placeholder="Select month"
+            value={formData.foundingMonth}
+            onChange={onSetMonth}
+            options={MONTHS.map(m => ({ label: m, value: m }))}
+          />
+          <CustomSelect
+            placeholder="Select year"
+            value={formData.foundingYear}
+            onChange={onSetYear}
+            options={YEARS.map(y => ({ label: y.toString(), value: y.toString() }))}
+          />
         </div>
       </div>
 
@@ -177,8 +127,8 @@ export function DetailsStep({
                 onFormChange(syntheticEvent);
               }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${formData.commissionDuration === "One-time" || !formData.commissionDuration
-                  ? "bg-[var(--accent-solid)] text-white shadow-sm"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                ? "bg-[var(--accent-solid)] text-white shadow-sm"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
             >
               One-time
@@ -192,8 +142,8 @@ export function DetailsStep({
                 onFormChange(syntheticEvent);
               }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${formData.commissionDuration === "Recurring"
-                  ? "bg-[var(--accent-solid)] text-white shadow-sm"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                ? "bg-[var(--accent-solid)] text-white shadow-sm"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
             >
               Recurring
@@ -222,6 +172,7 @@ export function DetailsStep({
 
       {/* Optional Metrics */}
       <div className="grid grid-cols-2 gap-4">
+        {/* Cookie Duration */}
         <div>
           <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiUsers className="w-3.5 h-3.5" /> Cookie Duration
@@ -229,15 +180,28 @@ export function DetailsStep({
               (optional)
             </span>
           </label>
-          <input
-            type="text"
-            name="cookieDuration"
-            value={formData.cookieDuration}
-            onChange={onFormChange}
-            placeholder="e.g. 90 Days"
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              name="cookieDuration"
+              value={formData.cookieDuration}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d{0,3}$/.test(value)) {
+                  onFormChange(e);
+                }
+              }}
+              placeholder="90"
+              maxLength={3}
+              className="w-full h-11 pl-4 pr-12 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] pointer-events-none">
+              Days
+            </span>
+          </div>
         </div>
+
+        {/* Avg Order Value */}
         <div>
           <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiBanknotes className="w-3.5 h-3.5" /> Avg Order Value
@@ -245,15 +209,22 @@ export function DetailsStep({
               (optional)
             </span>
           </label>
-          <input
-            type="text"
-            name="avgOrderValue"
-            value={formData.avgOrderValue}
-            onChange={onFormChange}
-            placeholder="e.g. 120"
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
-          />
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] pointer-events-none">
+              $
+            </span>
+            <input
+              type="text"
+              name="avgOrderValue"
+              value={formData.avgOrderValue}
+              onChange={onFormChange}
+              placeholder="120"
+              className="w-full h-11 pl-8 pr-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
+            />
+          </div>
         </div>
+
+        {/* Min Payout */}
         <div>
           <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiBanknotes className="w-3.5 h-3.5" /> Min Payout
@@ -261,31 +232,71 @@ export function DetailsStep({
               (optional)
             </span>
           </label>
-          <input
-            type="text"
-            name="minPayoutValue"
-            value={formData.minPayoutValue}
-            onChange={onFormChange}
-            placeholder="e.g. 50"
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
-          />
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] pointer-events-none">
+              $
+            </span>
+            <input
+              type="text"
+              name="minPayoutValue"
+              value={formData.minPayoutValue}
+              onChange={onFormChange}
+              placeholder="50"
+              className="w-full h-11 pl-8 pr-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
+            />
+          </div>
         </div>
-        <div>
+
+        {/* Payout Method (Refined Chips with Spacing) */}
+        <div className="relative" ref={payoutDropdownRef}>
           <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiBanknotes className="w-3.5 h-3.5" /> Payout Method
             <span className="text-[var(--text-secondary)] font-normal normal-case">
               (optional)
             </span>
           </label>
-          <input
-            type="text"
-            name="payoutMethod"
-            value={formData.payoutMethod}
-            onChange={onFormChange}
-            placeholder="e.g. PayPal, Wise"
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
-          />
+          <button
+            type="button"
+            onClick={() => setPayoutDropdownOpen(!payoutDropdownOpen)}
+            className="w-full min-h-[50px] px-3 py-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-start justify-between focus:outline-none hover:bg-[var(--bg)] transition-all duration-300"
+          >
+            <div className="flex flex-wrap gap-2.5 items-center w-full pr-2">
+              {formData.payoutMethod ? (
+                formData.payoutMethod.split(",").map((method, idx) => (
+                  <span key={idx} className="inline-flex items-center px-3 py-1 rounded-full bg-zinc-800/80 text-zinc-100 text-[11px] font-medium border border-zinc-700/50 shadow-sm backdrop-blur-md">
+                    {method.trim()}
+                  </span>
+                ))
+              ) : (
+                <span className="text-[var(--text-tertiary)] px-1 py-0.5">Select methods</span>
+              )}
+            </div>
+            <HiChevronDown className={`w-4 h-4 text-[var(--text-secondary)] shrink-0 transition-transform mt-1.5 ${payoutDropdownOpen ? "rotate-180" : ""}`} />
+          </button>
+
+          {/* Dropdown */}
+          {payoutDropdownOpen && (
+            <div className="absolute z-50 top-full left-0 right-0 mt-2 p-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl animate-fadeIn ring-1 ring-black/5">
+              <div className="grid grid-cols-1">
+                {PAYOUT_METHODS.map(method => {
+                  const isSelected = formData.payoutMethod?.split(",").map(s => s.trim()).includes(method);
+                  return (
+                    <button
+                      key={method}
+                      type="button"
+                      onClick={() => handlePayoutMethodToggle(method)}
+                      className={`flex items-center justify-between w-full px-3 py-2.5 text-sm rounded-lg transition-colors text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50`}
+                    >
+                      {method}
+                      {isSelected && <HiCheck className="w-4 h-4 text-emerald-500" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
+
         <div className="col-span-2">
           <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiUsers className="w-3.5 h-3.5" /> Target Audience
@@ -302,27 +313,36 @@ export function DetailsStep({
             className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
           />
         </div>
+
         <div>
+          {/* Approval Time - Simple Input */}
           <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
-            <HiUsers className="w-3.5 h-3.5" /> Affiliates Count
+            Approval Time
             <span className="text-[var(--text-secondary)] font-normal normal-case">
               (optional)
             </span>
           </label>
-          <select
-            name="affiliatesCountRange"
-            value={formData.affiliatesCountRange}
-            onChange={onFormChange}
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 appearance-none"
-          >
-            <option value="">Select range</option>
-            {AFFILIATE_RANGES.map((range) => (
-              <option key={range} value={range}>
-                {range}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <input
+              type="text"
+              name="approvalTimeRange"
+              value={formData.approvalTimeRange}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d{0,2}$/.test(value)) {
+                  onFormChange(e);
+                }
+              }}
+              placeholder="2"
+              maxLength={2}
+              className="w-full h-11 pl-4 pr-12 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] pointer-events-none">
+              Days
+            </span>
+          </div>
         </div>
+
         <div>
           <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
             <HiBanknotes className="w-3.5 h-3.5" /> Total Payouts
@@ -334,95 +354,50 @@ export function DetailsStep({
             name="payoutsTotalRange"
             value={formData.payoutsTotalRange}
             onChange={onFormChange}
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 appearance-none"
+            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 appearance-none bg-transparent"
           >
-            <option value="">Select range</option>
+            <option value="" className="text-zinc-500 bg-white dark:bg-zinc-900">Select range</option>
             {PAYOUT_RANGES.map((range) => (
-              <option key={range} value={range}>
+              <option key={range} value={range} className="text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-900">
                 {range}
               </option>
             ))}
           </select>
         </div>
+
         <div>
           <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
-            Approval Time
+            <HiUsers className="w-3.5 h-3.5" /> Affiliates Count
             <span className="text-[var(--text-secondary)] font-normal normal-case">
               (optional)
             </span>
           </label>
-          <div className="relative">
-            <select
-              name="approvalTimeRange"
-              value={formData.approvalTimeRange}
-              onChange={onFormChange}
-              className="w-full h-11 px-4 pr-16 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 appearance-none"
-            >
-              <option value="">Select</option>
-              {APPROVAL_TIMES.map((time) => (
-                <option key={time} value={time}>
-                  {time}
-                </option>
-              ))}
-            </select>
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[var(--text-secondary)] font-medium">
-              days
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Country/Region */}
-      <div className="relative">
-        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide">
-          Country / Region
-        </label>
-        <button
-          type="button"
-          onClick={onToggleCountryDropdown}
-          className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-center justify-between focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
-        >
-          <span
-            className={
-              formData.country
-                ? "text-[var(--text-primary)] flex items-center gap-2"
-                : "text-[var(--text-tertiary)]"
-            }
+          <select
+            name="affiliatesCountRange"
+            value={formData.affiliatesCountRange}
+            onChange={onFormChange}
+            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 appearance-none bg-transparent"
           >
-            {selectedCountry ? (
-              <>
-                <span className="text-lg">{selectedCountry.flag}</span>
-                {selectedCountry.name}
-              </>
-            ) : (
-              "Select country"
-            )}
-          </span>
-          <HiChevronDown
-            className={`w-5 h-5 text-[var(--text-secondary)] transition-transform duration-300 ${countryDropdownOpen ? "rotate-180" : ""
-              }`}
-          />
-        </button>
-
-        {countryDropdownOpen && (
-          <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl shadow-xl max-h-56 overflow-y-auto animate-fadeIn">
-            {COUNTRIES.map((country) => (
-              <button
-                key={country.code}
-                type="button"
-                onClick={() => onSetCountry(country.name)}
-                className={`w-full px-4 py-2.5 text-sm text-left flex items-center gap-3 hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)] ${formData.country === country.name
-                    ? "bg-[var(--bg-secondary)] font-medium"
-                    : ""
-                  }`}
-              >
-                <span className="text-lg">{country.flag}</span>
-                <span>{country.name}</span>
-              </button>
+            <option value="" className="text-zinc-500 bg-white dark:bg-zinc-900">Select range</option>
+            {AFFILIATE_RANGES.map((range) => (
+              <option key={range} value={range} className="text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-900">
+                {range}
+              </option>
             ))}
-          </div>
-        )}
+          </select>
+        </div>
+
       </div>
+
+      <CustomSelect
+        label="Country / Region"
+        placeholder="Select country"
+        value={formData.country}
+        onChange={(val) => onSetCountry(val)}
+        options={COUNTRIES.map(c => ({ label: c.name, value: c.name, icon: c.flag }))}
+        searchable
+        position="top"
+      />
     </div>
   );
 }

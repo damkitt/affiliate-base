@@ -1,46 +1,17 @@
 "use client";
 
-/**
- * Interest Chart Component
- * 
- * Displays program analytics with animated statistics and an area chart.
- * Fetches real data from the analytics API.
- */
-
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { motion } from "framer-motion";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import { HiEye } from "react-icons/hi2";
+import { HiEye, HiArrowTrendingUp } from "react-icons/hi2";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import type { AnalyticsData } from "@/types";
-
-// =============================================================================
-// Types
-// =============================================================================
+import { cn } from "@/lib/utils";
 
 interface InterestChartProps {
   readonly programId: string;
   readonly totalClicks: number;
 }
 
-interface ChartDataPoint {
-  day: string;
-  clicks: number;
-}
-
-// =============================================================================
-// Constants
-// =============================================================================
-
-const ANIMATION_DURATION = 1500;
-
-const EMPTY_CHART_DATA: ChartDataPoint[] = [
+const EMPTY_CHART_DATA = [
   { day: "Mon", clicks: 0 },
   { day: "Tue", clicks: 0 },
   { day: "Wed", clicks: 0 },
@@ -50,113 +21,19 @@ const EMPTY_CHART_DATA: ChartDataPoint[] = [
   { day: "Sun", clicks: 0 },
 ];
 
-// =============================================================================
-// Sub-components
-// =============================================================================
-
-interface ChartTooltipPayload {
-  value?: number;
-}
-
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: ChartTooltipPayload[];
-  label?: string;
-}
-
-function ChartTooltip({ active, payload, label }: CustomTooltipProps) {
-  if (!active || !payload?.length) return null;
-
-  return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg px-3 py-2 shadow-lg">
-      <p className="text-xs text-[var(--text-secondary)]">{label}</p>
-      <p className="text-sm font-semibold text-[var(--text-primary)]">
-        {payload[0].value} views
-      </p>
-    </div>
-  );
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="p-6 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] animate-pulse">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-lg bg-[var(--bg-secondary)]" />
-        <div className="space-y-2">
-          <div className="h-5 w-32 bg-[var(--bg-secondary)] rounded" />
-          <div className="h-3 w-40 bg-[var(--bg-secondary)] rounded" />
-        </div>
-      </div>
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-20 bg-[var(--bg-secondary)] rounded-xl" />
-        ))}
-      </div>
-      <div className="h-[250px] bg-[var(--bg-secondary)] rounded-xl" />
-    </div>
-  );
-}
-
-// =============================================================================
-// Hooks
-// =============================================================================
-
-function useAnimatedCounter(target: number): number {
-  const [value, setValue] = useState(target);
-  const rafRef = useRef<number | undefined>(undefined);
-  const startTimeRef = useRef<number | undefined>(undefined);
-  const startValueRef = useRef(0);
-
-  useEffect(() => {
-    if (target === 0) {
-      // Use requestAnimationFrame for initial zero set to avoid sync setState
-      rafRef.current = requestAnimationFrame(() => setValue(0));
-      return () => {
-        if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      };
-    }
-
-    startValueRef.current = 0;
-    startTimeRef.current = performance.now();
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - (startTimeRef.current || currentTime);
-      const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
-      const current = Math.floor(startValueRef.current + (target - startValueRef.current) * progress);
-      
-      setValue(current);
-
-      if (progress < 1) {
-        rafRef.current = requestAnimationFrame(animate);
-      } else {
-        setValue(target);
-      }
-    };
-
-    rafRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [target]);
-
-  return value;
-}
-
 function useAnalytics(programId: string) {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
   const fetchAnalytics = useCallback(async () => {
     try {
       const response = await fetch(`/api/programs/${programId}/view`);
-      if (!response.ok) throw new Error("Failed to fetch analytics");
-
-      const analytics: AnalyticsData = await response.json();
-      setData(analytics);
+      if (response.ok) {
+        const analytics: AnalyticsData = await response.json();
+        setData(analytics);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Unknown error"));
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -166,120 +43,144 @@ function useAnalytics(programId: string) {
     fetchAnalytics();
   }, [fetchAnalytics]);
 
-  return { data, loading, error };
+  return { data, loading };
 }
-
-// =============================================================================
-// Main Component
-// =============================================================================
 
 export function InterestChart({ programId, totalClicks }: InterestChartProps) {
   const { data: analyticsData, loading } = useAnalytics(programId);
+  // const containerRef = useRef<HTMLDivElement>(null); // Unused
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const chartData = useMemo(() => {
-    return [...(analyticsData?.chartData ?? EMPTY_CHART_DATA)];
+    return (analyticsData?.chartData ?? EMPTY_CHART_DATA).slice(); // Create mutable copy
   }, [analyticsData?.chartData]);
 
-  const todayViews = analyticsData?.todayViews ?? 0;
   const totalViews = analyticsData?.totalViews ?? totalClicks;
-
-  const animatedTotal = useAnimatedCounter(totalViews);
-  const animatedToday = useAnimatedCounter(todayViews);
+  const todayViews = analyticsData?.todayViews ?? 0;
 
   if (loading) {
-    return <LoadingSkeleton />;
+    return (
+      <div className="h-[240px] w-full rounded-3xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 animate-pulse" />
+    );
   }
 
   return (
-    <div className="card-solid p-8 rounded-3xl bg-[var(--bg-elevated)] border border-[var(--border)]">
+    <div
+      className="w-full rounded-[32px] bg-white dark:bg-[#0A0A0A] border border-zinc-200 dark:border-white/10 p-8 shadow-xl dark:shadow-2xl relative overflow-hidden group"
+    >
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-lg bg-[var(--accent-dim)] flex items-center justify-center">
-          <HiEye className="w-5 h-5 text-[var(--accent-solid)]" />
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 flex items-center justify-center">
+          <HiEye className="w-6 h-6 text-emerald-500" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-[var(--text-primary)]">Program Interest</h2>
-          <p className="text-sm text-[var(--text-secondary)]">Weekly analytics overview</p>
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-0.5">Program Interest</h2>
+          <p className="text-sm text-zinc-500 font-medium">Weekly analytics overview</p>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        {/* Total Views */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]"
-        >
-          <p className="text-sm text-[var(--text-secondary)] mb-1">Total Views</p>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
-            {animatedTotal.toLocaleString()}
-          </p>
-        </motion.div>
+      <div className="grid grid-cols-2 gap-4 mb-12">
+        {/* Total Views Card */}
+        <div className="bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-white/5 rounded-2xl p-6 hover:bg-zinc-100 dark:hover:bg-zinc-900/50 transition-colors">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-3">Total Views</p>
+          <p className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">{totalViews.toLocaleString()}</p>
+        </div>
 
-        {/* Today - Accent */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="p-4 rounded-xl border border-[var(--accent-solid)]/30 bg-[var(--accent-dim)]"
-        >
-          <p className="text-sm text-[var(--text-secondary)] mb-1">Today</p>
-          <p className="text-2xl font-bold text-[var(--accent-solid)] tabular-nums">
-            {animatedToday.toLocaleString()}
-          </p>
-        </motion.div>
+        {/* Today Card */}
+        <div className="bg-emerald-50/50 dark:bg-zinc-900/30 border border-emerald-100 dark:border-emerald-500/10 rounded-2xl p-6 hover:bg-emerald-50 dark:hover:bg-emerald-900/5 transition-colors relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 dark:bg-emerald-500/5 blur-[50px] rounded-full pointer-events-none" />
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-3">Today</p>
+          <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-500 tracking-tight">+{todayViews.toLocaleString()}</p>
+        </div>
       </div>
 
-      {/* Chart */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="h-[250px]"
+      {/* Chart Area */}
+      <div
+        className="relative h-64 w-full mb-8 select-none touch-none"
+        onMouseLeave={() => setHoveredIndex(null)}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+          <AreaChart
+            data={chartData}
+            margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
+            onMouseMove={(e: any) => {
+              if (e.activeTooltipIndex !== undefined) {
+                setHoveredIndex(e.activeTooltipIndex);
+              }
+            }}
+          >
             <defs>
-              <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
+                <stop offset="75%" stopColor="#10b981" stopOpacity={0.05} />
+                <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
               </linearGradient>
             </defs>
+            <CartesianGrid
+              strokeDasharray="4 4"
+              vertical={false}
+              stroke="#71717a"
+              strokeOpacity={0.2}
+            />
+            {/* Note: We use CSS variables or classes for stroke colors if possible, but Recharts is tricky. 
+                 Ideally, we'd pass a prop, but for now fixed dark gray works okay on white too, or we can make it conditional.
+                 Let's stick to a neutral zinc-700/30 look for grid which works on both. */}
             <XAxis
               dataKey="day"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "var(--text-tertiary)" }}
+              tick={{ fill: "#71717a", fontSize: 10, fontWeight: 500 }} // zinc-500
+              dy={10}
             />
             <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12, fill: "var(--text-tertiary)" }}
-              width={30}
+              hide
+              domain={[0, 'dataMax + 5']}
             />
-            <Tooltip content={<ChartTooltip />} />
+            <Tooltip
+              cursor={{ stroke: '#10b981', strokeWidth: 1, strokeDasharray: '4 4', strokeOpacity: 0.5 }}
+              content={({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl p-3 flex flex-col items-center min-w-[100px] transform -translate-y-4">
+                      <span className="text-zinc-500 text-[10px] font-medium uppercase tracking-wider mb-0.5">
+                        {label}
+                      </span>
+                      <span className="text-zinc-900 dark:text-white text-lg font-bold tabular-nums leading-none">
+                        {payload[0].value?.toLocaleString()} <span className="text-[10px] text-zinc-500 font-normal ml-0.5">views</span>
+                      </span>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
             <Area
               type="monotone"
               dataKey="clicks"
               stroke="#10b981"
-              strokeWidth={2}
-              fill="url(#colorClicks)"
-              animationDuration={ANIMATION_DURATION}
-              animationEasing="ease-out"
+              strokeWidth={3}
+              fill="url(#chartGradient)"
+              activeDot={{
+                r: 5,
+                fill: "#10b981", // Green solid fill for better visibility in light mode too, or keep black/white?
+                // Reference was black fill/white stroke. 
+                // In light mode: White fill, Green stroke? Or just Green fill?
+                // Let's go with Green fill, White stroke for universal pop.
+                stroke: "#ffffff",
+                strokeWidth: 2,
+              }}
             />
           </AreaChart>
         </ResponsiveContainer>
-      </motion.div>
+      </div>
 
-      {/* Live Indicator */}
-      <div className="flex items-center justify-center gap-2 mt-5 pt-4 border-t border-[var(--border)]">
-        <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-        </span>
-        <span className="text-sm text-[var(--text-secondary)]">Live tracking enabled</span>
+      {/* Footer Separator & Live Tracking */}
+      <div className="mt-4 pt-8 border-t border-zinc-100 dark:border-white/5 flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 font-medium tracking-wide">Live tracking enabled</span>
+        </div>
       </div>
     </div>
   );

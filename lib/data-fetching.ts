@@ -25,10 +25,11 @@ export const getLeaderboardPrograms = unstable_cache(
                 commissionDuration: true,
                 category: true,
                 tagline: true,
+                description: true, // Needed for search filtering
                 isFeatured: true,
                 featuredExpiresAt: true,
                 createdAt: true,
-                trendingScore: true, // Needed for sort validation if debugging
+                trendingScore: true,
             },
         });
     },

@@ -3,7 +3,6 @@
 import { HiPlus, HiMagnifyingGlass } from "react-icons/hi2";
 import { ThemeToggle } from "./ThemeToggle";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 
 const ROTATING_WORDS = ["Premium", "High-Paying", "SaaS", "Transparent"];
 
@@ -31,31 +30,30 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
       </div>
 
       <div className="relative max-w-[700px] mx-auto text-center">
-        {/* Logo - Simple text */}
+        {/* Logo - Simple text with link to home */}
         <div className="mb-8">
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-[var(--text-secondary)]">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              window.location.href = '/';
+            }}
+            className="text-xs font-semibold tracking-[0.2em] uppercase text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+          >
             Affiliate <span className="text-[var(--accent-solid)]">Base</span>
-          </span>
+          </a>
         </div>
 
         <h1 className="text-[40px] md:text-[56px] font-serif tracking-tight mb-6 leading-[1.15] bg-gradient-to-b from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent">
           The Database of{" "}
           <span className="relative inline-flex justify-start h-[1.15em] overflow-hidden align-bottom min-w-[180px] sm:min-w-[240px] md:min-w-[300px]">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={currentIndex}
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -50, opacity: 0 }}
-                transition={{
-                  duration: 0.5,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="absolute left-0 bg-gradient-to-b from-emerald-400 to-emerald-700 bg-clip-text text-transparent font-serif italic"
-              >
-                {ROTATING_WORDS[currentIndex]}
-              </motion.span>
-            </AnimatePresence>
+            <span
+              key={currentIndex}
+              className="absolute left-0 bg-gradient-to-b from-emerald-400 to-emerald-700 bg-clip-text text-transparent font-serif italic animate-fade-in-up"
+            >
+              {ROTATING_WORDS[currentIndex]}
+            </span>
           </span>
           <br />
           Affiliate Programs
@@ -99,6 +97,6 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
           </div>
         )}
       </div>
-    </header>
+    </header >
   );
 }

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic"; // Do not cache as availability changes
 
 export async function GET() {
-    const MAX_SLOTS = 6;
+    const MAX_SLOTS = 3;
     const now = new Date();
 
     // Find all active featured programs

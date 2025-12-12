@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+
 
 export function WhoopHero() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -30,11 +30,7 @@ export function WhoopHero() {
         canvas.width = width;
         canvas.height = height;
 
-        const particles: Particle[] = [];
-        // Scale particle count with height to maintain density
-        // Base 50 for 1000px height
-        const particleCount = Math.min(100, Math.floor(50 * (height / 1000)));
-
+        // Helper class for particles
         class Particle {
             x: number;
             y: number;
@@ -43,49 +39,57 @@ export function WhoopHero() {
             opacity: number;
             fadeSpeed: number;
 
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height; // Start anywhere
-                this.size = Math.random() * 2.0 + 0.8; // Larger: 0.8 to 2.8
-                this.speedY = Math.random() * 0.4 + 0.1; // Maintain ambient speed
-                this.opacity = Math.random() * 0.5 + 0.2; // Brighter: 0.2 to 0.7
-                this.fadeSpeed = Math.random() * 0.002 + 0.0005; // Slower fade for longer life
+            constructor(private w: number, private h: number) {
+                this.x = Math.random() * w;
+                this.y = Math.random() * h; // Start anywhere
+                this.size = Math.random() * 2.5 + 1.0; // Medium (1.0px - 3.5px)
+                this.speedY = Math.random() * 0.6 + 0.2; // Faster
+                this.opacity = Math.random() * 0.6 + 0.3; // Much Brighter
+                this.fadeSpeed = Math.random() * 0.002 + 0.0005;
             }
 
-            update() {
+            update(w: number, h: number) {
                 this.y += this.speedY;
                 this.opacity -= this.fadeSpeed;
 
                 // Reset when invisible or off screen
-                if (this.opacity <= 0 || this.y > height + 20) {
+                if (this.opacity <= 0 || this.y > h + 20) {
                     this.y = -20;
-                    this.x = Math.random() * width;
+                    this.x = Math.random() * w;
                     this.opacity = Math.random() * 0.6 + 0.3; // Reset to visible
                     this.speedY = Math.random() * 0.4 + 0.1;
                     this.fadeSpeed = Math.random() * 0.002 + 0.0005;
                 }
             }
 
-            draw() {
-                if (!ctx) return;
-                ctx.fillStyle = `rgba(0, 240, 160, ${this.opacity})`; // Whoop Green
+            draw(ctx: CanvasRenderingContext2D, h: number) {
+                // Fade out as they go down. Start strong at top.
+                // Factor: 1.0 at top, 0.0 at bottom.
+                const visibilityFactor = Math.max(0, 1 - (this.y / (h * 0.8)));
+
+                ctx.fillStyle = `rgba(0, 240, 160, ${this.opacity * visibilityFactor})`; // Whoop Green
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
 
+        const particles: Particle[] = [];
+        // Scale particle count with height to maintain density
+        // Increased significantly as requested
+        const particleCount = Math.min(150, Math.floor(80 * (height / 1000)));
+
         // Init particles
         for (let i = 0; i < particleCount; i++) {
-            particles.push(new Particle());
+            particles.push(new Particle(width, height));
         }
 
         const render = () => {
             ctx.clearRect(0, 0, width, height);
 
             particles.forEach((p) => {
-                p.update();
-                p.draw();
+                p.update(width, height);
+                p.draw(ctx, height);
             });
 
             animationFrameId = requestAnimationFrame(render);

@@ -44,3 +44,11 @@ export async function collectFingerprintComponents(): Promise<string[]> {
 
   return components;
 }
+
+export function isProgramNew(createdAt: Date | string | undefined | null): boolean {
+  if (!createdAt) return false;
+  const date = new Date(createdAt);
+  const now = new Date();
+  const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+  return diffInHours <= 24;
+}

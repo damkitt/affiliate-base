@@ -30,7 +30,7 @@ export default function HomeContent({ initialPrograms }: HomeContentProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
-        <div className="min-h-screen pb-20 relative overflow-hidden bg-background">
+        <div className="min-h-screen relative overflow-hidden bg-background">
             {/* New Whoop Style Background */}
             <WhoopHero />
 
