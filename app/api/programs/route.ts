@@ -3,17 +3,15 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { programsCreatedTotal, activeProgramsGauge } from "@/lib/metrics";
 import { validateCountry, validateCreateBody } from "@/lib/utils";
-import { calculateQualityScore, calculateTrendingScore, calculateTrustScore, calculateRecencyBoost } from "@/lib/scoring";
+import {
+  calculateQualityScore,
+  calculateTrendingScore,
+  calculateTrustScore,
+  calculateRecencyBoost,
+} from "@/lib/scoring";
 import { cleanAndValidateUrl } from "@/lib/url-validator";
 
-/**
- * GET /api/programs
- * Retrieves all approved programs sorted by trendingScore
- * Featured programs appear at the top, followed by organic ranking
- * @returns NextResponse with the list of approved programs
- */
 export async function GET(): Promise<NextResponse> {
-  // Get all approved programs, sort by: featured first, then trendingScore DESC
   const programs = await prisma.program.findMany({
     where: {
       approvalStatus: true,
@@ -52,13 +50,9 @@ export async function GET(): Promise<NextResponse> {
       createdAt: true,
       updatedAt: true,
     },
-    orderBy: [
-      { trendingScore: "desc" },
-      { createdAt: "desc" },
-    ],
+    orderBy: [{ trendingScore: "desc" }, { createdAt: "desc" }],
   });
 
-  // Separate featured and organic programs
   const now = new Date();
   const featured = programs.filter(
     (p) => p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now
@@ -67,7 +61,6 @@ export async function GET(): Promise<NextResponse> {
     (p) => !(p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now)
   );
 
-  // Combine: featured first, then organic
   const sortedPrograms = [...featured, ...organic];
 
   activeProgramsGauge.set(sortedPrograms.length);
@@ -75,33 +68,19 @@ export async function GET(): Promise<NextResponse> {
   return NextResponse.json(sortedPrograms);
 }
 
-/**
- * POST /api/programs
- * Creates a new program
- * @param request - The incoming request
- * @returns NextResponse with the created program or error message
- */
 export async function POST(request: Request): Promise<NextResponse> {
   try {
     const body = await request.json();
 
-    // URL Cleaning & Format Validation (non-blocking)
     try {
-      if (body.websiteUrl) body.websiteUrl = cleanAndValidateUrl(body.websiteUrl);
-      if (body.affiliateUrl) body.affiliateUrl = cleanAndValidateUrl(body.affiliateUrl);
-
-      // NOTE: Network reachability validation removed - many legitimate sites 
-      // block automated server requests (Cloudflare, WAF, etc.)
-      // The URL format validation above is sufficient for data quality
-
+      if (body.websiteUrl)
+        body.websiteUrl = cleanAndValidateUrl(body.websiteUrl);
+      if (body.affiliateUrl)
+        body.affiliateUrl = cleanAndValidateUrl(body.affiliateUrl);
     } catch (error: any) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    // Detailed Validation
     const requiredFields = [
       "programName",
       "websiteUrl",
@@ -149,7 +128,6 @@ export async function POST(request: Request): Promise<NextResponse> {
       approvalTimeRange,
     } = body;
 
-    // Generate unique slug from program name
     const baseSlug = programName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -158,13 +136,11 @@ export async function POST(request: Request): Promise<NextResponse> {
     let slug = baseSlug;
     let counter = 1;
 
-    // Check for duplicates and make slug unique
     while (await prisma.program.findFirst({ where: { slug } })) {
       slug = `${baseSlug}-${counter}`;
       counter++;
     }
 
-    // Prepare program data
     const programData = {
       programName: programName.trim(),
       slug,
@@ -192,11 +168,9 @@ export async function POST(request: Request): Promise<NextResponse> {
       approvalStatus: true,
     };
 
-    // Calculate quality score and initial trending score before saving
     const qualityScore = calculateQualityScore(programData);
     const trustScore = calculateTrustScore(programData);
-    const recencyBoost = calculateRecencyBoost(new Date()); // New programs get max recency boost
-    // Initial trending score: quality + trust + recency (no engagement yet)
+    const recencyBoost = calculateRecencyBoost(new Date());
     const trendingScore = qualityScore + trustScore + recencyBoost;
 
     const program = await prisma.program.create({
@@ -213,7 +187,6 @@ export async function POST(request: Request): Promise<NextResponse> {
   } catch (error: any) {
     console.error("[API] POST Error:", error);
 
-    // Handle Unique Constraint (P2002)
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
         const target = error.meta?.target as string[];
@@ -221,7 +194,10 @@ export async function POST(request: Request): Promise<NextResponse> {
         if (target && Array.isArray(target)) {
           if (target.includes("program_name")) {
             return NextResponse.json(
-              { error: "A program with this name already exists. Please choose a different name." },
+              {
+                error:
+                  "A program with this name already exists. Please choose a different name.",
+              },
               { status: 409 }
             );
           }
@@ -246,7 +222,6 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     }
 
-    // Generic Fallback (Mask internal details)
     return NextResponse.json(
       { error: "Something went wrong. Please try again." },
       { status: 500 }

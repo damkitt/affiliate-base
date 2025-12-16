@@ -38,7 +38,9 @@ export default function AddProgramModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [slideDirection, setSlideDirection] = useState<"left" | "right">("right");
+  const [slideDirection, setSlideDirection] = useState<"left" | "right">(
+    "right"
+  );
   const [showSuccess, setShowSuccess] = useState(false);
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
 
@@ -128,11 +130,13 @@ export default function AddProgramModal({
         data = JSON.parse(responseText);
       } catch {
         console.error("JSON Parse Error. Raw Response:", responseText);
-        throw new Error(`Server returned non-JSON response (Status: ${response.status}). Please check console.`);
+        throw new Error(
+          `Server returned non-JSON response (Status: ${response.status}). Please check console.`
+        );
       }
 
       if (response.ok) {
-        setFormData(prev => ({ ...prev, slug: data.slug })); // Store slug for success modal
+        setFormData((prev) => ({ ...prev, slug: data.slug })); // Store slug for success modal
         onSuccess?.();
         setShowSuccess(true);
       } else {
@@ -218,10 +222,11 @@ export default function AddProgramModal({
         {/* Form Content */}
         <div className="flex-1 overflow-auto">
           <div
-            className={`h-full overflow-y-auto px-6 py-4 transition-all duration-500 ease-out ${slideDirection === "right"
-              ? "animate-slideInRight"
-              : "animate-slideInLeft"
-              }`}
+            className={`h-full overflow-y-auto px-6 py-4 transition-all duration-500 ease-out ${
+              slideDirection === "right"
+                ? "animate-slideInRight"
+                : "animate-slideInLeft"
+            }`}
             key={currentStep}
           >
             {currentStep === 1 && (
@@ -286,10 +291,11 @@ export default function AddProgramModal({
               type="button"
               onClick={handleNext}
               disabled={!canProceedToStep(currentStep + 1, formData)}
-              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${canProceedToStep(currentStep + 1, formData)
-                ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
-                : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
-                }`}
+              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${
+                canProceedToStep(currentStep + 1, formData)
+                  ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
+                  : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
+              }`}
             >
               Continue
               <HiArrowRight className="w-4 h-4" />
@@ -299,10 +305,11 @@ export default function AddProgramModal({
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting || !canSubmitForm(formData)}
-              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${canSubmitForm(formData) && !isSubmitting
-                ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
-                : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
-                }`}
+              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${
+                canSubmitForm(formData) && !isSubmitting
+                  ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
+                  : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
+              }`}
             >
               {isSubmitting ? (
                 <>

@@ -1,0 +1,540 @@
+/* AdvertiseFlow.module.css */
+
+.container {
+  overflow: hidden;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s;
+  margin-bottom: 3rem;
+  padding-top: 2rem;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.progressBar {
+  height: 6px;
+  background: var(--bg-secondary);
+  width: 100%;
+  position: absolute;
+  top: 0;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent-solid);
+  transition: all 0.5s ease-out;
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+
+.stepWrapper {
+  animation: fadeIn 0.3s ease-out;
+  display: flex;
+  width: 100%;
+}
+
+/* Pricing Step */
+.pricingStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  justify-content: center;
+}
+
+.iconWrapper {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 9999px;
+  background: var(--accent-dim);
+  color: var(--accent-solid);
+}
+
+.iconLarge {
+  width: 3rem;
+  height: 3rem;
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.description {
+  color: var(--text-secondary);
+  max-width: 32rem;
+  margin-bottom: 2.5rem;
+  line-height: 1.625;
+}
+
+.pricingCard {
+  width: 100%;
+  max-width: 24rem;
+  background: var(--bg-secondary);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.pricingCard:hover {
+  border-color: var(--accent-solid);
+}
+
+.limitedBadge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--accent-solid);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-bottom-left-radius: 0.75rem;
+}
+
+.planLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.priceWrapper {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.price {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.period {
+  color: var(--text-secondary);
+}
+
+.featureList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.featureIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--accent-solid);
+}
+
+.soldOutWrapper {
+  text-align: center;
+}
+
+.soldOutWrapper > * + * {
+  margin-top: 0.75rem;
+}
+
+.soldOutBanner {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: rgb(239 68 68 / 0.1);
+  border: 1px solid rgb(239 68 68 / 0.2);
+  color: rgb(239 68 68);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.nextAvailable {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.soldOutButton {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.primaryButton {
+  width: max-content;
+  padding: 12px 16px;
+  border-radius: 32px;
+  background: var(--accent-solid);
+  color: white;
+  font-weight: 600;
+  transition: all 0.2s;
+  animation: animationFadeIn 0.5s ease-in-out forwards;
+}
+
+.primaryButton:hover {
+  box-shadow: 0 0px 30px 0 rgb(5 150 105 / 0.2);
+
+}
+
+.slotsLeft {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+/* Selection Step */
+.selectionStep {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.stepTitle {
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stepSubtitle {
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.02em;
+  color: var(--text-secondary);
+  margin-bottom: 2rem
+}
+
+.searchWrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--text-tertiary);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3rem;
+  border-radius: 2rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.02em;
+  transition: border-color 0.2s;
+}
+
+.searchInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent-solid);
+}
+
+.resultsWrapper {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 280px;
+  margin-bottom: 1rem;
+  position: absolute;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.02em;
+  bottom: -8.5rem;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.loadingText,
+.noResults {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.programRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.programLogo {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--text-secondary);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.programLogo img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.programInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.programName {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.programUrl {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.programCommission {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent-solid);
+}
+
+
+
+.addProgramButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+
+.addProgramButton:hover {
+  opacity: 1;
+}
+
+.addProgramButton span:first-child {
+  font-size: 1.125rem;
+}
+
+.addProgramButton span:last-child {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Preview Step */
+.previewStep {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewCard {
+  width: 100%;
+  max-width: 42rem;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  margin-bottom: 2.5rem;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+}
+
+.backButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.backButton:hover {
+  background: var(--bg-secondary);
+}
+
+.confirmButton {
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  background: rgb(5 150 105);
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s;
+  animation: animationFadeIn 0.5s ease-in-out forwards;
+}
+
+.confirmButton:hover {
+  background: rgb(4 120 87);
+  box-shadow: 0 0px 30px 0 rgb(5 150 105 / 0.3);
+
+}
+
+/* Success Step */
+.successStep {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.successIcon, .cancelIcon {
+  font-size: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  animation: animationFadeIn 0.5s ease-in-out forwards;
+}
+
+.successIcon {
+  color: var(--accent-solid);
+}
+
+.cancelIcon {
+  color: rgb(239 68 68);
+}
+
+
+
+.successTitle {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  animation: animationFadeIn 0.5s ease-in-out forwards;
+}
+
+.successDescription {
+  color: var(--text-secondary);
+  max-width: 400px;
+  line-height: 22px;
+  font-size: 14px;
+  margin-bottom: 1rem;
+  animation: animationFadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.confettiContainer {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    object-fit: cover;
+    flex-direction: column;
+    user-select: none;
+    pointer-events: none;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+
+.page_container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 80vh;
+    width: 100%;
+}
+
+@keyframes animationFadeIn {
+    0% {
+        opacity: 0;
+        scale: 110%;
+        filter: blur(10px);
+    }
+    100% {
+        opacity: 1;
+        scale: 100%;
+        filter: blur(0px);
+    }
+}

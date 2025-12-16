@@ -69,12 +69,10 @@
   --border: rgba(255, 255, 255, 0.08);
   --border-light: rgba(255, 255, 255, 0.05);
 
-  /* Vivid Accents that pop */
   --accent-from: #10B981;
   --accent-to: #059669;
   --accent-solid: #10B981;
 
-  /* Legacy Variables */
   --background: var(--bg);
   --foreground: var(--text-primary);
 }
@@ -87,18 +85,14 @@
 body {
   background: var(--bg);
   color: var(--text-primary);
-  min-height: 100vh;
 }
 
-/* Premium Card Styles */
-/* Premium Card Styles */
 .card-premium {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(0, 0, 0, 0.04);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
-  /* Softer shadow for light mode */
   transition: all 0.3s ease;
 }
 
@@ -152,7 +146,6 @@ body {
   animation-delay: 300ms;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -166,7 +159,6 @@ body {
   background: transparent;
 }
 
-/* Glass Utility */
 .glass {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
