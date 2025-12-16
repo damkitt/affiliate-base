@@ -3,8 +3,9 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const PRODUCT_ID = process.env.STRIPE_PRODUCT_ID!;
+// Remove top-level init
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+// const PRODUCT_ID = process.env.STRIPE_PRODUCT_ID!;
 
 interface FeaturedProgramRequest {
   programId?: string;
@@ -44,6 +45,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  const PRODUCT_ID = process.env.STRIPE_PRODUCT_ID!;
+
   const body: FeaturedProgramRequest = await request.json();
   const { programId, programData } = body;
 

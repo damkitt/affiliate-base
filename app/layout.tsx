@@ -16,6 +16,7 @@ const dmSerif = DM_Serif_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://affiliatebase.co'),
   title: "Affiliate Base - Verified Programs Directory",
   description: "The database of verified affiliate programs",
 };
