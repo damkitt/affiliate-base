@@ -87,6 +87,13 @@ export default function HomeContent({ initialPrograms }: HomeContentProps) {
                         </div>
                     )}
 
+                    {/* Rating Explanation */}
+                    <div className="text-center mb-6 mt-[-10px]">
+                        <p className="text-[11px] text-[var(--text-tertiary)] leading-tight">
+                            Ranked by <span className="text-[var(--text-secondary)] font-medium">engagement</span>, <span className="text-[var(--text-secondary)] font-medium">quality</span> & <span className="text-[var(--text-secondary)] font-medium">popularity</span>. New programs get a temporary boost.
+                        </p>
+                    </div>
+
                     {error && (
                         <div className="text-center py-8 text-red-500">
                             Failed to load programs. Please try again later.

@@ -5,11 +5,12 @@
 :root {
   --radius: 12px;
 
-  /* Premium Background System - Crisp & Bright */
+  /* Premium Background System - Clean White */
   --bg: #ffffff;
   --bg-secondary: #f8fafc;
   /* Slate-50 */
   --bg-card: #ffffff;
+  /* Pure White */
   --bg-elevated: #ffffff;
 
   /* Elegant Text Hierarchy - High Contrast for "Expensive" feel */

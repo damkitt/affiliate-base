@@ -7,6 +7,7 @@ import { HiArrowUpRight, HiStar } from "react-icons/hi2";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ProgramCard } from "./ProgramCard";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface LeaderboardProps {
   programs: Program[];
@@ -89,29 +90,55 @@ export function Leaderboard({ programs }: LeaderboardProps) {
             </div>
 
             <div className="divide-y divide-zinc-100 dark:divide-white/[0.04] perspective-[600px]">
-              {/* Featured Section */}
-              {featuredPrograms.length > 0 && Array.from({ length: Math.min(featuredPrograms.length, 3) }).map((_, i) => {
-                const pIndex = (featuredIndex + i) % featuredPrograms.length;
-                const program = featuredPrograms[pIndex];
+              <AnimatePresence mode="popLayout">
+                {/* Featured Section */}
+                {featuredPrograms.length > 0 && Array.from({ length: Math.min(featuredPrograms.length, 3) }).map((_, i) => {
+                  const pIndex = (featuredIndex + i) % featuredPrograms.length;
+                  const program = featuredPrograms[pIndex];
 
-                return (
-                  <ProgramCard
-                    key={`featured-${program.id}`}
-                    program={program}
-                    variant="row"
-                  />
-                );
-              })}
+                  return (
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 25,
+                        mass: 1
+                      }}
+                      key={`featured-${program.id}`}
+                    >
+                      <ProgramCard
+                        program={program}
+                        variant="row"
+                      />
+                    </motion.div>
+                  );
+                })}
 
-              {/* Regular Table Rows */}
-              {displayRegular.map((program, index) => (
-                <ProgramCard
-                  key={program.id}
-                  program={program}
-                  variant="row"
-                  rank={index + 1}
-                />
-              ))}
+                {/* Regular Table Rows */}
+                {displayRegular.map((program, index) => (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{
+                      layout: { type: "spring", stiffness: 200, damping: 25, mass: 1 }, // "Expensive" weight
+                      opacity: { duration: 0.3, ease: "easeOut" }
+                    }}
+                    key={program.id}
+                  >
+                    <ProgramCard
+                      program={program}
+                      variant="row"
+                      rank={index + 1}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </div>
         </div>

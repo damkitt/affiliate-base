@@ -7,6 +7,12 @@ import { Program } from "@/types";
 import { cn, isProgramNew } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { CATEGORY_ICONS } from "@/constants";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/Tooltip";
 
 interface ProgramCardProps {
     program: Program;
@@ -74,17 +80,16 @@ export function ProgramCard({
 
     const CommissionPill = (
         <div className={cn(
-            "inline-flex items-center transition-all duration-300 gap-2 px-3 py-1 rounded-full border",
+            "inline-flex items-center transition-all duration-300 gap-2 px-3.5 py-1.5 rounded-full border shadow-sm",
             isSponsored
-                ? "border-amber-200 dark:border-amber-500/20 bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                : "border-emerald-500/20 bg-emerald-500/5 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/30 text-emerald-500"
+                ? "border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300"
+                : "border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 group-hover:border-emerald-300 group-hover:bg-emerald-200/80 dark:group-hover:bg-emerald-500/30 dark:group-hover:border-emerald-500/50 transition-colors"
         )}>
             <span className="text-xs font-bold">
                 {program.commissionRate}%
             </span>
             <span className={cn(
-                "text-[10px] font-medium uppercase tracking-wide",
-                isSponsored ? "opacity-80" : "text-emerald-500/60"
+                "text-[10px] font-bold uppercase tracking-wide opacity-80"
             )}>
                 {program.commissionDuration === "Recurring" ? "recurring" : "one-time"}
             </span>
@@ -99,9 +104,10 @@ export function ProgramCard({
             "block transition-all duration-300 ease-out group relative",
             "border-b border-zinc-100 dark:border-white/[0.04] last:border-0",
             "hover:bg-zinc-50/50 dark:hover:bg-white/[0.02]",
-            isSponsored ? "bg-amber-50/50 dark:bg-amber-500/[0.03] hover:bg-amber-100/60 dark:hover:bg-amber-500/[0.08]" : ""
+            isSponsored
+                ? "bg-amber-50/30 dark:bg-amber-500/[0.03] hover:bg-amber-50/50 dark:hover:bg-amber-500/[0.08]"
+                : ""
         );
-
         return (
             <Link href={`/programs/${program.slug || program.id}`} className={wrapperClasses}>
                 {NewDot}
@@ -112,9 +118,30 @@ export function ProgramCard({
                         {isSponsored ? (
                             <HiStar className="w-4 h-4 text-amber-500 dark:text-amber-400 group-hover:scale-110 transition-transform" />
                         ) : (
-                            <span className="font-mono text-zinc-400 dark:text-zinc-600 text-xs">
-                                {rank}
-                            </span>
+                            <TooltipProvider>
+                                <Tooltip delayDuration={0}>
+                                    <TooltipTrigger asChild>
+                                        <div className="cursor-help flex items-center justify-center w-8 h-8 rounded-full hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors">
+                                            {rank === 1 ? (
+                                                <span className="text-xl leading-none filter drop-shadow-sm">🥇</span>
+                                            ) : rank === 2 ? (
+                                                <span className="text-xl leading-none filter drop-shadow-sm">🥈</span>
+                                            ) : rank === 3 ? (
+                                                <span className="text-xl leading-none filter drop-shadow-sm">🥉</span>
+                                            ) : (
+                                                <span className="font-mono text-zinc-400 dark:text-zinc-600 text-xs">
+                                                    {rank}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right" className="max-w-[220px] p-2.5 text-center bg-zinc-900/95 dark:bg-zinc-800/95 backdrop-blur-md border border-zinc-800 dark:border-white/10 shadow-xl animate-in fade-in-0 zoom-in-95">
+                                        <p className="text-[10px] leading-relaxed font-medium text-zinc-300">
+                                            Ranked by <span className="text-zinc-100">engagement</span>, <span className="text-zinc-100">quality</span> & <span className="text-zinc-100">popularity</span>. New programs get a temporary boost.
+                                        </p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         )}
                     </div>
 
