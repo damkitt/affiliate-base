@@ -1,5 +1,63 @@
 /* AdvertiseFlow.module.css */
 
+/* Loader */
+.loaderWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  min-height: 400px;
+}
+
+.loader {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loaderRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent-solid);
+  animation: spin 1s linear infinite;
+}
+
+.loaderIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--accent-solid);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.loaderText {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+}
+
 .container {
   overflow: hidden;
   min-height: 600px;
@@ -26,7 +84,7 @@
 .progressFill {
   height: 100%;
   background: var(--accent-solid);
-  transition: all 0.5s ease-out;
+  transition: width 0.5s ease-out;
 }
 
 .content {
@@ -34,8 +92,8 @@
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  max-width: 600px;
   width: 100%;
+  max-width: max-content;
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -46,6 +104,9 @@
   animation: fadeIn 0.3s ease-out;
   display: flex;
   width: 100%;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 /* Pricing Step */
@@ -223,7 +284,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: 600px;
 }
 
 .stepTitle {
@@ -245,13 +306,17 @@
 .searchWrapper {
   position: relative;
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  padding: 1rem 1rem 1rem 1rem;
+  border-radius: 2rem;
+  background: var(--bg-elevated);
+  gap: 0.5rem;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
 }
 
 .searchIcon {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
   width: 1.25rem;
   height: 1.25rem;
   color: var(--text-tertiary);
@@ -259,12 +324,10 @@
 
 .searchInput {
   width: 100%;
-  padding: 1rem 1rem 1rem 3rem;
-  border-radius: 2rem;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
+  background-color: transparent;
   font-size: 14px;
+  display: flex;
+  flex-direction: row;
   line-height: 22px;
   letter-spacing: -0.02em;
   transition: border-color 0.2s;
@@ -284,11 +347,8 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
   max-height: 280px;
   margin-bottom: 1rem;
-  position: absolute;
-  padding: 1rem;
   border-radius: 1rem;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
@@ -296,31 +356,43 @@
   font-size: 14px;
   line-height: 22px;
   letter-spacing: -0.02em;
-  bottom: -8.5rem;
-  left: 0;
-  right: 0;
-  z-index: 10;
 }
 
 .loadingText,
 .noResults {
   text-align: center;
-  padding: 1.5rem;
+  height: 56px;
+  font-size: 14px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  display: flex;
   color: var(--text-secondary);
 }
 
 .programRow {
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: start;
   gap: 1rem;
+  padding: .875rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
+.programRow:hover {
+  background: var(--bg-secondary);
+}
+.programRow:not(:first-child) {
+  border-top: 1px solid;
+  border-color: #ffffff0a;
+}
+
 .programLogo {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.5rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   background: var(--bg-secondary);
   display: flex;
   align-items: center;
@@ -345,10 +417,14 @@
 .programName {
   font-weight: 600;
   color: var(--text-primary);
+  font-size: 14px;
+  line-height: 22px;
 }
 
 .programUrl {
-  font-size: 0.75rem;
+  font-size: 11px;
+  margin-top: 0.125rem;
+  line-height: normal;
   color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -358,10 +434,17 @@
 .programCommission {
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--accent-solid);
+  background-color: rgba(16, 185, 129, 0.2);
+  color:rgb(110, 231, 183);
+  padding: 6px 14px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 9999px;
 }
-
-
 
 .addProgramButton {
   width: 100%;
@@ -390,6 +473,7 @@
 .previewStep {
   height: 100%;
   display: flex;
+  width: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -400,8 +484,9 @@
   max-width: 42rem;
   border-radius: 0.75rem;
   overflow: hidden;
-  border: 1px solid var(--border);
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  background-color: #f59e0b08;
+  border: 1px solid;
+  border-color: #ffffff0a;
   margin-bottom: 2.5rem;
 }
 

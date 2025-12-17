@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HiCheck, HiStar, HiMagnifyingGlass } from "react-icons/hi2";
 import { Program } from "@/types";
 import useSWR from "swr";
@@ -9,24 +9,115 @@ import { ProgramCard } from "./ProgramCard";
 import styles from "./AdvertiseFlow.module.css";
 import { config } from "@/config";
 import { useAdvertiseFlowFetch } from "@/hooks/useAdvertiseFlowFetch";
+import AdvertisingCardConfirm from "./AdvertisingCardConfirm";
+
+type AvailabilityData = {
+  isFull: boolean;
+  count?: number;
+  max?: number;
+};
 
 export function AdvertiseFlow() {
   const [step, setStep] = useState<number>(0);
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
+  const [data, setData] = useState<AvailabilityData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const handlePlanSelect = () => {
-    setStep(1);
-  };
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch("/api/featured/availability", {
+      signal: controller.signal,
+      cache: "no-store",
+    })
+      .then((res) => res.json())
+      .then((json) => setData(json))
+      .catch((err) => {
+        if (err.name !== "AbortError") {
+          console.error("Failed to fetch availability:", err);
+        }
+      })
+      .finally(() => setLoading(false));
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const stepParam = query.get("step");
+    const programParam = query.get("program");
+
+    if (stepParam) {
+      const stepNumber = parseInt(stepParam, 10);
+      if (!isNaN(stepNumber) && stepNumber >= 0 && stepNumber <= 2) {
+        setStep(stepNumber);
+
+        if (stepNumber === 2 && programParam) {
+          fetch(`/api/programs/${programParam}`)
+            .then((res) => res.json())
+            .then((programData) => setSelectedProgram(programData))
+            .catch((err) => console.error("Failed to fetch program:", err))
+            .finally(() => setIsInitialized(true));
+          return;
+        }
+      }
+    }
+    setIsInitialized(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const query = new URLSearchParams(window.location.search);
+    query.set("step", step.toString());
+
+    if (step === 2 && selectedProgram) {
+      query.set("program", selectedProgram.id);
+    } else {
+      query.delete("program");
+    }
+
+    const newUrl = `${window.location.pathname}?${query.toString()}${
+      window.location.hash
+    }`;
+    window.history.replaceState(null, "", newUrl);
+  }, [step, selectedProgram, isInitialized]);
+
+  const handlePlanSelect = () => setStep(1);
 
   const handleProgramSelect = (program: Program) => {
     setSelectedProgram(program);
     setStep(2);
   };
 
-  const progressWidth =
-    step === 0 ? "0%" : step === 1 ? "33%" : step === 2 ? "66%" : "100%";
+  const handleBack = () => {
+    if (step === 2) {
+      setStep(1);
+    } else if (step === 1) {
+      setStep(0);
+    }
+  };
+
+  const progressWidth = step === 1 ? "33%" : step === 2 ? "66%" : "0%";
 
   const { handleConfirm } = useAdvertiseFlowFetch(selectedProgram);
+
+  const isLoading = !isInitialized || (step === 2 && !selectedProgram);
+
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loaderWrapper}>
+          <div className={styles.loader}>
+            <div className={styles.loaderRing} />
+            <HiStar className={styles.loaderIcon} />
+          </div>
+          <p className={styles.loaderText}>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -37,7 +128,11 @@ export function AdvertiseFlow() {
       <div className={styles.content}>
         {step === 0 && (
           <div className={styles.stepWrapper}>
-            <PricingStep onSelect={handlePlanSelect} />
+            <PricingStep
+              onSelect={handlePlanSelect}
+              data={data ?? null}
+              loading={loading}
+            />
           </div>
         )}
         {step === 1 && (
@@ -50,7 +145,7 @@ export function AdvertiseFlow() {
             <PreviewStep
               program={selectedProgram}
               onConfirm={handleConfirm}
-              onBack={() => setStep(1)}
+              onBack={handleBack}
             />
           </div>
         )}
@@ -59,15 +154,16 @@ export function AdvertiseFlow() {
   );
 }
 
-function PricingStep({ onSelect }: { onSelect: () => void }) {
-  const { data: availability } = useSWR("/api/featured/availability", (url) =>
-    fetch(url).then((r) => r.json())
-  );
-
-  const isFull = availability?.isFull;
-  const nextDate = availability?.nextAvailable
-    ? new Date(availability.nextAvailable).toLocaleDateString()
-    : "soon";
+function PricingStep({
+  onSelect,
+  data,
+  loading,
+}: {
+  onSelect: () => void;
+  data: AvailabilityData | null;
+  loading: boolean;
+}) {
+  const isFull = data?.isFull;
 
   return (
     <div className={styles.pricingStep}>
@@ -110,28 +206,27 @@ function PricingStep({ onSelect }: { onSelect: () => void }) {
           </li>
         </ul>
 
-        {isFull ? (
-          <div className={styles.soldOutWrapper}>
-            <div className={styles.soldOutBanner}>
-              All 3 slots are currently taken
+        {data && !loading ? (
+          isFull ? (
+            <div className={styles.soldOutWrapper}>
+              <div className={styles.soldOutBanner}>
+                All 3 slots are currently taken
+              </div>
+              <button disabled className={styles.soldOutButton}>
+                Sold Out
+              </button>
             </div>
-            <p className={styles.nextAvailable}>
-              Next slot available on {nextDate}
-            </p>
-            <button disabled className={styles.soldOutButton}>
-              Sold Out
-            </button>
-          </div>
-        ) : (
-          <button onClick={onSelect} className={styles.primaryButton}>
-            Get Sponsored
-            {availability && (
+          ) : (
+            <button onClick={onSelect} className={styles.primaryButton}>
+              Get Sponsored
               <span className={styles.slotsLeft}>
-                ({config.advertising.maxSlots - availability.count} of{" "}
+                ({config.advertising.maxSlots - (data.count ?? 0)} of{" "}
                 {config.advertising.maxSlots} slots left)
               </span>
-            )}
-          </button>
+            </button>
+          )
+        ) : (
+          <div className={styles.loadingText}>Loading availability...</div>
         )}
       </div>
     </div>
@@ -167,7 +262,6 @@ function SelectionStep({ onSelect }: { onSelect: (p: Program) => void }) {
           Search for your affiliate program to sponsor it
         </p>
 
-        {/* Search Input */}
         <div className={styles.searchWrapper}>
           <HiMagnifyingGlass className={styles.searchIcon} />
           <input
@@ -178,59 +272,58 @@ function SelectionStep({ onSelect }: { onSelect: (p: Program) => void }) {
             className={styles.searchInput}
             autoFocus
           />
-
-          {search.length >= 2 && (
-            <div className={styles.resultsWrapper}>
-              {!programs ? (
-                <div className={styles.loadingText}>Loading...</div>
-              ) : filteredPrograms?.length === 0 ? (
-                <div className={styles.noResults}>
-                  No programs found for &ldquo;{search}&rdquo;
-                </div>
-              ) : (
-                filteredPrograms?.map((program) => (
-                  <div
-                    key={program.id}
-                    onClick={() => onSelect(program)}
-                    className={styles.programRow}
-                  >
-                    <div className={styles.programLogo}>
-                      {program.logoUrl ? (
-                        <img src={program.logoUrl} alt={program.programName} />
-                      ) : (
-                        program.programName[0]
-                      )}
-                    </div>
-                    <div className={styles.programInfo}>
-                      <h3 className={styles.programName}>
-                        {program.programName}
-                      </h3>
-                      <p className={styles.programUrl}>{program.websiteUrl}</p>
-                    </div>
-                    <div className={styles.programCommission}>
-                      {program.commissionRate}%
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
         </div>
 
-        {/* Add Program CTA */}
-        {search.length === 0 && (
-          <div className={styles.addProgramCta}>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className={styles.addProgramButton}
-            >
-              <span>Don&apos;t see your program? Add it first</span>
-            </button>
+        {search.length >= 2 && (
+          <div className={styles.resultsWrapper}>
+            {!programs ? (
+              <div className={styles.loadingText}>Loading...</div>
+            ) : filteredPrograms?.length === 0 ? (
+              <div className={styles.noResults}>
+                No programs found for &ldquo;{search}&rdquo;
+              </div>
+            ) : (
+              filteredPrograms?.map((program) => (
+                <div
+                  key={program.id}
+                  onClick={() => onSelect(program)}
+                  className={styles.programRow}
+                >
+                  <div className={styles.programLogo}>
+                    {program.logoUrl ? (
+                      <img src={program.logoUrl} alt={program.programName} />
+                    ) : (
+                      program.programName[0]
+                    )}
+                  </div>
+                  <div className={styles.programInfo}>
+                    <h3 className={styles.programName}>
+                      {program.programName}
+                    </h3>
+                    <p className={styles.programUrl}>{program.websiteUrl}</p>
+                  </div>
+                  <div className={styles.programCommission}>
+                    {program.commissionRate}%{" "}
+                    {program.commissionDuration?.toLowerCase() == "recurring"
+                      ? "Recurring"
+                      : "One-time"}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
+
+        <div className={styles.addProgramCta}>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className={styles.addProgramButton}
+          >
+            <span>Don&apos;t see your program? Add it first</span>
+          </button>
+        </div>
       </div>
 
-      {/* Add Program Modal */}
       {showAddModal && (
         <AddProgramModal
           isOpen={showAddModal}
@@ -256,20 +349,11 @@ function PreviewStep({
       <p className={styles.stepSubtitle}>
         This is exactly how your program will appear on the leaderboard
       </p>
-
-      {/* Preview Card */}
-      <div className={styles.previewCard}>
-        <ProgramCard program={program} variant="row" />
-      </div>
-
-      <div className={styles.buttonGroup}>
-        <button onClick={onBack} className={styles.backButton}>
-          Back
-        </button>
-        <button onClick={onConfirm} className={styles.confirmButton}>
-          Confirm & Pay $299
-        </button>
-      </div>
+      <AdvertisingCardConfirm
+        program={program}
+        onBack={onBack}
+        onConfirm={onConfirm}
+      />
     </div>
   );
 }

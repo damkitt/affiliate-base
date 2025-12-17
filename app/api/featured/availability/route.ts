@@ -2,39 +2,39 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { config } from "@/config";
 
-export const dynamic = "force-dynamic"; // Do not cache as availability changes
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const now = new Date();
-
-  const featuredPrograms = await prisma.program.findMany({
-    where: {
-      isFeatured: true,
-      featuredExpiresAt: {
-        gt: now,
+  try {
+    const featuredPrograms = await prisma.program.findMany({
+      where: {
+        isFeatured: true,
       },
-    },
-    select: {
-      id: true,
-      featuredExpiresAt: true,
-    },
-    orderBy: {
-      featuredExpiresAt: "asc",
-    },
-  });
+      select: {
+        featuredExpiresAt: true,
+      },
+    });
 
-  const count = featuredPrograms.length;
-  const isFull = count >= config.advertising.maxSlots;
+    const count = featuredPrograms.length;
+    const isFull = count >= config.advertising.maxSlots;
 
-  const nextAvailable =
-    isFull && featuredPrograms[0]?.featuredExpiresAt
-      ? featuredPrograms[0].featuredExpiresAt.toISOString()
-      : "soon";
-
-  return NextResponse.json({
-    count,
-    max: config.advertising.maxSlots,
-    isFull,
-    nextAvailable,
-  });
+    return NextResponse.json(
+      {
+        count,
+        max: config.advertising.maxSlots,
+        isFull,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Failed to fetch availability:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch availability" },
+      { status: 500 }
+    );
+  }
 }
