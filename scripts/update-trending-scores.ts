@@ -37,11 +37,11 @@ async function main() {
         const engagement = engagementMap.get(program.id) || { views: 0, clicks: 0 };
 
         // Calculate new quality score (in case formula changed)
-        const qualityScore = calculateQualityScore(program);
+        const qualityScore = calculateQualityScore(program as any);
 
         // Calculate trending score with all components
         const trendingScore = calculateTrendingScore(
-            { ...program, createdAt: program.createdAt },
+            program as any,
             engagement.views,
             engagement.clicks
         );

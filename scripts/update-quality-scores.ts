@@ -9,7 +9,7 @@ async function main() {
     const programs = await prisma.program.findMany();
 
     for (const program of programs) {
-        const qualityScore = calculateQualityScore(program);
+        const qualityScore = calculateQualityScore(program as any);
 
         await prisma.program.update({
             where: { id: program.id },
