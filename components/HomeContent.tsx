@@ -29,10 +29,7 @@ export default function HomeContent({ initialPrograms }: HomeContentProps) {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    filteredPrograms;
-    mutate();
-  }, [mutate, filteredPrograms]);
+
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-background">
@@ -55,8 +52,8 @@ export default function HomeContent({ initialPrograms }: HomeContentProps) {
                 <button
                   onClick={() => setSelectedCategory(null)}
                   className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 border ${selectedCategory === null
-                      ? "text-white border-transparent scale-105"
-                      : "bg-[var(--bg-card)] text-[var(--text-primary)] border-[var(--border)] hover:border-[var(--accent-solid)] hover:bg-[var(--bg-secondary)]"
+                    ? "text-white border-transparent scale-105"
+                    : "bg-[var(--bg-card)] text-[var(--text-primary)] border-[var(--border)] hover:border-[var(--accent-solid)] hover:bg-[var(--bg-secondary)]"
                     }`}
                   style={
                     selectedCategory === null
@@ -79,8 +76,8 @@ export default function HomeContent({ initialPrograms }: HomeContentProps) {
                         setSelectedCategory(isSelected ? null : category)
                       }
                       className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 border ${isSelected
-                          ? "text-white border-transparent scale-105"
-                          : "bg-[var(--bg-card)] text-[var(--text-primary)] border-[var(--border)] hover:border-[var(--accent-solid)] hover:bg-[var(--bg-secondary)]"
+                        ? "text-white border-transparent scale-105"
+                        : "bg-[var(--bg-card)] text-[var(--text-primary)] border-[var(--border)] hover:border-[var(--accent-solid)] hover:bg-[var(--bg-secondary)]"
                         }`}
                       style={
                         isSelected

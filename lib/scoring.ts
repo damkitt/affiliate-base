@@ -1,4 +1,4 @@
-import type { Program } from "@prisma/client";
+import type { Program } from "@/types";
 
 /**
  * Optional fields that contribute to quality score (+5 each if non-null/non-empty)
@@ -164,7 +164,7 @@ export function calculateTrendingScore(
     const recencyBoost = calculateRecencyBoost(program.createdAt);
 
     // 4. Final Calculation
-    const totalScore = (basePoints * multiplier) + qualityScore + trustScore + recencyBoost;
+    const totalScore = (basePoints * multiplier) + qualityScore + trustScore + recencyBoost + (program.manualScoreBoost || 0);
 
     return Math.round(totalScore);
 }

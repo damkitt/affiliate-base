@@ -1,8 +1,9 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { HiArrowUpRight, HiStar } from "react-icons/hi2";
+import { HiArrowUpRight, HiStar, HiChartBar, HiInformationCircle } from "react-icons/hi2";
 import { Program } from "@/types";
 import { isProgramNew } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -22,7 +23,7 @@ interface ProgramCardProps {
   highlightNew?: boolean;
 }
 
-export function ProgramCard({
+export const ProgramCard = memo(function ProgramCard({
   program,
   variant = "row",
   rank,
@@ -47,8 +48,9 @@ export function ProgramCard({
           src={program.logoUrl}
           alt={program.programName}
           fill
+          priority={isSponsored || (rank !== undefined && rank <= 3)}
+          sizes="(max-width: 768px) 48px, 64px"
           className="object-cover"
-          unoptimized
         />
       ) : (
         <div
@@ -68,7 +70,10 @@ export function ProgramCard({
           }`}
       />
       <div className={styles.newDotTooltip}>
-        New Arrival (24h)
+        <div className="flex items-center gap-2">
+          <HiInformationCircle className="w-3.5 h-3.5 text-emerald-400" />
+          <span>New Arrival (24h)</span>
+        </div>
         <div className={styles.newDotArrow} />
       </div>
     </div>
@@ -125,12 +130,17 @@ export function ProgramCard({
                     side="right"
                     className={styles.tooltipContent}
                   >
-                    <p className={styles.tooltipText}>
-                      Trending Score based on{" "}
-                      <span className={styles.tooltipHighlight}>7-day</span>{" "}
-                      unique views, clicks, and CTR. New programs get a
-                      temporary boost.
-                    </p>
+                    <div className="flex items-start gap-3">
+                      <div className="p-1.5 rounded-lg bg-emerald-500/10 shrink-0">
+                        <HiChartBar className="w-3.5 h-3.5 text-emerald-500" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[12px] font-bold text-white">Trending Score</p>
+                        <p className={styles.tooltipText}>
+                          Based on <span className={styles.tooltipHighlight}>7-day</span> unique views, clicks, and CTR. New programs get a temporary boost.
+                        </p>
+                      </div>
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -210,4 +220,4 @@ export function ProgramCard({
   }
 
   return null;
-}
+});

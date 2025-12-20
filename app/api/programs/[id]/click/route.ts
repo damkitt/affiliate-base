@@ -24,80 +24,16 @@ interface ClickResponse {
 // Handler
 // =============================================================================
 
-/**
- * POST /api/programs/[id]/click
- *
- * Increments the click counter for a program and tracks in Prometheus.
- * Called when user clicks an affiliate link.
- */
-export async function POST(
-  _request: Request,
-  { params }: RouteContext
-): Promise<NextResponse> {
+export async function POST(_req: Request, { params }: RouteContext) {
   try {
-    const { id } = await params;
+    const { id: programId } = await params;
+    const p = await (programId.startsWith("fake-") ? { programName: `Fake ${programId.replace("fake-", "")}` } : prisma.program.findUnique({ where: { id: programId }, select: { programName: true } }));
+    if (!p) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    if (!id) {
-      return NextResponse.json(
-        { error: "Program ID is required" },
-        { status: 400 }
-      );
-    }
+    await prisma.analyticsEvent.create({ data: { programId, eventType: "click", fingerprint: "anonymous", ipHash: "anonymous" } });
+    clicksTotal.labels({ program_id: programId, program_name: p.programName }).inc();
+    await pushMetrics("clicks", { instance: "api", program_id: programId });
 
-    // Ensure program exists and get its name for metrics labels
-    let programName = "unknown";
-
-    if (id.startsWith("fake-")) {
-      programName = `Fake Program ${id.replace("fake-", "")}`;
-    } else {
-      const program = await prisma.program.findUnique({
-        where: { id },
-        select: { programName: true },
-      });
-
-      if (!program) {
-        return NextResponse.json({ error: "Program not found" }, { status: 404 });
-      }
-      programName = program.programName;
-    }
-
-    // Track in Prometheus for monitoring
-    clicksTotal
-      .labels({
-        program_id: id,
-        program_name: programName,
-      })
-      .inc();
-
-    // Save to Database for persistent history and filtering
-    await prisma.analyticsEvent.create({
-      data: {
-        programId: id,
-        eventType: "click",
-        fingerprint: "anonymous", // Simplified for now, can be enhanced with actual fingerprinting
-        ipHash: "anonymous",      // Simplified
-      },
-    });
-
-    await pushMetrics("clicks", { instance: "api", program_id: id });
-
-    const response: ClickResponse = { success: true };
-
-    return NextResponse.json(response);
-  } catch (error) {
-    console.error("[POST /api/programs/:id/click]", error);
-
-    // Check if it's a "not found" error
-    if (
-      error instanceof Error &&
-      error.message.includes("Record to update not found")
-    ) {
-      return NextResponse.json({ error: "Program not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(
-      { error: "Failed to track click" },
-      { status: 500 }
-    );
-  }
+    return NextResponse.json({ success: true });
+  } catch (err) { return NextResponse.json({ error: "Failed" }, { status: 500 }); }
 }

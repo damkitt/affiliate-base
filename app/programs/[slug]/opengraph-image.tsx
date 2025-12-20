@@ -61,8 +61,12 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
         let logoSrc = null;
         if (program.logoUrl) {
             try {
+                if (!program.logoUrl.startsWith('http')) {
+                    throw new Error('Local/relative logo not supported in OG');
+                }
+
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s Timeout
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
 
                 const logoRes = await fetch(program.logoUrl, {
                     signal: controller.signal,
@@ -74,14 +78,12 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                     const arrayBuffer = await logoRes.arrayBuffer();
                     const buffer = Buffer.from(arrayBuffer);
 
-                    // Use Sharp to convert (WebP/Any) -> PNG and Resize
-                    // This prevents Satori crashes and optimizes size
                     const optimizedBuffer = await sharp(buffer)
                         .resize({
                             width: 320,
                             height: 320,
-                            fit: 'cover',
-                            background: { r: 0, g: 0, b: 0, alpha: 0 } // Transparent background
+                            fit: 'contain',
+                            background: { r: 5, g: 5, b: 5, alpha: 0 }
                         })
                         .png()
                         .toBuffer();
@@ -90,10 +92,9 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                     logoSrc = `data:image/png;base64,${base64}`;
                 }
             } catch (e) {
-                // Silent catch for OG image generation to prevent crash
+                console.warn('[OG] Logo processing failed:', e);
             }
         }
-
         // 3. Render
         return new ImageResponse(
             (
@@ -188,7 +189,7 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                                 border: '1px solid rgba(16, 185, 129, 0.2)',
                                 marginBottom: '24px',
                             }}>
-                                <span style={{ color: '#34d399', fontSize: '28px', fontWeight: 700, marginRight: '8px' }}>
+                                <span style={{ color: '#10b981', fontSize: '28px', fontWeight: 800, marginRight: '8px' }}>
                                     {program.commissionRate}%
                                 </span>
                                 <span style={{ color: '#a1a1aa', fontSize: '24px', fontWeight: 500 }}>
@@ -196,36 +197,43 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                                 </span>
                             </div>
 
-                            {/* Program Name */}
+                            {/* Program Name - Adaptive sizing */}
                             <div style={{
-                                fontSize: '80px',
-                                fontWeight: 800,
+                                fontSize: program.programName.length > 15 ? '60px' : '80px',
+                                fontWeight: 900,
                                 color: 'white',
-                                lineHeight: '1.1',
+                                lineHeight: '1.05',
                                 marginBottom: '40px',
                                 textShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                                letterSpacing: '-0.02em',
+                                letterSpacing: '-0.04em',
                                 display: 'flex',
-                                flexWrap: 'wrap',
                             }}>
                                 {program.programName}
                             </div>
 
                             {/* Trust Badge (Simulated) */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                background: 'rgba(255,255,255,0.03)',
+                                padding: '8px 16px',
+                                borderRadius: '12px',
+                                border: '1px solid rgba(255,255,255,0.05)'
+                            }}>
                                 <div style={{
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    width: '24px',
-                                    height: '24px',
+                                    width: '28px',
+                                    height: '28px',
                                     borderRadius: '50%',
                                     background: '#10b981',
                                     color: 'black',
-                                    fontSize: '14px',
-                                    fontWeight: 'bold',
+                                    fontSize: '16px',
+                                    fontWeight: '900',
                                 }}>✓</div>
-                                <span style={{ color: '#71717a', fontSize: '20px', fontWeight: 500 }}>Verified Program</span>
+                                <span style={{ color: '#71717a', fontSize: '24px', fontWeight: 600 }}>Verified Program</span>
                             </div>
                         </div>
                     </div>
@@ -238,13 +246,14 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        letterSpacing: '0.25em',
-                        fontSize: '24px',
+                        letterSpacing: '0.5em',
+                        fontSize: '22px',
                         fontWeight: 700,
                         textTransform: 'uppercase',
+                        opacity: 0.6
                     }}>
-                        <span style={{ color: '#a1a1aa', marginRight: '12px' }}>AFFILIATE</span>
-                        <span style={{ color: '#10b981' }}>BASE</span>
+                        <span style={{ color: '#a1a1aa', marginRight: '10px' }}>AFFILIATE</span>
+                        <span style={{ color: '#10b981' }}>BASE.CO</span>
                     </div>
 
                     {/* Top Right Decorative Element */}

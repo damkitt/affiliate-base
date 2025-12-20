@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, DM_Serif_Display } from "next/font/google";
+import { Suspense } from "react";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -45,6 +48,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Suspense fallback={null}>
+            <AnalyticsTracker />
+          </Suspense>
+          <Analytics />
           <main>{children}</main>
         </ThemeProvider>
       </body>

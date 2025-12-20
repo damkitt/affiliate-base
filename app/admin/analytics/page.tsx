@@ -12,6 +12,7 @@ import { FunnelSection } from "@/components/Admin/Analytics/FunnelSection";
 import { TopProgramsTable } from "@/components/Admin/Analytics/TopProgramsTable";
 import { SearchAnalytics } from "@/components/Admin/Analytics/SearchAnalytics";
 import { ReferrerTable } from "@/components/Admin/Analytics/ReferrerTable";
+import { NewProgramsDetail } from "@/components/Admin/Analytics/NewProgramsDetail";
 
 const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then((res) => res.json());
 
@@ -85,7 +86,10 @@ export default function AnalyticsPage() {
                 {/* Row 1: KPI Cards */}
                 <StatsCards data={data} isLoading={isLoading} />
 
-                {/* Row 2: Traffic Chart */}
+                {/* Row 2: New Programs Detail */}
+                <NewProgramsDetail data={data} isLoading={isLoading} range={range} />
+
+                {/* Row 3: Traffic Chart */}
                 <TrafficChart data={data} isLoading={isLoading} range={range} />
 
                 {/* Row 3: Conversion Funnel */}

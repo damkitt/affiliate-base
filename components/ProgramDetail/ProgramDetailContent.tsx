@@ -8,6 +8,8 @@ import {
     HiArrowUpRight,
     HiInformationCircle,
     HiCheckCircle,
+    HiShare,
+    HiCheck
 } from "react-icons/hi2";
 import type { Program } from "@/types";
 import { SimilarPrograms, EditReportModal, IncomeSimulator, ProgramStatsGrid, HowItWorks, ProgramSidebar } from "@/components/ProgramDetail";
@@ -44,8 +46,8 @@ export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
     const [fingerprint, setFingerprint] = useState<string | null>(null);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
     const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+    const [copied, setCopied] = useState(false);
 
 
     const { data: clicksMap } = useSWRImmutable<Record<string, number>>(
@@ -56,6 +58,16 @@ export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
     useEffect(() => {
         generateFingerprint().then(setFingerprint);
     }, []);
+
+    const handleShare = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy link:', err);
+        }
+    };
 
     useEffect(() => {
         if (program && fingerprint && !viewTracked.current) {
@@ -108,8 +120,8 @@ export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
                                         alt={program.programName}
                                         fill
                                         className="object-cover"
-                                        unoptimized
                                         priority
+                                        sizes="(max-width: 768px) 80px, 96px"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
                                             target.style.display = "none";
@@ -128,15 +140,37 @@ export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
                                 </div>
                             </div>
 
-                            {/* External Link */}
-                            <a
-                                href={program.websiteUrl}
-                                target="_blank"
-                                rel="nofollow sponsored noopener noreferrer"
-                                className="absolute top-6 right-6 md:static p-3 rounded-2xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] glass hover:bg-white/5 transition-all group"
-                            >
-                                <HiArrowUpRight className="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" />
-                            </a>
+                            {/* Action Buttons */}
+                            <div className="absolute top-6 right-6 md:static flex items-center gap-3">
+                                <button
+                                    onClick={handleShare}
+                                    className={`px-4 py-2.5 rounded-2xl transition-all group border flex items-center gap-2 font-semibold text-sm ${copied
+                                        ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
+                                        : "bg-black/40 border-white/10 hover:border-white/20 text-white"
+                                        }`}
+                                    title="Copy Link"
+                                >
+                                    {copied ? (
+                                        <>
+                                            <HiCheck className="w-4 h-4" />
+                                            <span>Copied</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <HiShare className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
+                                            <span>Share</span>
+                                        </>
+                                    )}
+                                </button>
+                                <a
+                                    href={program.websiteUrl}
+                                    target="_blank"
+                                    rel="nofollow sponsored noopener noreferrer"
+                                    className="p-3 rounded-2xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] glass hover:bg-white/5 transition-all group"
+                                >
+                                    <HiArrowUpRight className="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" />
+                                </a>
+                            </div>
                         </div>
                     </div>
 

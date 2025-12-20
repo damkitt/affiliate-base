@@ -85,7 +85,7 @@ export function Leaderboard({ programs }: LeaderboardProps) {
                 {featuredPrograms.slice(0, 3).map((program) => {
                   return (
                     <motion.div
-                      layout
+                      layout="position"
                       initial={{ opacity: 0, scale: 0.95, y: -20 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
@@ -108,7 +108,7 @@ export function Leaderboard({ programs }: LeaderboardProps) {
                 {/* Regular Table Rows */}
                 {displayRegular.map((program, index) => (
                   <motion.div
-                    layout
+                    layout="position"
                     initial={{ opacity: 0, scale: 0.98, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
@@ -152,7 +152,14 @@ export function Leaderboard({ programs }: LeaderboardProps) {
         visibleCount < regularPrograms.length && (
           <div className="mt-8 flex justify-center">
             <button
-              onClick={() => setVisibleCount((prev) => prev + 12)}
+              onClick={() => {
+                // Pre-increment to show items immediately, then maybe fetch more if needed in future
+                setVisibleCount((prev) => prev + 12);
+              }}
+              onMouseEnter={() => {
+                // If we had a paginated API, we'd prefetch here. 
+                // Since it's in-memory, we just ensure the render is fast.
+              }}
               className="px-6 py-2 rounded-full border border-white/10 text-sm text-zinc-400 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all duration-200"
             >
               Load more

@@ -28,6 +28,7 @@ export type Program = {
   readonly approvalTimeRange?: string | null;
   readonly qualityScore?: number;
   readonly trendingScore?: number;
+  readonly manualScoreBoost?: number;
   readonly totalViews?: number;
   readonly clicksCount: number;
   readonly approvalStatus: boolean;

@@ -76,11 +76,12 @@ export interface DashboardStats {
     liveUsers: number;
     totalViews: number;
     totalClicks: number;
+    advertiseViews: number;
     trafficChart: TrafficDataPoint[];
     geoReferrerStats: GeoReferrerStat[];
     startupOrigins: StartupOrigin[];
     topPrograms: TopProgram[];
-    newProgramsChart: { date: string; count: number }[];
+    newProgramsChart: { date: string; total: number; added: number }[];
     newProgramsCount: { day: number; week: number; month: number };
     clickBreakdown: ClickBreakdown[];
     // New analytics
@@ -149,7 +150,7 @@ export async function getDashboardStats(
     const liveUsers = liveUsersResult.length;
 
     // 2. Total views and clicks in range (use eventType for compatibility)
-    const [totalViews, totalClicks] = await Promise.all([
+    const [totalViews, totalClicks, advertiseViews] = await Promise.all([
         prisma.analyticsEvent.count({
             where: {
                 createdAt: { gte: rangeStart },
@@ -162,101 +163,57 @@ export async function getDashboardStats(
                 eventType: { in: ["click", "outbound"] },
             },
         }),
+        prisma.analyticsEvent.count({
+            where: {
+                createdAt: { gte: rangeStart },
+                url: { startsWith: "/advertise" },
+            },
+        }),
     ]);
 
-    // 3. Traffic chart data (grouped by hour for 24h, by day for 7d/30d)
-    const trafficEvents = await prisma.analyticsEvent.findMany({
+    // 3. Traffic chart data
+    const trafficByPeriod = new Map<string, { visitors: Set<string>; clicks: number }>();
+    const isHourly = range === "24h";
+
+    (await prisma.analyticsEvent.findMany({
         where: { createdAt: { gte: rangeStart } },
-        select: {
-            createdAt: true,
-            fingerprint: true,
-            eventType: true,
-        },
+        select: { createdAt: true, fingerprint: true, eventType: true },
+    })).forEach(event => {
+        const d = event.createdAt;
+        const periodKey = isHourly
+            ? `${d.toISOString().split("T")[0]}T${String(d.getHours()).padStart(2, "0")}:00`
+            : d.toISOString().split("T")[0];
+
+        const data = trafficByPeriod.get(periodKey) || { visitors: new Set(), clicks: 0 };
+        data.visitors.add(event.fingerprint);
+        if (["click", "outbound"].includes(event.eventType || "")) data.clicks++;
+        trafficByPeriod.set(periodKey, data);
     });
 
-    // Group by date or hour depending on range
-    const isHourly = range === "24h";
-    const trafficByPeriod = new Map<
-        string,
-        { visitors: Set<string>; clicks: number }
-    >();
-
-    for (const event of trafficEvents) {
-        let periodKey: string;
-        if (isHourly) {
-            // Group by hour: "2024-12-08T14"
-            const date = event.createdAt;
-            periodKey = `${date.toISOString().split("T")[0]}T${String(date.getHours()).padStart(2, "0")}:00`;
-        } else {
-            // Group by day
-            periodKey = event.createdAt.toISOString().split("T")[0];
-        }
-
-        if (!trafficByPeriod.has(periodKey)) {
-            trafficByPeriod.set(periodKey, { visitors: new Set(), clicks: 0 });
-        }
-        const periodData = trafficByPeriod.get(periodKey)!;
-        periodData.visitors.add(event.fingerprint);
-        if (event.eventType === "click" || event.eventType === "outbound") {
-            periodData.clicks++;
-        }
-    }
-
-    const trafficChart: TrafficDataPoint[] = Array.from(trafficByPeriod.entries())
-        .map(([date, data]) => ({
-            date,
-            visitors: data.visitors.size,
-            clicks: data.clicks,
-        }))
+    const trafficChart = Array.from(trafficByPeriod.entries())
+        .map(([date, data]) => ({ date, visitors: data.visitors.size, clicks: data.clicks }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
     // 4. Geo-Referrer stats
-    const geoEvents = await prisma.analyticsEvent.findMany({
-        where: {
-            createdAt: { gte: rangeStart },
-            country: { not: null },
-        },
-        select: {
-            country: true,
-            fingerprint: true,
-            referer: true,
-        },
+    const countryData = new Map<string, { sessions: Set<string>; referrers: Map<string, number> }>();
+    (await prisma.analyticsEvent.findMany({
+        where: { createdAt: { gte: rangeStart }, country: { not: null } },
+        select: { country: true, fingerprint: true, referer: true },
+    })).forEach(event => {
+        const country = event.country || "Unknown";
+        const data = countryData.get(country) || { sessions: new Set(), referrers: new Map() };
+        data.sessions.add(event.fingerprint);
+        const ref = parseReferrer(event.referer).name;
+        data.referrers.set(ref, (data.referrers.get(ref) || 0) + 1);
+        countryData.set(country, data);
     });
 
-    // Group by country, then find top referrer
-    const countryData = new Map<
-        string,
-        { sessions: Set<string>; referrers: Map<string, number> }
-    >();
-
-    for (const event of geoEvents) {
-        const country = event.country || "Unknown";
-        if (!countryData.has(country)) {
-            countryData.set(country, { sessions: new Set(), referrers: new Map() });
-        }
-        const data = countryData.get(country)!;
-        data.sessions.add(event.fingerprint);
-
-        const referrer = parseReferrer(event.referer);
-        data.referrers.set(referrer.name, (data.referrers.get(referrer.name) || 0) + 1);
-    }
-
-    const geoReferrerStats: GeoReferrerStat[] = Array.from(countryData.entries())
-        .map(([country, data]) => {
-            let topSource = { name: "Direct", domain: null as string | null };
-            let maxCount = 0;
-            for (const [source, count] of data.referrers.entries()) {
-                if (count > maxCount) {
-                    maxCount = count;
-                    topSource = { name: source, domain: null }; // Simplified for geo-stats for now, or could store domain in map keys
-                }
-            }
-            return {
-                country,
-                users: data.sessions.size,
-                topSource: topSource.name,
-            };
-        })
+    const geoReferrerStats = Array.from(countryData.entries())
+        .map(([country, data]) => ({
+            country,
+            users: data.sessions.size,
+            topSource: Array.from(data.referrers.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] || "Direct"
+        }))
         .sort((a, b) => b.users - a.users)
         .slice(0, 10);
 
@@ -274,60 +231,50 @@ export async function getDashboardStats(
     }));
 
     // 6. Top programs by performance
-    const programs = await prisma.program.findMany({
-        select: {
-            id: true,
-            programName: true,
-            slug: true,
-            totalViews: true,
-        },
+    const topPrograms: TopProgram[] = (await prisma.program.findMany({
+        select: { id: true, programName: true, slug: true, totalViews: true },
         orderBy: { totalViews: "desc" },
         take: 10,
-    });
+    })).map(p => ({
+        id: p.id,
+        name: p.programName,
+        slug: p.slug,
+        views: p.totalViews || 0,
+        clicks: 0, // Will be filled below
+        ctr: 0
+    }));
 
-    // Get click counts for these programs
-    const programIds = programs.map((p) => p.id);
-    const clickCounts = await prisma.analyticsEvent.groupBy({
+    (await prisma.analyticsEvent.groupBy({
         by: ["programId"],
-        where: {
-            programId: { in: programIds },
-            eventType: { in: ["click", "outbound"] },
-        },
+        where: { programId: { in: topPrograms.map(p => p.id) }, eventType: { in: ["click", "outbound"] } },
         _count: { id: true },
+    })).forEach(c => {
+        const p = topPrograms.find(tp => tp.id === c.programId);
+        if (p) {
+            p.clicks = c._count.id;
+            p.ctr = p.views > 0 ? Math.round((p.clicks / p.views) * 100 * 10) / 10 : 0;
+        }
     });
 
-    const clickMap = new Map(
-        clickCounts.map((c) => [c.programId, c._count.id])
-    );
+    // 7. New programs chart (Cumulative)
+    const [totalBefore, newPrograms] = await Promise.all([
+        prisma.program.count({ where: { createdAt: { lt: rangeStart } } }),
+        prisma.program.findMany({ where: { createdAt: { gte: rangeStart } }, select: { createdAt: true }, orderBy: { createdAt: "asc" } }),
+    ]);
 
-    const topPrograms: TopProgram[] = programs.map((p) => {
-        const clicks = clickMap.get(p.id) || 0;
-        const views = p.totalViews || 0;
-        return {
-            id: p.id,
-            name: p.programName,
-            slug: p.slug,
-            views,
-            clicks,
-            ctr: views > 0 ? Math.round((clicks / views) * 100 * 10) / 10 : 0,
-        };
-    });
-
-    // 7. New programs chart
-    const newPrograms = await prisma.program.findMany({
-        where: { createdAt: { gte: rangeStart } },
-        select: { createdAt: true },
-    });
-
-    const programsByDate = new Map<string, number>();
-    for (const program of newPrograms) {
-        const dateKey = program.createdAt.toISOString().split("T")[0];
-        programsByDate.set(dateKey, (programsByDate.get(dateKey) || 0) + 1);
+    const periods: string[] = [];
+    let curr = new Date(rangeStart);
+    while (curr <= new Date()) {
+        periods.push(isHourly ? `${curr.toISOString().split("T")[0]}T${String(curr.getHours()).padStart(2, "0")}:00` : curr.toISOString().split("T")[0]);
+        isHourly ? curr.setHours(curr.getHours() + 1) : curr.setDate(curr.getDate() + 1);
     }
 
-    const newProgramsChart = Array.from(programsByDate.entries())
-        .map(([date, count]) => ({ date, count }))
-        .sort((a, b) => a.date.localeCompare(b.date));
+    let runningTotal = totalBefore;
+    const newProgramsChart = periods.map(p => {
+        const added = newPrograms.filter(np => (isHourly ? `${np.createdAt.toISOString().split("T")[0]}T${String(np.createdAt.getHours()).padStart(2, "0")}:00` : np.createdAt.toISOString().split("T")[0]) === p).length;
+        runningTotal += added;
+        return { date: p, added, total: runningTotal };
+    });
 
     // 8. New programs counts (day/week/month)
     const [newDay, newWeek, newMonth] = await Promise.all([
@@ -336,151 +283,68 @@ export async function getDashboardStats(
         prisma.program.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
     ]);
 
-    // 9. Click breakdown by program - simpler approach
-    const clickEvents = await prisma.analyticsEvent.findMany({
-        where: {
-            eventType: { in: ["click", "outbound"] },
-        },
-        select: { programId: true },
+    // 9. Click breakdown by program
+    const clickData = await prisma.analyticsEvent.groupBy({
+        by: ["programId"],
+        where: { eventType: { in: ["click", "outbound"] }, programId: { not: null } },
+        _count: { id: true },
+        orderBy: { _count: { id: "desc" } },
+        take: 20,
     });
-
-    // Count clicks per program
-    const clickCountMap = new Map<string, number>();
-    for (const event of clickEvents) {
-        if (event.programId) {
-            clickCountMap.set(event.programId, (clickCountMap.get(event.programId) || 0) + 1);
-        }
-    }
-
-    // Sort and take top 20
-    const sortedClicks = Array.from(clickCountMap.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 20);
-
-    const clickProgramIds = sortedClicks.map(([id]) => id);
-
-    const clickPrograms = await prisma.program.findMany({
-        where: { id: { in: clickProgramIds } },
-        select: { id: true, programName: true, slug: true },
-    });
-
-    const programMap = new Map(clickPrograms.map((p) => [p.id, p]));
-
-    const clickBreakdown: ClickBreakdown[] = sortedClicks
-        .filter(([id]) => programMap.has(id))
-        .map(([id, clicks]) => {
-            const program = programMap.get(id)!;
-            return {
-                programId: id,
-                programName: program.programName,
-                slug: program.slug,
-                clicks,
-            };
-        });
+    const clickBreakdown = await Promise.all(clickData.map(async c => {
+        const p = await prisma.program.findUnique({ where: { id: c.programId! }, select: { programName: true, slug: true } });
+        return { programId: c.programId!, programName: p?.programName || "Unknown", slug: p?.slug || null, clicks: c._count.id };
+    }));
 
     // 10. Search analytics
-    let topSearches: SearchQuery[] = [];
-    let zeroResultSearches: SearchQuery[] = [];
-
+    let topSearches: SearchQuery[] = [], zeroResultSearches: SearchQuery[] = [];
     try {
-        const searchLogs = await prisma.searchLog.findMany({
-            where: { createdAt: { gte: rangeStart } },
-            select: { query: true, resultsCount: true },
+        const searches = await prisma.searchLog.findMany({ where: { createdAt: { gte: rangeStart } }, select: { query: true, resultsCount: true } });
+        const sMap = new Map<string, { count: number; res: number }>();
+        searches.forEach(s => {
+            const e = sMap.get(s.query) || { count: 0, res: s.resultsCount };
+            sMap.set(s.query, { count: e.count + 1, res: e.res });
         });
-
-        // Aggregate searches by query
-        const searchMap = new Map<string, { count: number; resultsCount: number }>();
-        for (const log of searchLogs) {
-            const existing = searchMap.get(log.query) || { count: 0, resultsCount: log.resultsCount };
-            existing.count++;
-            searchMap.set(log.query, existing);
-        }
-
-        const allSearches = Array.from(searchMap.entries())
-            .map(([query, data]) => ({ query, count: data.count, resultsCount: data.resultsCount }))
-            .sort((a, b) => b.count - a.count);
-
-        topSearches = allSearches.slice(0, 5);
-        zeroResultSearches = allSearches.filter(s => s.resultsCount === 0).slice(0, 5);
-    } catch {
-        // SearchLog table might not exist yet
-    }
+        const all = Array.from(sMap.entries()).map(([query, d]) => ({ query, count: d.count, resultsCount: d.res })).sort((a, b) => b.count - a.count);
+        topSearches = all.slice(0, 5);
+        zeroResultSearches = all.filter(s => s.resultsCount === 0).slice(0, 5);
+    } catch { }
 
     // 11. Category trends
-    const allEvents = await prisma.analyticsEvent.findMany({
-        where: {
-            createdAt: { gte: rangeStart },
-            eventType: "view",
-        },
-        select: { programId: true },
+    const catViews = new Map<string, number>();
+    const events = await prisma.analyticsEvent.findMany({
+        where: { createdAt: { gte: rangeStart }, eventType: "view", programId: { not: null } },
+        select: { programId: true }
+    });
+    const pIds = Array.from(new Set(events.map(e => e.programId!)));
+    const programs = await prisma.program.findMany({ where: { id: { in: pIds } }, select: { id: true, category: true } });
+    const idToCat = new Map(programs.map(p => [p.id, p.category]));
+    events.forEach(e => {
+        const cat = idToCat.get(e.programId!);
+        if (cat) catViews.set(cat, (catViews.get(cat) || 0) + 1);
     });
 
-    const viewsByProgramId = new Map<string, number>();
-    for (const event of allEvents) {
-        if (event.programId) {
-            viewsByProgramId.set(event.programId, (viewsByProgramId.get(event.programId) || 0) + 1);
-        }
-    }
-
-    const allProgramsWithCategories = await prisma.program.findMany({
-        where: { id: { in: Array.from(viewsByProgramId.keys()) } },
-        select: { id: true, category: true },
-    });
-
-    const viewsByCategory = new Map<string, number>();
-    for (const program of allProgramsWithCategories) {
-        const views = viewsByProgramId.get(program.id) || 0;
-        viewsByCategory.set(program.category, (viewsByCategory.get(program.category) || 0) + views);
-    }
-
-    const totalCategoryViews = Array.from(viewsByCategory.values()).reduce((a, b) => a + b, 0);
-    const categoryTrends: CategoryTrend[] = Array.from(viewsByCategory.entries())
-        .map(([category, views]) => ({
-            category,
-            views,
-            percentage: totalCategoryViews > 0 ? Math.round((views / totalCategoryViews) * 100) : 0,
-        }))
-        .sort((a, b) => b.views - a.views)
-        .slice(0, 10);
+    const totalCatViews = Array.from(catViews.values()).reduce((a, b) => a + b, 0);
+    const categoryTrends = Array.from(catViews.entries())
+        .map(([category, views]) => ({ category, views, percentage: totalCatViews > 0 ? Math.round((views / totalCatViews) * 100) : 0 }))
+        .sort((a, b) => b.views - a.views).slice(0, 10);
 
     // 12. Referrer CTR
-    const referrerEvents = await prisma.analyticsEvent.findMany({
+    const refMap = new Map<string, { visitors: Set<string>; clicks: number; domain: string | null }>();
+    (await prisma.analyticsEvent.findMany({
         where: { createdAt: { gte: rangeStart } },
-        select: { referer: true, fingerprint: true, eventType: true },
+        select: { referer: true, fingerprint: true, eventType: true }
+    })).forEach(e => {
+        const { name, domain } = parseReferrer(e.referer);
+        const d = refMap.get(name) || { visitors: new Set(), clicks: 0, domain };
+        d.visitors.add(e.fingerprint);
+        if (["click", "outbound"].includes(e.eventType || "")) d.clicks++;
+        refMap.set(name, d);
     });
 
-    const referrerData = new Map<string, { name: string; domain: string | null; visitors: Set<string>; clicks: number }>();
-    for (const event of referrerEvents) {
-        const { name, domain } = parseReferrer(event.referer);
-        // Use name as key to aggregate different subdomains if needed, or keep separate. 
-        // For simplicity let's use name as key. 
-        // Note: This means if google.com and google.co.uk both map to "Google", we pick one domain.
-        // Or we can use name as key and update domain if it's currently null.
-        if (!referrerData.has(name)) {
-            referrerData.set(name, { name, domain, visitors: new Set(), clicks: 0 });
-        }
-        const data = referrerData.get(name)!;
-        // If we have a domain now but didn't before (or want to overwrite), update it.
-        if (domain && !data.domain) {
-            data.domain = domain;
-        }
-
-        data.visitors.add(event.fingerprint);
-        if (event.eventType === "click" || event.eventType === "outbound") {
-            data.clicks++;
-        }
-    }
-
-    const referrerCTR: ReferrerCTR[] = Array.from(referrerData.entries())
-        .map(([, data]) => ({
-            source: data.name,
-            domain: data.domain,
-            visitors: data.visitors.size,
-            clicks: data.clicks,
-            ctr: data.visitors.size > 0 ? Math.round((data.clicks / data.visitors.size) * 100 * 10) / 10 : 0,
-        }))
-        .sort((a, b) => b.ctr - a.ctr)
-        .slice(0, 10);
+    const referrerCTR = Array.from(refMap.entries())
+        .map(([name, d]) => ({ source: name, domain: d.domain, visitors: d.visitors.size, clicks: d.clicks, ctr: d.visitors.size > 0 ? Math.round((d.clicks / d.visitors.size) * 100 * 10) / 10 : 0 }))
+        .sort((a, b) => b.ctr - a.ctr).slice(0, 10);
 
     // 13. Conversion Funnel
     // Step 1: Unique Visitors (distinct fingerprints in range)
@@ -522,6 +386,7 @@ export async function getDashboardStats(
         liveUsers,
         totalViews,
         totalClicks,
+        advertiseViews,
         trafficChart,
         geoReferrerStats,
         startupOrigins,
@@ -577,13 +442,14 @@ export function trackEventBackground(data: {
     country?: string;
     url?: string;
     targetUrl?: string;
+    eventType?: string; // Optional override
 }) {
     prisma.analyticsEvent
         .create({
             data: {
                 sessionId: data.sessionId,
                 eventName: data.eventName,
-                eventType: data.eventName.toLowerCase(),
+                eventType: data.eventType || data.eventName.toLowerCase(),
                 programId: data.programId ?? undefined,
                 fingerprint: data.fingerprint,
                 ipHash: data.ipHash,
@@ -610,4 +476,83 @@ export function generateSessionId(fingerprint: string): string {
         hash = hash & hash;
     }
     return Math.abs(hash).toString(36);
+}
+export interface ProgramStats {
+    views: number;
+    clicks: number;
+    ctr: number;
+    trafficChart: TrafficDataPoint[];
+}
+
+export async function getProgramStats(
+    programId: string,
+    range: "24h" | "7d" | "30d" = "7d"
+): Promise<ProgramStats> {
+    const rangeStart = getDateRange(range);
+
+    const [views, clicks, events] = await Promise.all([
+        prisma.analyticsEvent.count({
+            where: {
+                programId,
+                eventType: "view",
+                createdAt: { gte: rangeStart },
+            },
+        }),
+        prisma.analyticsEvent.count({
+            where: {
+                programId,
+                eventType: { in: ["click", "outbound"] },
+                createdAt: { gte: rangeStart },
+            },
+        }),
+        prisma.analyticsEvent.findMany({
+            where: {
+                programId,
+                createdAt: { gte: rangeStart },
+            },
+            select: {
+                createdAt: true,
+                eventType: true,
+                fingerprint: true,
+            },
+            orderBy: { createdAt: "asc" },
+        }),
+    ]);
+
+    // Grouping for chart
+    const isHourly = range === "24h";
+    const trafficByPeriod = new Map<string, { visitors: Set<string>; clicks: number }>();
+
+    for (const event of events) {
+        let periodKey: string;
+        if (isHourly) {
+            const date = event.createdAt;
+            periodKey = `${date.toISOString().split("T")[0]}T${String(date.getHours()).padStart(2, "0")}:00`;
+        } else {
+            periodKey = event.createdAt.toISOString().split("T")[0];
+        }
+
+        if (!trafficByPeriod.has(periodKey)) {
+            trafficByPeriod.set(periodKey, { visitors: new Set(), clicks: 0 });
+        }
+        const data = trafficByPeriod.get(periodKey)!;
+        if (event.eventType === "view") {
+            data.visitors.add(event.fingerprint);
+        } else if (event.eventType === "click" || event.eventType === "outbound") {
+            data.clicks++;
+        }
+    }
+
+    const trafficChart: TrafficDataPoint[] = Array.from(trafficByPeriod.entries()).map(([date, data]) => ({
+        date,
+        visitors: data.visitors.size,
+        clicks: data.clicks,
+    }));
+
+    return {
+        views,
+        clicks,
+        ctr: views > 0 ? Math.round((clicks / views) * 100 * 10) / 10 : 0,
+        trafficChart,
+    };
 }

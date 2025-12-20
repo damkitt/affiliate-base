@@ -41,11 +41,21 @@ export function ProgramStatsGrid({ program }: ProgramStatsGridProps) {
                     <h2 className="text-lg font-bold text-[var(--text-primary)]">Program Details</h2>
                 </div>
                 <div className="relative group">
-                    <HiInformationCircle className="w-5 h-5 text-[var(--text-tertiary)] cursor-help hover:text-white transition-colors" />
-                    <div className="absolute right-0 top-8 w-64 p-4 rounded-2xl glass-card border border-[var(--border)] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                            This information was added by the community during listing and has not been verified by the Affiliate Base team.
-                        </p>
+                    <HiInformationCircle className="w-5 h-5 text-[var(--text-tertiary)] cursor-help hover:text-white transition-all hover:scale-110" />
+                    <div className="absolute right-0 top-full mt-3 w-72 p-4 rounded-2xl bg-[#0A0A0A] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 translate-y-2 group-hover:translate-y-0 pointer-events-none">
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-emerald-500/10 shrink-0">
+                                <HiInformationCircle className="w-4 h-4 text-emerald-500" />
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[13px] font-bold text-white">Community Added</p>
+                                <p className="text-[11px] text-zinc-400 leading-relaxed font-medium">
+                                    This information was added by the community during listing and has not been verified by the Affiliate Base team.
+                                </p>
+                            </div>
+                        </div>
+                        {/* Arrow */}
+                        <div className="absolute top-[-5px] right-[6px] w-3 h-3 bg-[#0A0A0A] border-t border-l border-white/10 rotate-45"></div>
                     </div>
                 </div>
             </div>

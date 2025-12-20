@@ -21,6 +21,21 @@ export async function GET(): Promise<NextResponse> {
   const allPrograms = await prisma.program.findMany({
     where: { approvalStatus: true },
     orderBy: [{ trendingScore: "desc" }, { createdAt: "desc" }],
+    select: {
+      id: true,
+      programName: true,
+      slug: true,
+      logoUrl: true,
+      commissionRate: true,
+      commissionDuration: true,
+      category: true,
+      tagline: true,
+      description: true, // Keep for search
+      isFeatured: true,
+      featuredExpiresAt: true,
+      createdAt: true,
+      trendingScore: true,
+    }
   });
 
   // Query A: Sponsored (Top 3)
@@ -182,12 +197,16 @@ export async function POST(request: Request): Promise<NextResponse> {
       foundingDate: foundingDate ? new Date(foundingDate) : null,
       approvalTimeRange: approvalTimeRange || null,
       approvalStatus: true,
+      manualScoreBoost: 0,
     };
 
     const qualityScore = calculateQualityScore(programData);
     const trustScore = calculateTrustScore(programData);
-    const recencyBoost = calculateRecencyBoost(new Date());
-    const trendingScore = qualityScore + trustScore + recencyBoost;
+    const trendingScore = calculateTrendingScore(
+      { ...programData, createdAt: new Date() },
+      0,
+      0
+    );
 
     const program = await prisma.program.create({
       data: {

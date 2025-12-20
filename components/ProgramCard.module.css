@@ -100,25 +100,24 @@
 .newDotTooltip {
   position: absolute;
   left: 100%;
-  margin-left: 0.75rem;
-  padding: 0.375rem 0.75rem;
-  background: rgba(24, 24, 27, 0.95);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgb(39 39 42);
+  margin-left: 1rem;
+  padding: 0.5rem 0.875rem;
+  background: #0A0A0A;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   white-space: nowrap;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   opacity: 0;
   transform: translateX(0.25rem);
   transition: all 0.2s;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
 
 :global(.dark) .newDotTooltip {
-  background: rgba(39, 39, 42, 0.95);
+  background: #0A0A0A;
   border-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -130,14 +129,14 @@
 .newDotArrow {
   position: absolute;
   top: 50%;
-  left: -0.25rem;
+  left: -4px;
   margin-top: -3px;
-  border: 4px solid transparent;
-  border-right-color: rgba(24, 24, 27, 0.95);
-}
-
-:global(.dark) .newDotArrow {
-  border-right-color: rgba(39, 39, 42, 0.95);
+  width: 6px;
+  height: 6px;
+  background: #0A0A0A;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transform: rotate(45deg);
 }
 
 /* Sponsored Badge */
@@ -551,27 +550,23 @@
 
 /* Tooltip */
 .tooltipContent {
-  max-width: 220px;
-  padding: 0.625rem;
-  text-align: center;
-  background: rgba(24, 24, 27, 0.95);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgb(39 39 42);
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-}
-
-:global(.dark) .tooltipContent {
-  background: rgba(39, 39, 42, 0.95);
-  border-color: rgba(255, 255, 255, 0.1);
+  max-width: 260px;
+  padding: 0.875rem 1rem;
+  background: #0A0A0A !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 1rem !important;
+  color: white !important;
 }
 
 .tooltipText {
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.625;
-  font-weight: 500;
-  color: rgb(212 212 216);
+  font-weight: 600;
+  color: #A1A1AA;
 }
 
 .tooltipHighlight {
-  color: rgb(244 244 245);
+  color: white;
+  font-weight: 700;
 }

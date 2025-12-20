@@ -7,8 +7,8 @@ import { AdminHeader } from "@/components/Admin/AdminHeader";
 import { SearchBar } from "@/components/Admin/SearchBar";
 import { Tabs } from "@/components/Admin/Tabs";
 import { ProgramCard } from "@/components/Admin/ProgramCard";
-import { EditForm } from "@/components/Admin/EditForm";
 import { ReportsList } from "@/components/Admin/ReportsList";
+import { useRouter } from "next/navigation";
 
 interface ProgramReport {
   id: string;
@@ -18,9 +18,8 @@ interface ProgramReport {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function AdminPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"pending" | "all" | "reports">("pending");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Partial<Program>>({});
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: pendingPrograms = [], mutate: mutatePending } = useSWR<
@@ -57,26 +56,10 @@ export default function AdminPage() {
   };
 
   const handleEdit = (program: Program) => {
-    setEditingId(program.id);
-    setEditForm(program);
+    router.push(`/admin/programs/${program.id}`);
   };
 
-  const handleSaveEdit = async () => {
-    if (!editingId) return;
-    await fetch(`/api/programs/${editingId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editForm),
-    });
-    setEditingId(null);
-    setEditForm({});
-    mutatePending();
-    mutateAll();
-  };
 
-  const handleEditChange = (field: keyof Program, value: unknown) => {
-    setEditForm((prev) => ({ ...prev, [field]: value }));
-  };
 
   const filterPrograms = (programs: Program[]) => {
     if (!searchQuery) return programs;
@@ -124,37 +107,25 @@ export default function AdminPage() {
                 key={program.id}
                 className="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] shadow-lg"
               >
-              {editingId === program.id ? (
-                <EditForm
-                  program={editForm}
-                  onChange={handleEditChange}
-                  onSave={handleSaveEdit}
-                  onCancel={() => {
-                    setEditingId(null);
-                    setEditForm({});
-                  }}
-                />
-              ) : (
                 <ProgramCard
                   program={program}
                   onApprove={handleApprove}
                   onDecline={handleDecline}
                   onEdit={handleEdit}
                 />
-              )}
-            </div>
-          ))}
+              </div>
+            ))}
 
-          {programs.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-lg font-medium text-[var(--text-secondary)]">
-                {searchQuery
-                  ? "No programs match your search"
-                  : "No programs to review"}
-              </p>
-            </div>
-          )}
-        </div>
+            {programs.length === 0 && (
+              <div className="text-center py-20">
+                <p className="text-lg font-medium text-[var(--text-secondary)]">
+                  {searchQuery
+                    ? "No programs match your search"
+                    : "No programs to review"}
+                </p>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

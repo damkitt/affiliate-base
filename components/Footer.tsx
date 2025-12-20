@@ -1,10 +1,30 @@
+"use client";
+
 import Link from "next/link";
+import { generateFingerprint } from "@/lib/fingerprint";
 
 interface FooterProps {
   onAddProgram?: () => void;
 }
 
 export function Footer({ onAddProgram }: FooterProps) {
+  const handleAdvertiseClick = async () => {
+    try {
+      const fp = await generateFingerprint();
+      fetch("/api/analytics/collect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fingerprint: fp,
+          url: "/advertise",
+          referer: window.location.href,
+        }),
+      }).catch(() => { });
+    } catch (err) {
+      console.error("Failed to track advertise click:", err);
+    }
+  };
+
   return (
     <footer className="w-full border-t border-[var(--border)] bg-[var(--bg-secondary)] mt-auto relative z-10">
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -44,6 +64,7 @@ export function Footer({ onAddProgram }: FooterProps) {
                 <li>
                   <Link
                     href="/advertise"
+                    onClick={handleAdvertiseClick}
                     className="hover:text-[var(--accent-solid)] transition-colors"
                   >
                     Promote Your Program

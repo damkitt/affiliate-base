@@ -79,6 +79,7 @@ model Program {
   approvalTimeRange    String?   @map("approval_time_range")
   qualityScore         Int       @default(0) @map("quality_score")
   trendingScore        Float     @default(0) @map("trending_score")
+  manualScoreBoost     Int       @default(0) @map("manual_score_boost")
   totalViews           Int       @default(0) @map("total_views")
   approvalStatus       Boolean   @default(true) @map("approval_status")
   isFeatured           Boolean   @default(false) @map("is_featured")
@@ -89,6 +90,8 @@ model Program {
   reports              ProgramReport[]
 
   @@index([approvalStatus, trendingScore, createdAt])
+  @@index([approvalStatus, category, trendingScore])
+  @@index([approvalStatus, programName])
   @@index([isFeatured, featuredExpiresAt])
 }
 

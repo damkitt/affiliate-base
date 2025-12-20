@@ -4,10 +4,13 @@ import {
     HiPresentationChartLine,
     HiGlobeAlt,
     HiEnvelope,
-    HiPencilSquare
+    HiPencilSquare,
+    HiShare,
+    HiCheck
 } from "react-icons/hi2";
 import { FaXTwitter } from "react-icons/fa6";
 import { Program } from "@/types";
+import { useState } from "react";
 
 interface ProgramSidebarProps {
     program: Program;
@@ -17,6 +20,18 @@ interface ProgramSidebarProps {
 }
 
 export function ProgramSidebar({ program, onApply, onOpenCalculator, onOpenEditModal }: ProgramSidebarProps) {
+    const [copied, setCopied] = useState(false);
+
+    const handleShare = async () => {
+        const url = typeof window !== 'undefined' ? window.location.href : '';
+        try {
+            await navigator.clipboard.writeText(url);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    };
     return (
         <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-6">
 
@@ -45,10 +60,31 @@ export function ProgramSidebar({ program, onApply, onOpenCalculator, onOpenEditM
                 {/* Income Calculator Button */}
                 <button
                     onClick={onOpenCalculator}
-                    className="w-full py-4 px-6 glass rounded-2xl text-[var(--text-primary)] font-semibold flex items-center justify-center gap-2 hover:bg-[var(--bg-secondary)] border border-[var(--border)] transition-all group"
+                    className="w-full py-4 px-6 glass rounded-2xl text-[var(--text-primary)] font-semibold flex items-center justify-center gap-2 hover:bg-[var(--bg-secondary)] border border-[var(--border)] transition-all group mb-3"
                 >
                     <HiPresentationChartLine className="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform" />
                     Income Calculator
+                </button>
+
+                {/* Share Button */}
+                <button
+                    onClick={handleShare}
+                    className={`w-full py-4 px-6 rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all group border ${copied
+                            ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
+                            : "bg-black/40 border-white/10 hover:border-white/20 text-white"
+                        }`}
+                >
+                    {copied ? (
+                        <>
+                            <HiCheck className="w-5 h-5" />
+                            <span>Copied</span>
+                        </>
+                    ) : (
+                        <>
+                            <HiShare className="w-5 h-5 text-[var(--text-tertiary)] group-hover:text-white transition-colors" />
+                            <span>Share</span>
+                        </>
+                    )}
                 </button>
 
                 <p className="text-xs text-[var(--text-tertiary)] text-center mt-4 font-medium">Free to join • No credit card required</p>

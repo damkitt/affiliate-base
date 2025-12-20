@@ -8,14 +8,9 @@ import { unstable_cache } from "next/cache";
 export const getLeaderboardPrograms = unstable_cache(
     async () => {
         return await prisma.program.findMany({
-            where: {
-                approvalStatus: true,
-            },
-            orderBy: [
-                { trendingScore: "desc" },
-                { createdAt: "desc" },
-            ],
-            take: 50, // Limit to top 50 for initial render performance
+            where: { approvalStatus: true },
+            orderBy: [{ trendingScore: "desc" }, { createdAt: "desc" }],
+            take: 50,
             select: {
                 id: true,
                 programName: true,
@@ -25,7 +20,7 @@ export const getLeaderboardPrograms = unstable_cache(
                 commissionDuration: true,
                 category: true,
                 tagline: true,
-                description: true, // Needed for search filtering
+                description: true,
                 isFeatured: true,
                 featuredExpiresAt: true,
                 createdAt: true,
@@ -33,11 +28,8 @@ export const getLeaderboardPrograms = unstable_cache(
             },
         });
     },
-    ["leaderboard-programs"], // Cache key
-    {
-        revalidate: 60, // Revalidate every 60 seconds
-        tags: ["programs"],
-    }
+    ["leaderboard-programs-v2"],
+    { revalidate: 60, tags: ["programs"] }
 );
 
 /**

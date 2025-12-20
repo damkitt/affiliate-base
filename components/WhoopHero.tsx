@@ -87,10 +87,20 @@ export function WhoopHero() {
         const render = () => {
             ctx.clearRect(0, 0, width, height);
 
-            particles.forEach((p) => {
+            // Set fixed color once if possible, but we have per-particle opacity
+            // Optimization: Cache shared strings or use globalAlpha
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
                 p.update(width, height);
-                p.draw(ctx, height);
-            });
+
+                const visibilityFactor = Math.max(0, 1 - (p.y / (height * 0.8)));
+                ctx.globalAlpha = p.opacity * visibilityFactor;
+                ctx.fillStyle = "#00F0A0"; // Whoop Green
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1.0;
 
             animationFrameId = requestAnimationFrame(render);
         };

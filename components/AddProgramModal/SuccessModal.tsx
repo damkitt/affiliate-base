@@ -15,15 +15,15 @@ export function SuccessModal({ onClose, programName, slug, logoUrl }: SuccessMod
   const [ogImageLoaded, setOgImageLoaded] = useState(false);
   const [ogImageError, setOgImageError] = useState(false);
 
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://affiliatebase.com';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://affiliatebase.co';
   const shareUrl = `${baseUrl}/programs/${slug}`;
   const ogImageUrl = `${baseUrl}/programs/${slug}/opengraph-image`;
 
   // Updated Copy
-  const shareText = `Just submitted the ${programName} affiliate program to @AffiliateBase! 🚀\n\nDiscover high-paying partner programs.`;
+  const shareText = `Just submitted ${programName} to @AffiliateBase directory! 🚀\n\nFind high-paying partner programs:`;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+    navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -51,7 +51,7 @@ export function SuccessModal({ onClose, programName, slug, logoUrl }: SuccessMod
           Program Submitted
         </h2>
         <p className="text-zinc-400 mb-8 max-w-sm text-sm leading-relaxed">
-          Thanks for submitting <span className="text-white font-medium">{programName}</span>. It is now under review and will be live on the platform shortly.
+          Thanks for submitting <span className="text-white font-medium">{programName}</span>. It is now <span className="text-emerald-500 font-semibold">live</span> on the platform and ready to be discovered!
         </p>
 
         {/* Share Section */}
@@ -61,10 +61,13 @@ export function SuccessModal({ onClose, programName, slug, logoUrl }: SuccessMod
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={handleCopy}
-                className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 hover:border-white/10 transition-all group active:scale-[0.98]"
+                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl transition-all group active:scale-[0.98] border ${copied
+                  ? "bg-emerald-500/10 border-emerald-500/50"
+                  : "bg-zinc-900/50 hover:bg-zinc-900 border-white/5 hover:border-white/10"
+                  }`}
               >
                 {copied ? <HiCheck className="w-5 h-5 text-emerald-500" /> : <HiLink className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />}
-                <span className="text-xs font-semibold text-zinc-400 group-hover:text-white transition-colors">{copied ? "Copied!" : "Copy Link"}</span>
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${copied ? "text-emerald-500" : "text-zinc-500 group-hover:text-white transition-colors"}`}>{copied ? "Copied" : "Copy Link"}</span>
               </button>
 
               <button
@@ -143,7 +146,7 @@ export function SuccessModal({ onClose, programName, slug, logoUrl }: SuccessMod
 
                 {/* Card Footer (Domain) */}
                 <div className="bg-black/50 backdrop-blur-sm p-3 flex items-center justify-between border-t border-white/5">
-                  <span className="text-xs text-zinc-500 font-medium">affiliatebase.com</span>
+                  <span className="text-xs text-zinc-500 font-medium">affiliatebase.co</span>
                   <HiArrowUpRight className="w-3 h-3 text-zinc-600" />
                 </div>
               </div>

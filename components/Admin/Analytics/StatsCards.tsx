@@ -44,31 +44,14 @@ export function StatsCards({ data, isLoading }: StatsCardsProps) {
                 </span>
             </div>
 
-            {/* New Programs */}
+            {/* Advertise Views */}
             <div className="p-5 rounded-lg border border-white/10 bg-white/[0.02]">
                 <span className="text-xs text-white/40 uppercase tracking-wider block mb-3">
-                    New Programs
+                    Advertise Page
                 </span>
-                <div className="flex items-baseline gap-4">
-                    <div>
-                        <span className="text-3xl font-light tabular-nums">
-                            {isLoading ? "—" : data?.newProgramsCount?.day ?? 0}
-                        </span>
-                        <span className="text-xs text-white/30 ml-1">today</span>
-                    </div>
-                    <div className="text-white/30 text-sm">
-                        <span className="tabular-nums">
-                            {data?.newProgramsCount?.week ?? 0}
-                        </span>
-                        <span className="text-xs ml-1">7d</span>
-                    </div>
-                    <div className="text-white/30 text-sm">
-                        <span className="tabular-nums">
-                            {data?.newProgramsCount?.month ?? 0}
-                        </span>
-                        <span className="text-xs ml-1">30d</span>
-                    </div>
-                </div>
+                <span className="text-3xl font-light tabular-nums">
+                    {isLoading ? "—" : data?.advertiseViews?.toLocaleString() ?? 0}
+                </span>
             </div>
         </div>
     );
