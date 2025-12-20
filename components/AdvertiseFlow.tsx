@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { HiCheck, HiStar, HiMagnifyingGlass } from "react-icons/hi2";
+import { HiCheck, HiStar, HiMagnifyingGlass, HiCubeTransparent } from "react-icons/hi2";
+import Image from "next/image";
 import { Program } from "@/types";
 import useSWR from "swr";
 import AddProgramModal from "./AddProgramModal";
@@ -78,9 +79,8 @@ export function AdvertiseFlow() {
       query.delete("program");
     }
 
-    const newUrl = `${window.location.pathname}?${query.toString()}${
-      window.location.hash
-    }`;
+    const newUrl = `${window.location.pathname}?${query.toString()}${window.location.hash
+      }`;
     window.history.replaceState(null, "", newUrl);
   }, [step, selectedProgram, isInitialized]);
 
@@ -167,15 +167,26 @@ function PricingStep({
 
   return (
     <div className={styles.pricingStep}>
-      <div className={styles.iconWrapper}>
-        <HiStar className={styles.iconLarge} />
+      {/* Vertical Brand Header */}
+      <div className={styles.brandHeader}>
+        <div className={styles.logoWrapper}>
+          <Image
+            src="/default-logo.png"
+            alt="Logo"
+            width={64}
+            height={64}
+            className={styles.logoImage}
+          />
+        </div>
+        <span className={styles.brandName}>
+          Affiliate <span className={styles.brandHighlight}>Base</span>
+        </span>
       </div>
-      <h2 className={styles.title}>Become a Sponsored Program</h2>
+
+      <h1 className={styles.title}>Recruit Partners, Not Leads.</h1>
       <p className={styles.description}>
-        Get premium visibility at the top of our leaderboard. Sponsored programs
-        receive priority placement above organic listings, a distinctive
-        &ldquo;Sponsored&rdquo; badge, and significantly more visibility from
-        our targeted affiliate audience.
+        Stop paying for single clicks. Get discovered by creators who bring you
+        thousands of customers. Secure the top spot.
       </p>
 
       <div className={styles.pricingCard}>
@@ -190,19 +201,19 @@ function PricingStep({
         <ul className={styles.featureList}>
           <li className={styles.featureItem}>
             <HiCheck className={styles.featureIcon} />
-            <span>Top 3 placement on leaderboard</span>
+            <span>Permanent Rank #1, #2, or #3</span>
           </li>
           <li className={styles.featureItem}>
             <HiCheck className={styles.featureIcon} />
-            <span>&ldquo;Sponsored&rdquo; badge & premium styling</span>
+            <span>Premium Gold Highlight & Badge</span>
           </li>
           <li className={styles.featureItem}>
             <HiCheck className={styles.featureIcon} />
-            <span>5x more clicks than organic listings</span>
+            <span>5x Higher Click-Through Rate</span>
           </li>
           <li className={styles.featureItem}>
             <HiCheck className={styles.featureIcon} />
-            <span>Priority support & detailed analytics</span>
+            <span>Seen by 100% of Visitors</span>
           </li>
         </ul>
 
@@ -229,6 +240,9 @@ function PricingStep({
           <div className={styles.loadingText}>Loading availability...</div>
         )}
       </div>
+      <p className={styles.guaranteeText}>
+        One-time payment. Valid for 30 days. No auto-renewal.
+      </p>
     </div>
   );
 }
@@ -243,15 +257,15 @@ function SelectionStep({ onSelect }: { onSelect: (p: Program) => void }) {
   const filteredPrograms =
     search.length >= 2
       ? programs?.filter((p) => {
-          const matchesSearch = p.programName
-            .toLowerCase()
-            .includes(search.toLowerCase());
-          const isAlreadyFeatured =
-            p.isFeatured &&
-            p.featuredExpiresAt &&
-            new Date(p.featuredExpiresAt) > new Date();
-          return matchesSearch && !isAlreadyFeatured;
-        })
+        const matchesSearch = p.programName
+          .toLowerCase()
+          .includes(search.toLowerCase());
+        const isAlreadyFeatured =
+          p.isFeatured &&
+          p.featuredExpiresAt &&
+          new Date(p.featuredExpiresAt) > new Date();
+        return matchesSearch && !isAlreadyFeatured;
+      })
       : [];
 
   return (

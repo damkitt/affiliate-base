@@ -54,17 +54,16 @@ export default function HomeContent({ initialPrograms }: HomeContentProps) {
               <div className="flex items-center justify-center gap-2 flex-wrap">
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 border ${
-                    selectedCategory === null
+                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 border ${selectedCategory === null
                       ? "text-white border-transparent scale-105"
                       : "bg-[var(--bg-card)] text-[var(--text-primary)] border-[var(--border)] hover:border-[var(--accent-solid)] hover:bg-[var(--bg-secondary)]"
-                  }`}
+                    }`}
                   style={
                     selectedCategory === null
                       ? {
-                          background: "var(--accent-gradient-dark)",
-                          boxShadow: "var(--shadow-md)",
-                        }
+                        background: "var(--accent-gradient-dark)",
+                        boxShadow: "var(--shadow-md)",
+                      }
                       : { boxShadow: "var(--shadow-sm)" }
                   }
                 >
@@ -79,17 +78,16 @@ export default function HomeContent({ initialPrograms }: HomeContentProps) {
                       onClick={() =>
                         setSelectedCategory(isSelected ? null : category)
                       }
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 border ${
-                        isSelected
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 border ${isSelected
                           ? "text-white border-transparent scale-105"
                           : "bg-[var(--bg-card)] text-[var(--text-primary)] border-[var(--border)] hover:border-[var(--accent-solid)] hover:bg-[var(--bg-secondary)]"
-                      }`}
+                        }`}
                       style={
                         isSelected
                           ? {
-                              background: "var(--accent-gradient-dark)",
-                              boxShadow: "var(--shadow-md)",
-                            }
+                            background: "var(--accent-gradient-dark)",
+                            boxShadow: "var(--shadow-md)",
+                          }
                           : { boxShadow: "var(--shadow-sm)" }
                       }
                     >

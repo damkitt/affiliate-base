@@ -12,60 +12,76 @@ import {
 import { cleanAndValidateUrl } from "@/lib/url-validator";
 
 export async function GET(): Promise<NextResponse> {
-  const programs = await prisma.program.findMany({
-    where: {
-      approvalStatus: true,
-    },
-    select: {
-      id: true,
-      slug: true,
-      programName: true,
-      tagline: true,
-      description: true,
-      category: true,
-      websiteUrl: true,
-      affiliateUrl: true,
-      country: true,
-      xHandle: true,
-      email: true,
-      logoUrl: true,
-      commissionRate: true,
-      commissionDuration: true,
-      cookieDuration: true,
-      payoutMethod: true,
-      minPayoutValue: true,
-      avgOrderValue: true,
-      targetAudience: true,
-      additionalInfo: true,
-      affiliatesCountRange: true,
-      payoutsTotalRange: true,
-      foundingDate: true,
-      approvalTimeRange: true,
-      approvalStatus: true,
-      isFeatured: true,
-      featuredExpiresAt: true,
-      qualityScore: true,
-      trendingScore: true,
-      totalViews: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+  const now = new Date();
+  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  // Fetch all active programs to handle sorting and filtering in memory
+  // In a larger app, we'd do this via Prisma queries, but for this size, 
+  // memory sorting allows for more complex "zipper" logic easily.
+  const allPrograms = await prisma.program.findMany({
+    where: { approvalStatus: true },
     orderBy: [{ trendingScore: "desc" }, { createdAt: "desc" }],
   });
 
-  const now = new Date();
-  const featured = programs.filter(
-    (p) => p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now
-  );
-  const organic = programs.filter(
-    (p) => !(p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now)
-  );
+  // Query A: Sponsored (Top 3)
+  const sponsored = allPrograms
+    .filter(p => p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now)
+    .slice(0, 3);
 
-  const sortedPrograms = [...featured, ...organic];
+  // Query B: Organic Leaders (All non-sponsored active programs)
+  // These are already sorted by trendingScore DESC from the DB query
+  const organic = allPrograms.filter(p => !sponsored.some(s => s.id === p.id));
 
-  activeProgramsGauge.set(sortedPrograms.length);
+  // Query C: The Injection Queue (Underdogs - Newcomers < 24h)
+  // Sorted by trendingScore DESC then createdAt DESC
+  const newcomers = organic
+    .filter(p => p.createdAt >= twentyFourHoursAgo)
+    .sort((a, b) => {
+      if (b.trendingScore !== a.trendingScore) return b.trendingScore - a.trendingScore;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
 
-  return NextResponse.json(sortedPrograms);
+  // Smart Zipper Merge Logic
+  const finalList: any[] = [...sponsored];
+  const seenIds = new Set(sponsored.map(p => p.id));
+
+  let organicIndex = 0;
+  let newcomerIndex = 0;
+  const injectionSlots = [8, 13, 18, 23, 28, 33, 38, 43, 48]; // Target slots (1-indexed)
+
+  while (finalList.length < allPrograms.length) {
+    const nextSlot = finalList.length + 1;
+
+    // Check for Injection Slot
+    if (injectionSlots.includes(nextSlot) && newcomerIndex < newcomers.length) {
+      // Find the next unique newcomer
+      let candidate = newcomers[newcomerIndex++];
+      while (candidate && seenIds.has(candidate.id) && newcomerIndex < newcomers.length) {
+        candidate = newcomers[newcomerIndex++];
+      }
+
+      if (candidate && !seenIds.has(candidate.id)) {
+        finalList.push({ ...candidate, isInjected: true });
+        seenIds.add(candidate.id);
+        continue; // Move to next slot
+      }
+    }
+
+    // Standard Organic Flow
+    if (organicIndex < organic.length) {
+      const p = organic[organicIndex++];
+      if (!seenIds.has(p.id)) {
+        finalList.push(p);
+        seenIds.add(p.id);
+      }
+    } else {
+      break; // No more programs
+    }
+  }
+
+  activeProgramsGauge.set(finalList.length);
+
+  return NextResponse.json(finalList);
 }
 
 export async function POST(request: Request): Promise<NextResponse> {

@@ -129,20 +129,42 @@ export function calculateEngagementScore(
 
 /**
  * Calculate total trending score combining all components:
- * A. Engagement (Rolling 14 Days): (UniqueViews * 1) + (OutboundClicks * 10)
- * B. Quality: +10 for Logo, +5 for each filled optional field
- * C. Trust Tiers: affiliatesCount/totalPayouts mapped to 0-10pts (safety capped)
- * D. Recency Boost: <3 days +100pts, <7 days +50pts
+ * A. Base Points (Rolling 7 Days): (UniqueViews7d * 1) + (UniqueClicks7d * 10)
+ * B. Multiplier (Quality Bonus): 
+ *    - IF Views >= 30 AND CTR > 10% -> x1.3
+ *    - IF Views >= 30 AND CTR > 5% -> x1.1
+ *    - ELSE -> x1.0
+ *    (CTR = Clicks / Views, safety check for 0)
+ * C. Quality: +10 for Logo, +5 for each filled optional field
+ * D. Trust Tiers: affiliatesCount/totalPayouts mapped to 0-10pts (capped)
+ * E. Recency Boost: <3 days +100pts, <7 days +50pts
  */
 export function calculateTrendingScore(
     program: Partial<Program> & { createdAt: Date },
-    fourteenDayViews: number,
-    fourteenDayClicks: number
+    sevenDayViews: number,
+    sevenDayClicks: number
 ): number {
-    const engagementScore = calculateEngagementScore(fourteenDayViews, fourteenDayClicks);
+    // 1. Base Points
+    const basePoints = (sevenDayViews * 1) + (sevenDayClicks * 10);
+
+    // 2. Multiplier logic
+    let multiplier = 1.0;
+    if (sevenDayViews >= 30) {
+        const ctr = sevenDayClicks / sevenDayViews;
+        if (ctr > 0.10) {
+            multiplier = 1.3;
+        } else if (ctr > 0.05) {
+            multiplier = 1.1;
+        }
+    }
+
+    // 3. Other components
     const qualityScore = calculateQualityScore(program);
     const trustScore = calculateTrustScore(program);
     const recencyBoost = calculateRecencyBoost(program.createdAt);
 
-    return engagementScore + qualityScore + trustScore + recencyBoost;
+    // 4. Final Calculation
+    const totalScore = (basePoints * multiplier) + qualityScore + trustScore + recencyBoost;
+
+    return Math.round(totalScore);
 }

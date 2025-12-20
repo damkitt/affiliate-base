@@ -15,7 +15,6 @@ interface LeaderboardProps {
 
 export function Leaderboard({ programs }: LeaderboardProps) {
   const [visibleCount, setVisibleCount] = useState(12);
-  const [featuredIndex, setFeaturedIndex] = useState(0);
 
   // Scrollbar logic
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -47,16 +46,7 @@ export function Leaderboard({ programs }: LeaderboardProps) {
   const featuredPrograms = programs.filter(p => p.isFeatured && p.featuredExpiresAt && new Date(p.featuredExpiresAt) > now);
   const regularPrograms = programs.filter(p => !featuredPrograms.find(f => f.id === p.id));
 
-  // Carousel logic  // Auto-rotate featured programs
-  useEffect(() => {
-    if (featuredPrograms.length <= 3) return;
-
-    const interval = setInterval(() => {
-      setFeaturedIndex((prev) => (prev + 3) % featuredPrograms.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [featuredPrograms.length]);
+  // Carousel logic removed - only showing top 3
 
   const displayRegular = regularPrograms.slice(0, visibleCount);
 
@@ -92,10 +82,7 @@ export function Leaderboard({ programs }: LeaderboardProps) {
             <div className="divide-y divide-zinc-100 dark:divide-white/[0.04] perspective-[600px]">
               <AnimatePresence mode="popLayout">
                 {/* Featured Section */}
-                {featuredPrograms.length > 0 && Array.from({ length: Math.min(featuredPrograms.length, 3) }).map((_, i) => {
-                  const pIndex = (featuredIndex + i) % featuredPrograms.length;
-                  const program = featuredPrograms[pIndex];
-
+                {featuredPrograms.slice(0, 3).map((program) => {
                   return (
                     <motion.div
                       layout

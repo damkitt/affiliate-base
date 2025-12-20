@@ -39,9 +39,8 @@ export function ProgramCard({
 
   const Logo = (
     <div
-      className={`${styles.logo} ${
-        variant === "row" ? styles.logoRow : styles.logoCard
-      }`}
+      className={`${styles.logo} ${variant === "row" ? styles.logoRow : styles.logoCard
+        }`}
     >
       {program.logoUrl ? (
         <Image
@@ -53,9 +52,8 @@ export function ProgramCard({
         />
       ) : (
         <div
-          className={`${styles.logoPlaceholder} ${
-            variant === "card" ? styles.logoPlaceholderCard : ""
-          }`}
+          className={`${styles.logoPlaceholder} ${variant === "card" ? styles.logoPlaceholderCard : ""
+            }`}
         >
           {program.programName[0]}
         </div>
@@ -66,9 +64,8 @@ export function ProgramCard({
   const NewDot = isNew ? (
     <div className={styles.newDotWrapper}>
       <div
-        className={`${styles.newDot} ${
-          isSponsored ? styles.newDotSponsored : styles.newDotDefault
-        }`}
+        className={`${styles.newDot} ${isSponsored ? styles.newDotSponsored : styles.newDotDefault
+          }`}
       />
       <div className={styles.newDotTooltip}>
         New Arrival (24h)
@@ -83,11 +80,10 @@ export function ProgramCard({
 
   const CommissionPill = (
     <div
-      className={`${styles.commissionPill} ${
-        isSponsored
-          ? styles.commissionPillSponsored
-          : styles.commissionPillDefault
-      }`}
+      className={`${styles.commissionPill} ${isSponsored
+        ? styles.commissionPillSponsored
+        : styles.commissionPillDefault
+        }`}
     >
       <span className={styles.commissionRate}>{program.commissionRate}%</span>
       <span className={styles.commissionDuration}>
@@ -100,9 +96,8 @@ export function ProgramCard({
     return (
       <Link
         href={`/programs/${program.slug || program.id}`}
-        className={`${styles.rowWrapper} ${
-          isSponsored ? styles.rowWrapperSponsored : ""
-        }`}
+        className={`${styles.rowWrapper} ${isSponsored ? styles.rowWrapperSponsored : ""
+          }`}
       >
         {NewDot}
 
@@ -131,16 +126,10 @@ export function ProgramCard({
                     className={styles.tooltipContent}
                   >
                     <p className={styles.tooltipText}>
-                      Ranked by{" "}
-                      <span className={styles.tooltipHighlight}>
-                        engagement
-                      </span>
-                      , <span className={styles.tooltipHighlight}>quality</span>{" "}
-                      &{" "}
-                      <span className={styles.tooltipHighlight}>
-                        popularity
-                      </span>
-                      . New programs get a temporary boost.
+                      Trending Score based on{" "}
+                      <span className={styles.tooltipHighlight}>7-day</span>{" "}
+                      unique views, clicks, and CTR. New programs get a
+                      temporary boost.
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -153,9 +142,8 @@ export function ProgramCard({
             <div className={styles.programInfoContent}>
               <div className={styles.programInfoHeader}>
                 <h3
-                  className={`${styles.programName} ${
-                    isSponsored ? styles.programNameSponsored : ""
-                  }`}
+                  className={`${styles.programName} ${isSponsored ? styles.programNameSponsored : ""
+                    }`}
                 >
                   {program.programName}
                 </h3>
