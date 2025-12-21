@@ -39,7 +39,7 @@ export function ProgramCard({
       {/* Main Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1">
-          <h2 className="text-base font-bold text-[var(--text-primary)] truncate">
+          <h2 className="text-base font-bold text-[var(--text-primary)] break-words">
             {program.programName}
           </h2>
           <div className="flex gap-1.5 flex-shrink-0">

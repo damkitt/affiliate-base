@@ -191,7 +191,7 @@ export default function AddProgramModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-[#111111]/95 backdrop-blur-2xl rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-scaleIn border border-white/10">
+      <div className="relative w-full max-w-2xl bg-[var(--bg-card)] backdrop-blur-2xl rounded-2xl shadow-[var(--shadow-premium)] max-h-[90vh] flex flex-col overflow-hidden animate-scaleIn border border-[var(--border)]">
         {/* Header */}
         <div className="relative px-6 pt-6 pb-4">
           <button
@@ -222,11 +222,10 @@ export default function AddProgramModal({
         {/* Form Content */}
         <div className="flex-1 overflow-auto">
           <div
-            className={`h-full overflow-y-auto px-6 py-4 transition-all duration-500 ease-out ${
-              slideDirection === "right"
+            className={`h-full overflow-y-auto px-6 py-4 transition-all duration-500 ease-out ${slideDirection === "right"
                 ? "animate-slideInRight"
                 : "animate-slideInLeft"
-            }`}
+              }`}
             key={currentStep}
           >
             {currentStep === 1 && (
@@ -291,11 +290,10 @@ export default function AddProgramModal({
               type="button"
               onClick={handleNext}
               disabled={!canProceedToStep(currentStep + 1, formData)}
-              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${
-                canProceedToStep(currentStep + 1, formData)
+              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${canProceedToStep(currentStep + 1, formData)
                   ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
                   : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
-              }`}
+                }`}
             >
               Continue
               <HiArrowRight className="w-4 h-4" />
@@ -305,11 +303,10 @@ export default function AddProgramModal({
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting || !canSubmitForm(formData)}
-              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${
-                canSubmitForm(formData) && !isSubmitting
+              className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${canSubmitForm(formData) && !isSubmitting
                   ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
                   : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
-              }`}
+                }`}
             >
               {isSubmitting ? (
                 <>

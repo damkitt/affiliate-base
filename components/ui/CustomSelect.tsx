@@ -86,18 +86,18 @@ export function CustomSelect({
 
             {isOpen && (
                 <div className={cn(
-                    "absolute z-50 left-0 right-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl max-h-56 overflow-hidden flex flex-col animate-fadeIn ring-1 ring-black/5",
+                    "absolute z-50 left-0 right-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl shadow-2xl max-h-56 overflow-hidden flex flex-col animate-fadeIn ring-1 ring-[var(--border)]/10",
                     position === "top" ? "bottom-full mb-2" : "top-full mt-2"
                 )}>
                     {searchable && (
-                        <div className="p-2 border-b border-zinc-100 dark:border-zinc-800">
+                        <div className="p-2 border-b border-[var(--border)]">
                             <input
                                 autoFocus
                                 type="text"
                                 placeholder="Search..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full px-3 py-2 text-sm bg-zinc-50 dark:bg-zinc-800 rounded-lg focus:outline-none text-zinc-900 dark:text-zinc-100 placeholder-zinc-400"
+                                className="w-full px-3 py-2 text-sm bg-[var(--bg-secondary)] rounded-lg focus:outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
                             />
                         </div>
                     )}
@@ -115,19 +115,19 @@ export function CustomSelect({
                                     }}
                                     className={cn(
                                         "w-full px-3 py-2.5 text-sm text-left flex items-center justify-between gap-3 rounded-lg transition-colors",
-                                        "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50",
-                                        value === option.value && "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium"
+                                        "text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]",
+                                        value === option.value && "bg-[var(--accent-dim)] text-[var(--accent-solid)] font-bold"
                                     )}
                                 >
                                     <span className="flex items-center gap-2 truncate">
                                         {option.icon && <span className="text-lg">{option.icon}</span>}
                                         {option.label}
                                     </span>
-                                    {value === option.value && <HiCheck className="w-4 h-4 text-emerald-500" />}
+                                    {value === option.value && <HiCheck className="w-4 h-4 text-[var(--accent-solid)]" />}
                                 </button>
                             ))
                         ) : (
-                            <div className="px-4 py-3 text-sm text-zinc-400 text-center">
+                            <div className="px-4 py-3 text-sm text-[var(--text-tertiary)] text-center">
                                 No results found
                             </div>
                         )}

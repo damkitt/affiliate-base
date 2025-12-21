@@ -6,6 +6,8 @@ interface EditFormProps {
   onChange: (field: keyof Program, value: unknown) => void;
   onSave: () => void;
   onCancel: () => void;
+  isSaving?: boolean;
+  saveStatus?: "idle" | "success" | "error";
 }
 
 export function EditForm({
@@ -13,6 +15,8 @@ export function EditForm({
   onChange,
   onSave,
   onCancel,
+  isSaving,
+  saveStatus,
 }: EditFormProps) {
   return (
     <div className="space-y-4">
@@ -46,13 +50,21 @@ export function EditForm({
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
-          Tagline *
-        </label>
+        <div className="flex justify-between items-center mb-2">
+          <label className="block text-xs font-medium text-[var(--text-tertiary)]">
+            Tagline * <span className="text-[10px] text-[var(--accent-solid)]">(50 characters max)</span>
+          </label>
+          <span className={`text-[10px] font-medium ${(program.tagline?.length || 0) >= 50 ? "text-red-500" : "text-[var(--text-tertiary)]"
+            }`}>
+            {program.tagline?.length || 0}/50
+          </span>
+        </div>
         <input
           className="w-full px-4 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)]"
           value={program.tagline || ""}
           onChange={(e) => onChange("tagline", e.target.value)}
+          maxLength={50}
+          placeholder="50 characters max"
         />
       </div>
 
@@ -210,9 +222,15 @@ export function EditForm({
       <div className="flex gap-3 pt-4 border-t border-[var(--border)]">
         <button
           onClick={onSave}
-          className="px-6 py-3 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600 transition-colors shadow-lg"
+          disabled={isSaving}
+          className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-lg disabled:opacity-50 ${saveStatus === "success"
+            ? "bg-emerald-500 text-white"
+            : saveStatus === "error"
+              ? "bg-red-500 text-white"
+              : "bg-emerald-500 text-white hover:bg-emerald-600"
+            }`}
         >
-          Save Changes
+          {isSaving ? "Saving..." : saveStatus === "success" ? "Saved!" : saveStatus === "error" ? "Error" : "Save Changes"}
         </button>
         <button
           onClick={onCancel}

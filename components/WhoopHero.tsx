@@ -130,17 +130,18 @@ export function WhoopHero() {
     return (
         <div ref={containerRef} className="absolute inset-0 w-full min-h-full pointer-events-none overflow-hidden z-0 bg-[var(--bg)]">
             {/* Top Green Glow - "Horizon" effect */}
+            {/* Top Green Glow - "Horizon" effect */}
             <div
-                className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[100vw] h-[70vh] opacity-30 blur-[100px]"
+                className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[100vw] h-[70vh] opacity-20 dark:opacity-30 blur-[100px] pointer-events-none"
                 style={{
-                    background: "radial-gradient(ellipse at center, rgba(0,240,160,0.4) 0%, rgba(0,240,160,0.05) 50%, transparent 80%)"
+                    background: "radial-gradient(ellipse at center, rgba(0,240,160,0.3) 0%, rgba(0,240,160,0.05) 50%, transparent 80%)"
                 }}
             />
 
             <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
-            {/* Vignette to darken edges/bottom - Dark Mode Only */}
-            <div className="hidden dark:block absolute inset-0 bg-[radial-gradient(circle_at_top,transparent_0%,#000000_100%)] opacity-80" />
+            {/* Vignette for depth - Theme aware */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,transparent_0%,rgba(0,0,0,0.03)_100%)] dark:bg-[radial-gradient(circle_at_top,transparent_0%,#000000_100%)] dark:opacity-80" />
         </div>
     );
 }

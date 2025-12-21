@@ -306,18 +306,6 @@ export default function ManageProgramClient({ initialProgram, initialStats }: Ma
                                     <h2 className="text-xl font-bold tracking-tight">Program Settings</h2>
                                     <p className="text-sm text-white/40">Manage visibility, commission, and metadata.</p>
                                 </div>
-                                <button
-                                    onClick={handleSave}
-                                    disabled={isSaving}
-                                    className={`px-8 py-3 rounded-xl font-bold transition-all shadow-xl disabled:opacity-50 flex items-center gap-2 ${saveStatus === "success"
-                                        ? "bg-emerald-500 text-white shadow-emerald-500/10"
-                                        : saveStatus === "error"
-                                            ? "bg-red-500 text-white"
-                                            : "bg-white text-black hover:bg-neutral-200 shadow-white/5"
-                                        }`}
-                                >
-                                    {isSaving ? "Saving..." : saveStatus === "success" ? "Saved!" : saveStatus === "error" ? "Error" : <><HiCheck className="w-5 h-5" /> Save Changes</>}
-                                </button>
                             </div>
 
                             <EditForm
@@ -325,6 +313,8 @@ export default function ManageProgramClient({ initialProgram, initialStats }: Ma
                                 onChange={handleEditChange}
                                 onSave={handleSave}
                                 onCancel={() => router.push("/admin")}
+                                isSaving={isSaving}
+                                saveStatus={saveStatus}
                             />
                         </div>
                     </div>

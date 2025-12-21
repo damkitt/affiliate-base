@@ -263,7 +263,7 @@ export function DetailsStep({
             <div className="flex flex-wrap gap-2.5 items-center w-full pr-2">
               {formData.payoutMethod ? (
                 formData.payoutMethod.split(",").map((method, idx) => (
-                  <span key={idx} className="inline-flex items-center px-3 py-1 rounded-full bg-zinc-800/80 text-zinc-100 text-[11px] font-medium border border-zinc-700/50 shadow-sm backdrop-blur-md">
+                  <span key={idx} className="inline-flex items-center px-3 py-1 rounded-full bg-[var(--accent-dim)] text-[var(--accent-solid)] text-[11px] font-bold border border-[var(--accent-solid)]/20 shadow-sm transition-all duration-300">
                     {method.trim()}
                   </span>
                 ))

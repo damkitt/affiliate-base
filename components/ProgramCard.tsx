@@ -153,13 +153,13 @@ export const ProgramCard = memo(function ProgramCard({
               <div className={styles.programInfoHeader}>
                 <h3
                   className={`${styles.programName} ${isSponsored ? styles.programNameSponsored : ""
-                    }`}
+                    } break-words`}
                 >
                   {program.programName}
                 </h3>
                 {SponsoredBadge}
               </div>
-              <p className={styles.programTagline}>{program.tagline}</p>
+              <p className={`${styles.programTagline} break-words`}>{program.tagline}</p>
             </div>
           </div>
 
@@ -193,7 +193,7 @@ export const ProgramCard = memo(function ProgramCard({
           {Logo}
 
           <div className="flex-1 min-w-0">
-            <h3 className={styles.cardProgramName}>{program.programName}</h3>
+            <h3 className={`${styles.cardProgramName} break-words`}>{program.programName}</h3>
 
             <div className={styles.cardCategoryBadge}>
               <CategoryIcon
