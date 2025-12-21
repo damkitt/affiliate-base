@@ -7,28 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum EventName {
-  VIEW
-  CLICK
-  OUTBOUND
-}
-
 model AnalyticsEvent {
   id          String    @id @default(uuid())
   programId   String?   @map("program_id")
-  sessionId   String    @default("legacy") @map("session_id")
-  eventName   EventName @default(VIEW) @map("event_name")
-  eventType   String    @default("view") @map("event_type") // Legacy field
+  eventType   String    @default("view") @map("event_type")
   fingerprint String
   ipHash      String    @map("ip_hash")
   userAgent   String?   @map("user_agent")
   referer     String?
   country     String?
-  url         String?   // Current page URL
-  targetUrl   String?   @map("target_url") // For outbound clicks
   createdAt   DateTime  @default(now()) @map("created_at")
+  eventName   EventName @default(VIEW) @map("event_name")
+  sessionId   String    @default("legacy") @map("session_id")
+  targetUrl   String?   @map("target_url")
+  url         String?
 
-  // Performance indexes for dashboard queries
   @@index([programId])
   @@index([programId, fingerprint])
   @@index([programId, createdAt])
@@ -53,64 +46,67 @@ model SearchLog {
 }
 
 model Program {
-  id                   String    @id @default(uuid())
-  programName          String    @unique @default("N/A") @map("program_name")
-  slug                 String?   @unique
-  tagline              String    @default("No tagline provided.")
-  description          String    @default("No description provided.")
-  category             String    @default("Not specified")
-  websiteUrl           String    @unique @map("website_url")
-  affiliateUrl         String    @unique @map("affiliate_url")
-  country              Country   @default(Other)
-  xHandle              String?   @map("x_handle")
+  id                   String          @id @default(uuid())
+  programName          String          @unique @default("N/A") @map("program_name")
+  tagline              String          @default("No tagline provided.")
+  description          String          @default("No description provided.")
+  category             String          @default("Not specified")
+  websiteUrl           String          @unique @map("website_url")
+  affiliateUrl         String          @unique @map("affiliate_url")
+  country              Country         @default(Other)
+  xHandle              String?         @map("x_handle")
   email                String?
-  logoUrl              String?   @map("logo_url")
-  commissionRate       Int       @default(0)
-  commissionDuration   String?   @map("commission_duration")
-  cookieDuration       Int?      @map("cookie_duration")
-  payoutMethod         String?   @map("payout_method")
-  minPayoutValue       Int?      @map("min_payout_value")
-  avgOrderValue        Int?      @map("avg_order_value")
-  targetAudience       String?   @map("target_audience")
-  additionalInfo       String?   @map("additional_info")
-  affiliatesCountRange String?   @map("affiliates_count_range")
-  payoutsTotalRange    String?   @map("payouts_total_range")
-  foundingDate         DateTime? @map("founding_date")
-  approvalTimeRange    String?   @map("approval_time_range")
-  qualityScore         Int       @default(0) @map("quality_score")
-  trendingScore        Float     @default(0) @map("trending_score")
-  manualScoreBoost     Int       @default(0) @map("manual_score_boost")
-  totalViews           Int       @default(0) @map("total_views")
-  approvalStatus       Boolean   @default(true) @map("approval_status")
-  isFeatured           Boolean   @default(false) @map("is_featured")
-  featuredExpiresAt    DateTime? @map("featured_expires_at")
-  createdAt            DateTime  @default(now()) @map("created_at")
-  updatedAt            DateTime  @updatedAt
-
+  logoUrl              String?         @map("logo_url")
+  commissionRate       Int             @default(0)
+  commissionDuration   String?         @map("commission_duration")
+  cookieDuration       Int?            @map("cookie_duration")
+  payoutMethod         String?         @map("payout_method")
+  minPayoutValue       Int?            @map("min_payout_value")
+  avgOrderValue        Int?            @map("avg_order_value")
+  targetAudience       String?         @map("target_audience")
+  additionalInfo       String?         @map("additional_info")
+  affiliatesCountRange String?         @map("affiliates_count_range")
+  payoutsTotalRange    String?         @map("payouts_total_range")
+  foundingDate         DateTime?       @map("founding_date")
+  approvalTimeRange    String?         @map("approval_time_range")
+  approvalStatus       Boolean         @default(true) @map("approval_status")
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt
+  featuredExpiresAt    DateTime?       @map("featured_expires_at")
+  isFeatured           Boolean         @default(false) @map("is_featured")
+  slug                 String?         @unique
+  qualityScore         Int             @default(0) @map("quality_score")
+  totalViews           Int             @default(0) @map("total_views")
+  trendingScore        Float           @default(0) @map("trending_score")
+  manualScoreBoost     Int             @default(0) @map("manual_score_boost")
   reports              ProgramReport[]
 
   @@index([approvalStatus, trendingScore, createdAt])
-  @@index([approvalStatus, category, trendingScore])
-  @@index([approvalStatus, programName])
   @@index([isFeatured, featuredExpiresAt])
 }
 
 model ProgramReport {
-  id          String       @id @default(uuid())
-  programId   String       @map("program_id")
-  program     Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
-  type        ReportType   @default(EDIT)
-  reason      String?      // For reports: "broken_link", "scam", "misleading", "other"
-  message     String       @db.Text
-  email       String?
-  isFounder   Boolean      @default(false) @map("is_founder")
-  status      ReportStatus @default(PENDING)
-  createdAt   DateTime     @default(now()) @map("created_at")
-  resolvedAt  DateTime?    @map("resolved_at")
+  id         String       @id @default(uuid())
+  programId  String       @map("program_id")
+  type       ReportType   @default(EDIT)
+  reason     String?
+  message    String
+  email      String?
+  isFounder  Boolean      @default(false) @map("is_founder")
+  status     ReportStatus @default(PENDING)
+  createdAt  DateTime     @default(now()) @map("created_at")
+  resolvedAt DateTime?    @map("resolved_at")
+  program    Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
 
   @@index([programId])
   @@index([status])
   @@map("program_reports")
+}
+
+enum EventName {
+  VIEW
+  CLICK
+  OUTBOUND
 }
 
 enum ReportType {

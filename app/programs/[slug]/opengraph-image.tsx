@@ -1,9 +1,12 @@
 import { ImageResponse } from 'next/og';
 import { prisma } from '@/lib/prisma';
 import sharp from 'sharp';
+import fs from 'fs/promises';
+import path from 'path';
 
 // Force Node.js runtime for stability and sharp support
 export const runtime = 'nodejs';
+export const revalidate = 0;
 
 export const alt = 'Program Detail';
 export const size = {
@@ -15,10 +18,9 @@ export const contentType = 'image/png';
 
 export default async function Image(props: { params: Promise<{ slug: string }> }) {
     try {
-        const params = await props.params;
-        const { slug } = params;
+        const { slug } = await props.params;
 
-        // 1. Fetch Data directly from DB
+        // 1. Fetch Data
         const program = await prisma.program.findFirst({
             where: { slug, approvalStatus: true },
             select: {
@@ -26,257 +28,252 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                 logoUrl: true,
                 commissionRate: true,
                 commissionDuration: true,
+                tagline: true,
             },
         });
 
         if (!program) {
             return new ImageResponse(
                 (
-                    <div
-                        style={{
-                            background: '#09090b',
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontFamily: 'sans-serif',
-                        }}
-                    >
-                        <div style={{ fontSize: 60, fontWeight: 900, marginBottom: 20 }}>
-                            Affiliate Base
-                        </div>
-                        <div style={{ fontSize: 30, color: '#71717a' }}>
-                            Program not found
-                        </div>
+                    <div style={{ background: 'black', width: '100%', height: '100%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        Program Not Found
                     </div>
                 ),
                 { ...size }
             );
         }
 
-        // 2. Prepare Logo (Safe Fetch + Convert to PNG via Sharp)
+        // 2. Prepare Program Logo via Sharp
         let logoSrc = null;
         if (program.logoUrl) {
             try {
-                if (!program.logoUrl.startsWith('http')) {
-                    throw new Error('Local/relative logo not supported in OG');
-                }
-
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-                const logoRes = await fetch(program.logoUrl, {
-                    signal: controller.signal,
-                    headers: { 'User-Agent': 'AffiliateBase-OG-Bot/1.0' }
-                });
-                clearTimeout(timeoutId);
-
+                const logoRes = await fetch(program.logoUrl);
                 if (logoRes.ok) {
-                    const arrayBuffer = await logoRes.arrayBuffer();
-                    const buffer = Buffer.from(arrayBuffer);
-
+                    const buffer = Buffer.from(await logoRes.arrayBuffer());
                     const optimizedBuffer = await sharp(buffer)
-                        .resize({
-                            width: 320,
-                            height: 320,
-                            fit: 'contain',
-                            background: { r: 5, g: 5, b: 5, alpha: 0 }
-                        })
+                        .resize({ width: 320, height: 320, fit: 'cover' })
                         .png()
                         .toBuffer();
-
-                    const base64 = optimizedBuffer.toString('base64');
-                    logoSrc = `data:image/png;base64,${base64}`;
+                    logoSrc = `data:image/png;base64,${optimizedBuffer.toString('base64')}`;
                 }
             } catch (e) {
-                console.warn('[OG] Logo processing failed:', e);
+                console.error('[OG] Logo error:', e);
             }
         }
-        // 3. Render
+
+        // 3. Prepare Brand Logo
+        const brandLogoBuffer = await fs.readFile(path.join(process.cwd(), 'public', 'default-logo.png'));
+        const brandLogoSrc = `data:image/png;base64,${brandLogoBuffer.toString('base64')}`;
+
+        // 4. Prepare Fonts (Using stable Inter URLs)
+        const interBold = await fetch(new URL('https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf', import.meta.url)).then(res => res.arrayBuffer());
+        const interMedium = await fetch(new URL('https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf', import.meta.url)).then(res => res.arrayBuffer());
+
         return new ImageResponse(
             (
                 <div
                     style={{
-                        background: '#050505',
-                        width: '100%',
-                        height: '100%',
+                        background: '#000000',
+                        width: '1200px',
+                        height: '630px',
                         display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontFamily: 'sans-serif',
                         position: 'relative',
                         overflow: 'hidden',
+                        fontFamily: '"Inter"',
                     }}
                 >
-                    {/* Background Gradients (Combined) */}
-                    <div style={{ position: 'absolute', top: '-300px', left: '-100px', width: '1000px', height: '1000px', background: 'radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(0,0,0,0) 70%)' }} />
-                    <div style={{ position: 'absolute', bottom: '-300px', right: '-100px', width: '1000px', height: '1000px', background: 'radial-gradient(circle, rgba(52, 211, 153, 0.05) 0%, rgba(0,0,0,0) 70%)' }} />
+                    {/* Background Layer: Spotlight */}
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundImage: 'radial-gradient(circle at 50% -20%, #202022 0%, #000000 50%)',
+                            display: 'flex',
+                        }}
+                    />
 
-                    {/* Main Content Container */}
-                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '1000px', height: '420px', zIndex: 10 }}>
-                        {/* Left: Program Logo */}
+                    {/* Background Layer: Grid (Simplified) */}
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            display: 'flex',
+                            opacity: 0.04,
+                            backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
+                            backgroundSize: '40px 40px',
+                        }}
+                    />
+
+                    {/* Top Branding Pill (Absolute Centered) */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '60px',
+                        left: 0,
+                        right: 0,
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}>
                         <div style={{
                             display: 'flex',
-                            width: '400px',
-                            justifyContent: 'center',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            padding: '10px 24px',
+                            borderRadius: '100px',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(16, 185, 129, 0.4)',
                         }}>
                             <div style={{
-                                width: '320px',
-                                height: '320px',
-                                borderRadius: '64px',
-                                padding: '10px',
-                                background: 'linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))',
-                                border: '1px solid rgba(255,255,255,0.1)',
+                                fontSize: '20px',
+                                fontWeight: 700,
+                                letterSpacing: '0.4em',
+                                textTransform: 'uppercase',
                                 display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
                             }}>
-                                {logoSrc ? (
-                                    // lint-disable-next-line @next/next/no-img-element
-                                    <img
-                                        src={logoSrc}
-                                        alt={program.programName}
-                                        style={{
-                                            width: '300px',
-                                            height: '300px',
-                                            borderRadius: '54px',
-                                            objectFit: 'cover',
-                                        }}
-                                    />
-                                ) : (
-                                    <div
-                                        style={{
-                                            width: '300px',
-                                            height: '300px',
-                                            borderRadius: '54px',
-                                            background: '#18181b',
-                                            color: '#52525b',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontSize: '120px',
-                                            fontWeight: 900,
-                                        }}
-                                    >
-                                        {program.programName?.charAt(0) || '?'}
-                                    </div>
-                                )}
+                                <div style={{ color: '#ffffff', display: 'flex' }}>AFFILIATE</div>
+                                <div style={{ color: '#10b981', marginLeft: '0.4em', display: 'flex' }}>BASE</div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Right: Details */}
+                    {/* Main Content Layout */}
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        width: '100%',
+                        height: '100%',
+                        padding: '120px 80px 80px 80px',
+                        alignItems: 'center',
+                        gap: '60px',
+                    }}>
+                        {/* The Left Element: The "Jewel Box" Container (FIXED) */}
+                        <div style={{
+                            width: '360px',
+                            height: '360px',
+                            borderRadius: '40px',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                        }}>
+                            {logoSrc ? (
+                                <img
+                                    src={logoSrc}
+                                    style={{
+                                        width: '360px',
+                                        height: '360px',
+                                        objectFit: 'cover',
+                                        borderRadius: '40px',
+                                    }}
+                                    alt={program.programName}
+                                />
+                            ) : (
+                                <div style={{ fontSize: '140px', fontWeight: 800, color: 'rgba(255,255,255,0.2)', display: 'flex' }}>
+                                    {program.programName.charAt(0)}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* The Right Element: Typography & Hierarchy */}
                         <div style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            alignItems: 'flex-start',
-                            justifyContent: 'center',
                             flex: 1,
-                            paddingLeft: '40px',
+                            height: '360px',
+                            justifyContent: 'center',
                         }}>
-                            {/* Commission Pill */}
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                padding: '12px 24px',
-                                background: 'rgba(16, 185, 129, 0.1)',
-                                borderRadius: '100px',
-                                border: '1px solid rgba(16, 185, 129, 0.2)',
-                                marginBottom: '24px',
-                            }}>
-                                <span style={{ color: '#10b981', fontSize: '28px', fontWeight: 800, marginRight: '8px' }}>
-                                    {program.commissionRate}%
-                                </span>
-                                <span style={{ color: '#a1a1aa', fontSize: '24px', fontWeight: 500 }}>
-                                    {program.commissionDuration === 'Recurring' ? 'Recurring' : 'Commission'}
-                                </span>
-                            </div>
+                            {/* Text Content Group */}
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {/* Program Name */}
+                                <div style={{
+                                    fontSize: '84px',
+                                    fontWeight: 800,
+                                    color: 'white',
+                                    lineHeight: '1',
+                                    display: 'flex',
+                                    wordBreak: 'break-word',
+                                }}>
+                                    {program.programName}
+                                </div>
 
-                            {/* Program Name - Adaptive sizing */}
-                            <div style={{
-                                fontSize: program.programName.length > 15 ? '60px' : '80px',
-                                fontWeight: 900,
-                                color: 'white',
-                                lineHeight: '1.05',
-                                marginBottom: '40px',
-                                textShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                                letterSpacing: '-0.04em',
-                                display: 'flex',
-                            }}>
-                                {program.programName}
-                            </div>
+                                {/* Tagline */}
+                                <div style={{
+                                    fontSize: '34px',
+                                    fontWeight: 500,
+                                    color: '#a1a1aa',
+                                    display: 'flex',
+                                    marginTop: '16px',
+                                }}>
+                                    {program.tagline || 'Verified Affiliate Program'}
+                                </div>
 
-                            {/* Trust Badge (Simulated) */}
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                                background: 'rgba(255,255,255,0.03)',
-                                padding: '8px 16px',
-                                borderRadius: '12px',
-                                border: '1px solid rgba(255,255,255,0.05)'
-                            }}>
+                                {/* The Hook (Commission) - Grounded on one line */}
                                 <div style={{
                                     display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '28px',
-                                    height: '28px',
-                                    borderRadius: '50%',
-                                    background: '#10b981',
-                                    color: 'black',
-                                    fontSize: '16px',
-                                    fontWeight: '900',
-                                }}>✓</div>
-                                <span style={{ color: '#71717a', fontSize: '24px', fontWeight: 600 }}>Verified Program</span>
+                                    flexDirection: 'row',
+                                    alignItems: 'flex-end', // Ground everything
+                                    gap: '20px',
+                                    marginTop: '48px',
+                                }}>
+                                    <div style={{
+                                        fontSize: '100px',
+                                        fontWeight: 900,
+                                        color: '#34d399',
+                                        display: 'flex',
+                                        lineHeight: 1,
+                                    }}>
+                                        {program.commissionRate}%
+                                    </div>
+                                    <div style={{
+                                        fontSize: '32px',
+                                        fontWeight: 600,
+                                        color: '#ffffff',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.15em',
+                                        opacity: 0.8,
+                                        display: 'flex',
+                                        lineHeight: 1,
+                                        marginBottom: '14px', // Tweak to 14px for perfect visual floor
+                                    }}>
+                                        {program.commissionDuration === 'Recurring' ? 'RECURRING' : 'COMMISSION'}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    {/* Footer / Branding Layer */}
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '50px',
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        letterSpacing: '0.5em',
-                        fontSize: '22px',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        opacity: 0.6
-                    }}>
-                        <span style={{ color: '#a1a1aa', marginRight: '10px' }}>AFFILIATE</span>
-                        <span style={{ color: '#10b981' }}>BASE.CO</span>
-                    </div>
-
-                    {/* Top Right Decorative Element */}
-                    <div style={{
-                        position: 'absolute',
-                        top: '40px',
-                        right: '40px',
-                        width: '80px',
-                        height: '4px',
-                        background: 'linear-gradient(90deg, #10b981, transparent)',
-                        borderRadius: '2px',
-                    }} />
                 </div>
             ),
-            { ...size }
+            {
+                ...size,
+                fonts: [
+                    {
+                        name: 'Inter',
+                        data: interBold,
+                        style: 'normal',
+                        weight: 700,
+                    },
+                    {
+                        name: 'Inter',
+                        data: interMedium,
+                        style: 'normal',
+                        weight: 500,
+                    },
+                ],
+            }
         );
-
     } catch (e: any) {
         console.error('[OG] Fatal Error:', e);
         return new ImageResponse(
             (
-                <div style={{ background: 'white', width: '100%', height: '100%', color: 'black', fontSize: 32 }}>
-                    Error: {e.message}
+                <div style={{ background: 'white', width: '100%', height: '100%', color: 'black', padding: 40, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontSize: 48, fontWeight: 'bold', display: 'flex' }}>Error generating image</div>
+                    <div style={{ fontSize: 24, marginTop: 20, display: 'flex' }}>{e.message}</div>
                 </div>
             ),
             { ...size }

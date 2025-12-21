@@ -1,0 +1,1 @@
+import { PrismaClient } from '@prisma/client'; const prisma = new PrismaClient(); async function main() { const programs = await prisma.program.findMany({ select: { slug: true, programName: true } }); console.log(JSON.stringify(programs, null, 2)); } main();
