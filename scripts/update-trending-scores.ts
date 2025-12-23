@@ -11,21 +11,20 @@ async function main() {
 
     const programs = await prisma.program.findMany();
 
-    // Get 14-day engagement stats for all programs
-    const fourteenDaysAgo = new Date();
-    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+    // Get 7-day engagement stats for all programs
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const stats = await prisma.programEvent.groupBy({
         by: ["programId", "type"],
         where: {
-            createdAt: { gte: fourteenDaysAgo },
+            createdAt: { gte: sevenDaysAgo },
             type: { in: ["VIEW", "CLICK"] }
         },
-        _count: true, // Prisma Client type might return { _all: number } or number depending on version, assuming number logic same as before or adapted.
-        // Wait, "stat._count" was used directly.
+        _count: true,
     });
 
-    // Build lookup map for 14-day stats
+    // Build lookup map for 7-day stats
     const engagementMap = new Map<string, { views: number; clicks: number }>();
     for (const stat of stats) {
         if (!stat.programId) continue;
@@ -38,10 +37,10 @@ async function main() {
     for (const program of programs) {
         const engagement = engagementMap.get(program.id) || { views: 0, clicks: 0 };
 
-        // Calculate new quality score (in case formula changed)
+        // Calculate new quality score
         const qualityScore = calculateQualityScore(program as any);
 
-        // Calculate trending score with all components
+        // Calculate trending score (Pure Stats + Manual Boost)
         const trendingScore = calculateTrendingScore(
             program as any,
             engagement.views,
@@ -59,8 +58,8 @@ async function main() {
         console.log(
             `✓ ${program.programName}: ` +
             `quality=${qualityScore}, ` +
-            `engagement=${engagement.views}v/${engagement.clicks}c, ` +
-            `trending=${trendingScore.toFixed(0)}`
+            `stats=${engagement.views}v/${engagement.clicks}c, ` +
+            `score=${trendingScore.toFixed(0)}`
         );
     }
 

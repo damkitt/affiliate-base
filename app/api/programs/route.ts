@@ -48,9 +48,11 @@ export async function GET(): Promise<NextResponse> {
   const organic = allPrograms.filter(p => !sponsored.some(s => s.id === p.id));
 
   // Query C: The Injection Queue (Underdogs - Newcomers < 24h)
-  // Sorted by trendingScore DESC then createdAt DESC
+  // RULE: If a program is already in the Top 20 organically, it appears naturally.
+  // We only inject those who are outside the Top 20.
+  const top20OrganicIds = new Set(organic.slice(0, 20).map(p => p.id));
   const newcomers = organic
-    .filter(p => p.createdAt >= twentyFourHoursAgo)
+    .filter(p => p.createdAt >= twentyFourHoursAgo && !top20OrganicIds.has(p.id))
     .sort((a, b) => {
       if (b.trendingScore !== a.trendingScore) return b.trendingScore - a.trendingScore;
       return b.createdAt.getTime() - a.createdAt.getTime();
@@ -225,12 +227,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     };
 
     const qualityScore = calculateQualityScore(programData);
-    const trustScore = calculateTrustScore(programData);
-    const trendingScore = calculateTrendingScore(
-      { ...programData, createdAt: new Date() },
-      0,
-      0
-    );
+    const trendingScore = calculateTrendingScore(programData, 0, 0);
 
     const program = await prisma.program.create({
       data: {

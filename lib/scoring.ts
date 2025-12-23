@@ -117,7 +117,7 @@ export function calculateRecencyBoost(createdAt: Date): number {
 }
 
 /**
- * Calculate engagement score from 14-day rolling views and clicks
+ * Calculate engagement score from 7-day rolling views and clicks
  * Views * 1 + Clicks * 10
  */
 export function calculateEngagementScore(
@@ -128,29 +128,21 @@ export function calculateEngagementScore(
 }
 
 /**
- * Calculate total trending score combining all components:
- * A. Base Points (Rolling 7 Days): (UniqueViews7d * 1) + (UniqueClicks7d * 10)
- * B. Multiplier (Quality Bonus): 
- *    - IF Views >= 30 AND CTR > 10% -> x1.3
- *    - IF Views >= 30 AND CTR > 5% -> x1.1
- *    - ELSE -> x1.0
- *    (CTR = Clicks / Views, safety check for 0)
- * C. Quality: +10 for Logo, +5 for each filled optional field
- * D. Trust Tiers: affiliatesCount/totalPayouts mapped to 0-10pts (capped)
- * E. Recency Boost: <3 days +100pts, <7 days +50pts
+ * Calculate pure stats-based score (Organic Performance)
+ * Based on 7-day rolling views and clicks with CTR multiplier
+ * Formula: ((Views * 1) + (Clicks * 10)) * Multiplier
  */
-export function calculateTrendingScore(
-    program: Partial<Program> & { createdAt: Date },
-    sevenDayViews: number,
-    sevenDayClicks: number
+export function calculatePureStatsScore(
+    views: number,
+    clicks: number
 ): number {
-    // 1. Base Points
-    const basePoints = (sevenDayViews * 1) + (sevenDayClicks * 10);
+    // 1. Base Score
+    const baseScore = (views * 1) + (clicks * 10);
 
-    // 2. Multiplier logic
+    // 2. Multiplier logic (Quality Bonus based on CTR)
     let multiplier = 1.0;
-    if (sevenDayViews >= 30) {
-        const ctr = sevenDayClicks / sevenDayViews;
+    if (views > 30) {
+        const ctr = clicks / views;
         if (ctr > 0.10) {
             multiplier = 1.3;
         } else if (ctr > 0.05) {
@@ -158,13 +150,23 @@ export function calculateTrendingScore(
         }
     }
 
-    // 3. Other components
-    const qualityScore = calculateQualityScore(program);
-    const trustScore = calculateTrustScore(program);
-    const recencyBoost = calculateRecencyBoost(program.createdAt);
+    return Math.round(baseScore * multiplier);
+}
 
-    // 4. Final Calculation
-    const totalScore = (basePoints * multiplier) + qualityScore + trustScore + recencyBoost + (program.manualScoreBoost || 0);
+/**
+ * Calculate total trending score combining organic performance and manual boost.
+ * This is the score stored in the database.
+ * 
+ * Note: Freshness/Recency boosts are now handled by the injection logic 
+ * in the API, not stored in the trendingScore.
+ */
+export function calculateTrendingScore(
+    program: { manualScoreBoost?: number },
+    sevenDayViews: number,
+    sevenDayClicks: number
+): number {
+    const pureStatsScore = calculatePureStatsScore(sevenDayViews, sevenDayClicks);
 
-    return Math.round(totalScore);
+    // We include manualScoreBoost as it's a persistent override
+    return pureStatsScore + (program.manualScoreBoost || 0);
 }
