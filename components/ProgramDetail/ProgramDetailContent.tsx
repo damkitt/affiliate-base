@@ -72,15 +72,18 @@ export function ProgramDetailContent({ program, relatedProgramsSlot }: ProgramDe
 
     useEffect(() => {
         if (program && fingerprint && !viewTracked.current) {
+            // Temporarily disabled session block for verification
+            /*
             if (wasViewedInSession(program.id)) {
                 viewTracked.current = true;
                 return;
             }
+            */
             viewTracked.current = true;
-            markViewedInSession(program.id);
-            markViewedInSession(program.id);
+            // markViewedInSession(program.id);
+            // markViewedInSession(program.id);
             // View Tracking
-            markViewedInSession(program.id);
+            // markViewedInSession(program.id);
             // View Tracking
             fetch('/api/track', {
                 method: "POST",

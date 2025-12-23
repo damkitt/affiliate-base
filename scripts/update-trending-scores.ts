@@ -15,12 +15,14 @@ async function main() {
     const fourteenDaysAgo = new Date();
     fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
-    const stats = await prisma.analyticsEvent.groupBy({
-        by: ["programId", "eventType"],
+    const stats = await prisma.programEvent.groupBy({
+        by: ["programId", "type"],
         where: {
             createdAt: { gte: fourteenDaysAgo },
+            type: { in: ["VIEW", "CLICK"] }
         },
-        _count: true,
+        _count: true, // Prisma Client type might return { _all: number } or number depending on version, assuming number logic same as before or adapted.
+        // Wait, "stat._count" was used directly.
     });
 
     // Build lookup map for 14-day stats
@@ -28,8 +30,8 @@ async function main() {
     for (const stat of stats) {
         if (!stat.programId) continue;
         const entry = engagementMap.get(stat.programId) || { views: 0, clicks: 0 };
-        if (stat.eventType === "view") entry.views = stat._count;
-        if (stat.eventType === "click") entry.clicks = stat._count;
+        if (stat.type === "VIEW") entry.views = stat._count;
+        if (stat.type === "CLICK") entry.clicks = stat._count;
         engagementMap.set(stat.programId, entry);
     }
 

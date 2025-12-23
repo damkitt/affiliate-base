@@ -23,11 +23,11 @@ export async function GET(request: Request): Promise<NextResponse> {
     startDate.setHours(0, 0, 0, 0);
   }
 
-  // Aggregate clicks from Database
-  const aggregations = await prisma.analyticsEvent.groupBy({
+  // Aggregate clicks from Database (Strict ProgramEvent)
+  const aggregations = await prisma.programEvent.groupBy({
     by: ["programId"],
     where: {
-      eventType: "click",
+      type: "CLICK",
       createdAt: {
         gte: startDate,
       },

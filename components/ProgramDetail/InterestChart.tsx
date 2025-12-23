@@ -27,7 +27,10 @@ function useAnalytics(programId: string) {
 
   const fetchAnalytics = useCallback(async () => {
     try {
-      const response = await fetch(`/api/programs/${programId}/view`);
+      // Add timestamp to bust cache
+      const response = await fetch(`/api/programs/${programId}/view?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
       if (response.ok) {
         const analytics: AnalyticsData = await response.json();
         setData(analytics);
@@ -41,6 +44,10 @@ function useAnalytics(programId: string) {
 
   useEffect(() => {
     fetchAnalytics();
+
+    // Poll every 5 seconds for live updates
+    const interval = setInterval(fetchAnalytics, 5000);
+    return () => clearInterval(interval);
   }, [fetchAnalytics]);
 
   return { data, loading };
@@ -80,17 +87,23 @@ export function InterestChart({ programId, totalClicks }: InterestChartProps) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
         {/* Total Views Card */}
         <div className="bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-white/5 rounded-2xl p-6 hover:bg-zinc-100 dark:hover:bg-zinc-900/50 transition-colors">
           <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-3">Total Views</p>
           <p className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">{totalViews.toLocaleString()}</p>
         </div>
 
+        {/* Total Clicks Card */}
+        <div className="bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-white/5 rounded-2xl p-6 hover:bg-zinc-100 dark:hover:bg-zinc-900/50 transition-colors">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-3">Total Clicks</p>
+          <p className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">{(analyticsData as any)?.totalClicks ?? totalClicks}</p>
+        </div>
+
         {/* Today Card */}
         <div className="bg-emerald-50/50 dark:bg-zinc-900/30 border border-emerald-100 dark:border-emerald-500/10 rounded-2xl p-6 hover:bg-emerald-50 dark:hover:bg-emerald-900/5 transition-colors relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 dark:bg-emerald-500/5 blur-[50px] rounded-full pointer-events-none" />
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-3">Today</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-3">Today Views</p>
           <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-500 tracking-tight">+{todayViews.toLocaleString()}</p>
         </div>
       </div>
@@ -111,10 +124,15 @@ export function InterestChart({ programId, totalClicks }: InterestChartProps) {
             }}
           >
             <defs>
-              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
                 <stop offset="75%" stopColor="#10b981" stopOpacity={0.05} />
                 <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="clicksGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
+                <stop offset="75%" stopColor="#3b82f6" stopOpacity={0.05} />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -123,14 +141,11 @@ export function InterestChart({ programId, totalClicks }: InterestChartProps) {
               stroke="#71717a"
               strokeOpacity={0.2}
             />
-            {/* Note: We use CSS variables or classes for stroke colors if possible, but Recharts is tricky. 
-                 Ideally, we'd pass a prop, but for now fixed dark gray works okay on white too, or we can make it conditional.
-                 Let's stick to a neutral zinc-700/30 look for grid which works on both. */}
             <XAxis
               dataKey="day"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#71717a", fontSize: 10, fontWeight: 500 }} // zinc-500
+              tick={{ fill: "#71717a", fontSize: 10, fontWeight: 500 }}
               dy={10}
             />
             <YAxis
@@ -142,13 +157,24 @@ export function InterestChart({ programId, totalClicks }: InterestChartProps) {
               content={({ active, payload, label }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl p-3 flex flex-col items-center min-w-[100px] transform -translate-y-4">
-                      <span className="text-zinc-500 text-[10px] font-medium uppercase tracking-wider mb-0.5">
+                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl p-3 flex flex-col min-w-[120px] transform -translate-y-4">
+                      <span className="text-zinc-500 text-[10px] font-medium uppercase tracking-wider mb-2">
                         {label}
                       </span>
-                      <span className="text-zinc-900 dark:text-white text-lg font-bold tabular-nums leading-none">
-                        {payload[0].value?.toLocaleString()} <span className="text-[10px] text-zinc-500 font-normal ml-0.5">views</span>
-                      </span>
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-emerald-500 text-[10px] font-bold uppercase">Views</span>
+                          <span className="text-zinc-900 dark:text-white text-base font-bold tabular-nums">
+                            {payload.find(p => p.dataKey === 'views')?.value?.toLocaleString() ?? 0}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-blue-500 text-[10px] font-bold uppercase">Clicks</span>
+                          <span className="text-zinc-900 dark:text-white text-base font-bold tabular-nums">
+                            {payload.find(p => p.dataKey === 'clicks')?.value?.toLocaleString() ?? 0}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   );
                 }
@@ -157,19 +183,19 @@ export function InterestChart({ programId, totalClicks }: InterestChartProps) {
             />
             <Area
               type="monotone"
-              dataKey="clicks"
+              dataKey="views"
               stroke="#10b981"
               strokeWidth={3}
-              fill="url(#chartGradient)"
-              activeDot={{
-                r: 5,
-                fill: "#10b981", // Green solid fill for better visibility in light mode too, or keep black/white?
-                // Reference was black fill/white stroke. 
-                // In light mode: White fill, Green stroke? Or just Green fill?
-                // Let's go with Green fill, White stroke for universal pop.
-                stroke: "#ffffff",
-                strokeWidth: 2,
-              }}
+              fill="url(#viewsGradient)"
+              activeDot={{ r: 5, fill: "#10b981", stroke: "#ffffff", strokeWidth: 2 }}
+            />
+            <Area
+              type="monotone"
+              dataKey="clicks"
+              stroke="#3b82f6"
+              strokeWidth={3}
+              fill="url(#clicksGradient)"
+              activeDot={{ r: 5, fill: "#3b82f6", stroke: "#ffffff", strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>

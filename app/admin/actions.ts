@@ -17,8 +17,8 @@ export async function updateProgramBoost(id: string, boost: number) {
         const fourteenDaysAgo = new Date();
         fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
-        const stats = await prisma.analyticsEvent.groupBy({
-            by: ["eventType"],
+        const stats = await prisma.programEvent.groupBy({
+            by: ["type"],
             where: {
                 programId: id,
                 createdAt: { gte: fourteenDaysAgo },
@@ -26,8 +26,8 @@ export async function updateProgramBoost(id: string, boost: number) {
             _count: true,
         });
 
-        const views = stats.find(s => s.eventType === 'view')?._count || 0;
-        const clicks = stats.find(s => s.eventType === 'click')?._count || 0;
+        const views = stats.find(s => s.type === 'VIEW')?._count || 0;
+        const clicks = stats.find(s => s.type === 'CLICK')?._count || 0;
 
         // 3. Calculate new score including the NEW boost
         const newTrendingScore = calculateTrendingScore(
@@ -86,8 +86,8 @@ export async function updateProgramData(id: string, data: any) {
         const fourteenDaysAgo = new Date();
         fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
-        const stats = await prisma.analyticsEvent.groupBy({
-            by: ["eventType"],
+        const stats = await prisma.programEvent.groupBy({
+            by: ["type"],
             where: {
                 programId: id,
                 createdAt: { gte: fourteenDaysAgo },
@@ -95,8 +95,8 @@ export async function updateProgramData(id: string, data: any) {
             _count: true,
         });
 
-        const views = stats.find(s => s.eventType === 'view')?._count || 0;
-        const clicks = stats.find(s => s.eventType === 'click')?._count || 0;
+        const views = stats.find(s => s.type === 'VIEW')?._count || 0;
+        const clicks = stats.find(s => s.type === 'CLICK')?._count || 0;
 
         const newTrendingScore = calculateTrendingScore(
             updatedProgram as any,

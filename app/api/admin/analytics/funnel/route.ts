@@ -27,29 +27,32 @@ export async function GET(request: Request) {
                 break;
         }
 
-        // For featured programs: Impressions = Total Site Visitors (since they're visible on homepage)
-        const totalVisitorsResult = await prisma.analyticsEvent.findMany({
+        // For featured programs: Impressions = Total Site Visitors (Approximation via TrafficLog unique IPs)
+        // TrafficLog doesn't have a reliable visitorId, so we approximate with distinct IP + UserAgent or just IP.
+        // Or if we want strict unique visitors, we rely on ProgramEvent which has visitorId but only for programs.
+        // Let's use TrafficLog IP distinct count for "Impressions".
+        const totalVisitorsResult = await prisma.trafficLog.findMany({
             where: { createdAt: { gte: rangeStart } },
-            select: { fingerprint: true },
-            distinct: ["fingerprint"],
+            select: { ip: true },
+            distinct: ["ip"],
         });
         const impressions = totalVisitorsResult.length;
 
-        // Program-specific views
-        const programViews = await prisma.analyticsEvent.count({
+        // Program-specific views (Strict)
+        const programViews = await prisma.programEvent.count({
             where: {
                 createdAt: { gte: rangeStart },
                 programId: programId,
-                eventType: "view",
+                type: "VIEW",
             },
         });
 
-        // Program-specific clicks
-        const programClicks = await prisma.analyticsEvent.count({
+        // Program-specific clicks (Strict)
+        const programClicks = await prisma.programEvent.count({
             where: {
                 createdAt: { gte: rangeStart },
                 programId: programId,
-                eventType: { in: ["click", "outbound"] },
+                type: "CLICK", // "outbound" is handled as CLICK in new system
             },
         });
 

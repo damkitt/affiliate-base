@@ -37,40 +37,34 @@ export async function GET(_req: Request, { params }: RouteContext) {
     const today = new Date();
     const dateKey = today.toISOString().split('T')[0];
 
-    // 1. Get totals from Program (fast access from "Current Totals" requirement)
-    const program = await prisma.program.findUnique({
-      where: { id: programId },
-      select: { totalViews: true, clicks: true }
+    // 2. Derive Totals from Events (always accurate)
+    const totalViews = await prisma.programEvent.count({
+      where: { programId, type: 'VIEW' }
+    });
+    const totalClicks = await prisma.programEvent.count({
+      where: { programId, type: 'CLICK' }
     });
 
-    // 2. Get Today's Activity (Strict ProgramEvent - Views only per user request)
-    const todayCount = await prisma.programEvent.count({
-      where: {
-        programId,
-        dateKey,
-        type: 'VIEW'
-      }
-    });
+    console.log(`[API/View] Program: ${programId}, totalViews: ${totalViews}, totalClicks: ${totalClicks}`);
 
-    // 3. Get Last 7 Days Chart Data (Strict ProgramEvent - Views only)
+    // 3. Get Last 7 Days Chart Data
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
     const minDateKey = sevenDaysAgo.toISOString().split('T')[0];
 
-    // Group by DateKey from strict table
     const dailyStats = await prisma.programEvent.groupBy({
-      by: ['dateKey'],
+      by: ['dateKey', 'type'],
       where: {
         programId,
-        dateKey: { gte: minDateKey },
-        type: 'VIEW'
+        dateKey: { gte: minDateKey }
       },
       _count: { _all: true }
     });
 
-    // Map to chart format, filling in missing days with 0
+    // Map to chart format
     const formatter = new Intl.DateTimeFormat('en-US', { weekday: 'short' });
     const chartData = [];
+    let todayViews = 0;
 
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
@@ -78,22 +72,35 @@ export async function GET(_req: Request, { params }: RouteContext) {
       const k = d.toISOString().split('T')[0];
       const dayName = formatter.format(d);
 
-      const stat = dailyStats.find(s => s.dateKey === k);
+      const viewStat = dailyStats.find(s => s.dateKey === k && s.type === 'VIEW');
+      const clickStat = dailyStats.find(s => s.dateKey === k && s.type === 'CLICK');
+
+      const views = viewStat ? viewStat._count._all : 0;
+      if (i === 0) todayViews = views;
+
       chartData.push({
         day: dayName,
-        clicks: stat ? stat._count._all : 0 // "clicks" key kept for frontend compatibility, but reflects Views
+        views,
+        clicks: clickStat ? clickStat._count._all : 0
       });
     }
 
-    const weeklyViews = dailyStats.reduce((acc, curr) => acc + curr._count._all, 0);
-    // Total Activity for the line is just Views as requested for the chart context
-    const totalActivity = program?.totalViews || 0;
+    const weeklyViews = dailyStats.filter(s => s.type === 'VIEW').reduce((acc, curr) => acc + curr._count._all, 0);
+    const weeklyClicks = dailyStats.filter(s => s.type === 'CLICK').reduce((acc, curr) => acc + curr._count._all, 0);
 
     return NextResponse.json({
       chartData,
-      totalViews: totalActivity,
-      todayViews: todayCount,
-      weeklyViews
+      totalViews: Math.max(totalViews, todayViews),
+      totalClicks: Math.max(totalClicks, weeklyClicks), // weeklyClicks is more of a sum of recent, but safe
+      todayViews,
+      weeklyViews,
+      weeklyClicks
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
     });
   } catch (error) {
     console.error("Analytics fetch failed:", error);
