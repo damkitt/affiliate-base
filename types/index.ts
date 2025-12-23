@@ -30,7 +30,8 @@ export type Program = {
   readonly trendingScore?: number;
   readonly manualScoreBoost?: number;
   readonly totalViews?: number;
-  readonly clicksCount: number;
+  readonly clicks: number;
+  readonly clicksCount: number; // Deprecated, mapped to clicks? Or just keep for compatibility.
   readonly approvalStatus: boolean;
   readonly isFeatured?: boolean;
   readonly featuredExpiresAt?: Date | null;
@@ -44,15 +45,23 @@ export type ProgramCreateInput = Omit<
 >;
 export type ProgramUpdateInput = Partial<ProgramCreateInput>;
 
-export type AnalyticsEvent = {
+export type ProgramEvent = {
   readonly id: string;
   readonly programId: string;
-  readonly eventType: "view" | "click";
-  readonly fingerprint: string;
-  readonly ipHash: string;
+  readonly type: string;
+  readonly visitorId: string;
+  readonly dateKey: string;
+  readonly createdAt: Date;
+};
+
+export type TrafficLog = {
+  readonly id: string;
+  readonly path: string;
+  readonly referrer?: string | null;
   readonly userAgent?: string | null;
-  readonly referer?: string | null;
   readonly country?: string | null;
+  readonly ip?: string | null;
+  readonly programId?: string | null;
   readonly createdAt: Date;
 };
 

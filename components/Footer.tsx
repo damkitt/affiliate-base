@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { generateFingerprint } from "@/lib/fingerprint";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface FooterProps {
   onAddProgram?: () => void;
@@ -44,6 +45,9 @@ export function Footer({ onAddProgram }: FooterProps) {
               The most trusted directory of high-paying affiliate programs.
               Verified manually for quality and reliability.
             </p>
+            <div className="mt-8">
+              <ThemeToggle />
+            </div>
           </div>
 
           {/* Links */}
@@ -100,10 +104,8 @@ export function Footer({ onAddProgram }: FooterProps) {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[var(--text-tertiary)]">
-          <p>
-            © {new Date().getFullYear()} Affiliate Base. All rights reserved.
-          </p>
+        <div className="mt-8 flex items-center gap-2 text-xs text-[var(--text-tertiary)]">
+          <p>© {new Date().getFullYear()} Affiliate Base. All rights reserved.</p>
         </div>
       </div>
     </footer>

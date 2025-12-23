@@ -259,7 +259,19 @@ export default function ManageProgramClient({ initialProgram, initialStats }: Ma
                                             <p className="text-[10px] text-white/40">Pin to top of the leaderboard</p>
                                         </div>
                                         <button
-                                            onClick={() => handleEditChange("isFeatured", !program.isFeatured)}
+                                            onClick={() => {
+                                                const newFeatured = !program.isFeatured;
+                                                handleEditChange("isFeatured", newFeatured);
+                                                if (newFeatured) {
+                                                    // Auto-set 30-day expiry when enabling sponsorship
+                                                    const expiryDate = new Date();
+                                                    expiryDate.setDate(expiryDate.getDate() + 30);
+                                                    handleEditChange("featuredExpiresAt", expiryDate);
+                                                } else {
+                                                    // Clear expiry when disabling
+                                                    handleEditChange("featuredExpiresAt", null);
+                                                }
+                                            }}
                                             className={`w-12 h-6 rounded-full transition-all relative ${program.isFeatured ? "bg-amber-500" : "bg-white/10"
                                                 }`}
                                         >

@@ -1,10 +1,21 @@
 import { ChangeEvent, RefObject, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { HiPhoto, HiGlobeAlt, HiLink, HiExclamationCircle } from "react-icons/hi2";
+import {
+  HiChevronRight,
+  HiInformationCircle,
+  HiCheckCircle,
+  HiExclamationCircle,
+  HiQuestionMarkCircle,
+  HiPencilSquare,
+  HiPhoto,
+  HiGlobeAlt,
+  HiLink
+} from 'react-icons/hi2';
 import { CategoryIcon } from "@/components/CategoryIcon";
 import type { FormData } from "../types";
 import { CATEGORIES, CATEGORY_ICONS } from "@/constants";
 import { getUrlValidationError } from "../error-utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/Tooltip";
 
 interface DuplicateErrors {
   programName?: string;
@@ -212,9 +223,14 @@ export function BasicInfoStep({
         </div>
         <div className="flex-1 space-y-3">
           <div>
-            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide">
-              Program Name <span className="text-red-500">*</span>
-            </label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)]">
+                Program Name <span className="text-red-500">*</span>
+              </label>
+              <span className={`text-[10px] font-medium ${(formData.programName?.length || 0) >= 30 ? "text-red-500" : "text-[var(--text-tertiary)]"}`}>
+                {formData.programName?.length || 0}/30
+              </span>
+            </div>
             <input
               type="text"
               name="programName"
@@ -222,6 +238,7 @@ export function BasicInfoStep({
               onChange={onFormChange}
               placeholder="e.g. Stripe, Notion, Figma..."
               required
+              maxLength={30}
               className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${duplicateErrors.programName
                 ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
                 : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
@@ -230,15 +247,43 @@ export function BasicInfoStep({
             {renderFieldError("programName", duplicateErrors.programName, checkingFields.has("programName"))}
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide">
-              Tagline
+            <label className="flex items-center justify-between text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+              <span className="flex items-center gap-1.5">
+                Tagline
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="cursor-help outline-none">
+                        <HiQuestionMarkCircle className="w-4 h-4 text-[var(--text-tertiary)] hover:text-white transition-colors" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={8} className="max-w-[260px] bg-[#0A0A0A] border border-white/10 shadow-2xl rounded-xl p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-1.5 rounded-lg bg-emerald-500/10 shrink-0">
+                          <HiInformationCircle className="w-4 h-4 text-emerald-500" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-white">Quick Tip</p>
+                          <p className="text-[11px] text-gray-400 leading-relaxed font-medium">
+                            Describe your product in <span className="text-white">5-7 words</span>. Keep it punchy and clear.
+                          </p>
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </span>
+              <span className={`text-[10px] font-bold tabular-nums ${formData.tagline.length >= 50 ? 'text-red-500' : 'text-[var(--text-tertiary)]'}`}>
+                {formData.tagline.length}/50
+              </span>
             </label>
             <input
               type="text"
               name="tagline"
               value={formData.tagline}
               onChange={onFormChange}
-              placeholder="A short description..."
+              placeholder="e.g. AI-powered writing assistant for teams"
+              maxLength={50}
               className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10 transition-all duration-300"
             />
           </div>
@@ -247,7 +292,7 @@ export function BasicInfoStep({
 
       {/* Category */}
       <div>
-        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-3 uppercase tracking-wide">
+        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-3">
           Category
         </label>
         <div className="flex flex-wrap gap-2">
@@ -272,25 +317,82 @@ export function BasicInfoStep({
         </div>
       </div>
 
-      {/* Description */}
+      {/* About This Program */}
       <div>
-        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide">
-          Description
+        <label className="flex items-center justify-between text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+          <span className="flex items-center gap-1.5">
+            About This Program
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="cursor-help outline-none">
+                    <HiQuestionMarkCircle className="w-4 h-4 text-[var(--text-tertiary)] hover:text-white transition-colors" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={8} className="max-w-[310px] bg-[#0A0A0A] border border-white/10 shadow-2xl rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-1.5 rounded-lg bg-emerald-500/10 shrink-0 mt-0.5">
+                      <HiPencilSquare className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <div className="space-y-4">
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-white">Quick Tip</p>
+                        <p className="text-[11px] text-gray-400 leading-relaxed font-medium">
+                          Don&apos;t just copy your homepage. Treat this as a briefing for your partners.
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-2.5">
+                          <span className="text-emerald-500/50 mt-1.5">•</span>
+                          <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
+                            <span className="text-white font-bold">The Fit:</span> Who buys your product and why?
+                          </p>
+                        </div>
+                        <div className="flex items-start gap-2.5">
+                          <span className="text-emerald-500/50 mt-1.5">•</span>
+                          <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
+                            <span className="text-white font-bold">The Partner:</span> Who can join? Any restrictions?
+                          </p>
+                        </div>
+                        <div className="flex items-start gap-2.5">
+                          <span className="text-emerald-500/50 mt-1.5">•</span>
+                          <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
+                            <span className="text-white font-bold">The Playbook:</span> What formats convert best?
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-white/5">
+                        <p className="text-[11px] text-emerald-400 font-bold leading-relaxed">
+                          Give creators the blueprint to succeed.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </span>
+          <span className={`text-[10px] font-bold tabular-nums ${formData.description.length >= 2000 ? 'text-red-500' : 'text-[var(--text-tertiary)]'}`}>
+            {formData.description.length}/2000
+          </span>
         </label>
         <textarea
           name="description"
           value={formData.description}
           onChange={onFormChange}
-          placeholder="Tell us about this affiliate program..."
-          rows={3}
-          className="w-full px-4 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 resize-none"
+          placeholder="Tell partners about your program, ideal customers, and what content works best..."
+          rows={5}
+          maxLength={2000}
+          className="w-full px-4 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 resize-none"
         />
       </div>
 
       {/* Links */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 items-center gap-1.5">
             <HiGlobeAlt className="w-3.5 h-3.5" /> Website{" "}
             <span className="text-red-500">*</span>
           </label>
@@ -313,7 +415,7 @@ export function BasicInfoStep({
           )}
         </div>
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 items-center gap-1.5">
             <HiLink className="w-3.5 h-3.5" /> Affiliate URL{" "}
             <span className="text-red-500">*</span>
           </label>

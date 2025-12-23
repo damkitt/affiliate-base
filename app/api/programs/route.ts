@@ -159,6 +159,30 @@ export async function POST(request: Request): Promise<NextResponse> {
       approvalTimeRange,
     } = body;
 
+    // Validate tagline length (max 50 characters)
+    if (tagline && tagline.length > 50) {
+      return NextResponse.json(
+        { error: "Tagline must be 50 characters or less." },
+        { status: 400 }
+      );
+    }
+
+    // Validate program name length (max 30 characters)
+    if (programName && programName.length > 30) {
+      return NextResponse.json(
+        { error: "Program name must be 30 characters or less." },
+        { status: 400 }
+      );
+    }
+
+    // Validate description length (max 2000 characters)
+    if (description && description.length > 2000) {
+      return NextResponse.json(
+        { error: "Description must be 2000 characters or less." },
+        { status: 400 }
+      );
+    }
+
     const baseSlug = programName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")

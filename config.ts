@@ -1,5 +1,5 @@
 export const config = {
   advertising: {
-    maxSlots: 10,
+    maxSlots: 3,
   },
 };

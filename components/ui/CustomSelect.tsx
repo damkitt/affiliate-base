@@ -86,7 +86,7 @@ export function CustomSelect({
 
             {isOpen && (
                 <div className={cn(
-                    "absolute z-50 left-0 right-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl shadow-2xl max-h-56 overflow-hidden flex flex-col animate-fadeIn ring-1 ring-[var(--border)]/10",
+                    "absolute z-50 left-0 right-0 bg-white dark:bg-[#09090b] border border-[var(--border)] rounded-xl shadow-2xl max-h-56 overflow-hidden flex flex-col animate-fadeIn ring-1 ring-[var(--border)]/10",
                     position === "top" ? "bottom-full mb-2" : "top-full mt-2"
                 )}>
                     {searchable && (

@@ -12,9 +12,9 @@ import {
     HiCheck
 } from "react-icons/hi2";
 import type { Program } from "@/types";
-import { SimilarPrograms, EditReportModal, IncomeSimulator, ProgramStatsGrid, HowItWorks, ProgramSidebar } from "@/components/ProgramDetail";
+import { SimilarPrograms, EditReportModal, IncomeCalculator, ProgramStatsGrid, HowItWorks, ProgramSidebar } from "@/components/ProgramDetail";
 import { NavBar } from "@/components/NavBar";
-import { Footer } from "@/components/Footer";
+// Removed Footer import to control placement in page.tsx
 import { CallToAction } from "@/components/CallToAction";
 import AddProgramModal from "@/components/AddProgramModal";
 import { WhoopHero } from "@/components/WhoopHero";
@@ -39,9 +39,10 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface ProgramDetailContentProps {
     program: Program;
+    relatedProgramsSlot?: React.ReactNode;
 }
 
-export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
+export function ProgramDetailContent({ program, relatedProgramsSlot }: ProgramDetailContentProps) {
     const viewTracked = useRef(false);
     const [fingerprint, setFingerprint] = useState<string | null>(null);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -77,17 +78,37 @@ export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
             }
             viewTracked.current = true;
             markViewedInSession(program.id);
-            fetch(`/api/programs/${program.id}/view`, {
+            markViewedInSession(program.id);
+            // View Tracking
+            markViewedInSession(program.id);
+            // View Tracking
+            fetch('/api/track', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ fingerprint }),
+                body: JSON.stringify({
+                    programId: program.id,
+                    type: 'VIEW',
+                    fingerprint: fingerprint || undefined,
+                    path: window.location.pathname
+                }),
             });
         }
     }, [program, fingerprint]);
 
     const handleApplyClick = async () => {
         if (!program) return;
-        fetch(`/api/programs/${program.id}/click`, { method: "POST" });
+        // Click Tracking with keepalive to allow navigation
+        fetch('/api/track', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                programId: program.id,
+                type: 'CLICK',
+                fingerprint: fingerprint || undefined,
+                path: window.location.pathname
+            }),
+            keepalive: true
+        });
     };
 
     const logoSrc = program.logoUrl || `https://www.google.com/s2/favicons?domain=${program.websiteUrl}&sz=128`;
@@ -135,18 +156,18 @@ export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
                                             {program.category}
                                         </span>
                                     </div>
-                                    <h1 className="text-2xl md:text-4xl font-bold text-[var(--text-primary)] mb-2 leading-tight tracking-tight">{program.programName}</h1>
-                                    <p className="text-sm md:text-base text-[var(--text-secondary)] line-clamp-1 md:line-clamp-none font-medium">{program.tagline ?? ''}</p>
+                                    <h1 className="text-2xl md:text-4xl font-bold text-[var(--text-primary)] mb-2 leading-tight tracking-tight break-words">{program.programName}</h1>
+                                    <p className="text-sm md:text-base text-[var(--text-secondary)] font-medium break-words">{program.tagline ?? ''}</p>
                                 </div>
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="absolute top-6 right-6 md:static flex items-center gap-3">
+                            <div className="flex items-center gap-3 w-auto mt-2 md:mt-0">
                                 <button
                                     onClick={handleShare}
-                                    className={`px-4 py-2.5 rounded-2xl transition-all group border flex items-center gap-2 font-semibold text-sm ${copied
+                                    className={`px-5 py-2 rounded-full transition-all group border flex items-center gap-2 font-semibold text-xs md:text-sm ${copied
                                         ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
-                                        : "bg-black/40 border-white/10 hover:border-white/20 text-white"
+                                        : "bg-white/5 border-white/10 hover:border-white/20 text-white"
                                         }`}
                                     title="Copy Link"
                                 >
@@ -166,9 +187,9 @@ export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
                                     href={program.websiteUrl}
                                     target="_blank"
                                     rel="nofollow sponsored noopener noreferrer"
-                                    className="p-3 rounded-2xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] glass hover:bg-white/5 transition-all group"
+                                    className="p-2.5 shrink-0 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] glass hover:bg-white/5 border border-white/10 hover:border-white/20 transition-all group"
                                 >
-                                    <HiArrowUpRight className="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" />
+                                    <HiArrowUpRight className="w-4 h-4 md:w-5 md:h-5 group-hover:rotate-45 transition-transform duration-300" />
                                 </a>
                             </div>
                         </div>
@@ -191,7 +212,7 @@ export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
                                     <h2 className="text-lg font-bold text-[var(--text-primary)]">About This Program</h2>
                                 </div>
                                 <div className="prose prose-invert max-w-none">
-                                    <p className="text-base text-[var(--text-secondary)] leading-relaxed">
+                                    <p className="text-base text-[var(--text-secondary)] leading-relaxed break-words whitespace-pre-wrap">
                                         {program.description ?? program.tagline ?? ''}
                                     </p>
                                     {program.additionalInfo && (
@@ -200,7 +221,7 @@ export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
                                                 <HiCheckCircle className="w-5 h-5 text-emerald-500" />
                                                 Additional Details
                                             </h3>
-                                            <p className="text-sm text-[var(--text-tertiary)] leading-relaxed whitespace-pre-wrap">
+                                            <p className="text-sm text-[var(--text-tertiary)] leading-relaxed whitespace-pre-wrap break-words">
                                                 {program.additionalInfo}
                                             </p>
                                         </div>
@@ -231,17 +252,17 @@ export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
 
                     </div>
 
-                    {/* Similar Programs */}
-                    <div className="mt-12 animate-fade-in-up delay-500">
-                        <SimilarPrograms programId={program.id} />
-                    </div>
+                    {/* Similar Programs removed - succeeded by RelatedPrograms in page.tsx */}
                 </main>
+
+                <div className="max-w-7xl mx-auto px-6 w-full">
+                    {relatedProgramsSlot}
+                </div>
 
                 {/* Call to Action */}
                 <CallToAction onAddProgram={() => setIsAddModalOpen(true)} />
 
-                {/* Footer */}
-                <Footer onAddProgram={() => setIsAddModalOpen(true)} />
+                {/* Footer removed - controlled in page.tsx */}
 
                 {/* Edit/Report Modal */}
                 <EditReportModal
@@ -257,8 +278,8 @@ export function ProgramDetailContent({ program }: ProgramDetailContentProps) {
                     onClose={() => setIsAddModalOpen(false)}
                 />
 
-                {/* Income Simulator Modal */}
-                <IncomeSimulator
+                {/* Income Calculator Modal */}
+                <IncomeCalculator
                     isOpen={isCalculatorOpen}
                     onClose={() => setIsCalculatorOpen(false)}
                     commissionRate={program.commissionRate ?? 0}

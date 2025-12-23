@@ -73,10 +73,10 @@ export function Leaderboard({ programs }: LeaderboardProps) {
             {/* Table Header */}
             <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-zinc-200 dark:border-white/[0.08] bg-zinc-50/50 dark:bg-white/[0.02] text-[11px] font-bold text-zinc-900 dark:text-zinc-300 uppercase tracking-widest backdrop-blur-sm">
               <div className="col-span-1 text-center opacity-40">#</div>
-              <div className="col-span-6 md:col-span-5">Program</div>
-              <div className="col-span-3 hidden md:block opacity-60">Category</div>
-              <div className="col-span-3 md:col-span-2 text-left opacity-60">Commission</div>
-              <div className="col-span-2 md:col-span-1"></div>
+              <div className="col-span-5">Program</div>
+              <div className="col-span-3 opacity-60">Category</div>
+              <div className="col-span-2 text-left opacity-60">Commission</div>
+              <div className="col-span-1"></div>
             </div>
 
             <div className="divide-y divide-zinc-100 dark:divide-white/[0.04] perspective-[600px]">

@@ -163,11 +163,12 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.375rem 0.875rem;
+  padding: 0.375rem 1rem;
   border-radius: 9999px;
   border: 1px solid;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   transition: all 0.3s;
+  white-space: nowrap;
 }
 
 .commissionPillDefault {
@@ -197,6 +198,7 @@
 .commissionRate {
   font-size: 0.75rem;
   font-weight: 700;
+  flex-shrink: 0;
 }
 
 .commissionDuration {
@@ -205,6 +207,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   opacity: 0.8;
+  flex-shrink: 0;
 }
 
 /* Row Variant */
@@ -315,17 +318,11 @@
 
 /* Program Info Column */
 .programInfoCol {
-  grid-column: span 6;
+  grid-column: span 5;
   display: flex;
   align-items: center;
   gap: 1rem;
   min-width: 0;
-}
-
-@media (min-width: 768px) {
-  .programInfoCol {
-    grid-column: span 5;
-  }
 }
 
 .programInfoContent {
@@ -375,26 +372,14 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   margin-top: 0.125rem;
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .programTagline {
-    display: block;
-  }
+  display: block;
 }
 
 /* Category Column */
 .categoryCol {
   grid-column: span 3;
-  display: none;
+  display: flex;
   align-items: center;
-}
-
-@media (min-width: 768px) {
-  .categoryCol {
-    display: flex;
-  }
 }
 
 .categoryBadge {
@@ -424,30 +409,18 @@
 
 /* Commission Column */
 .commissionCol {
-  grid-column: span 3;
+  grid-column: span 2;
   display: flex;
   justify-content: flex-start;
 }
 
-@media (min-width: 768px) {
-  .commissionCol {
-    grid-column: span 2;
-  }
-}
-
 /* Action Column */
 .actionCol {
-  grid-column: span 2;
+  grid-column: span 1;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 0.5rem;
-}
-
-@media (min-width: 768px) {
-  .actionCol {
-    grid-column: span 1;
-  }
 }
 
 .actionIcon {

@@ -7,29 +7,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model AnalyticsEvent {
-  id          String    @id @default(uuid())
-  programId   String?   @map("program_id")
-  eventType   String    @default("view") @map("event_type")
-  fingerprint String
-  ipHash      String    @map("ip_hash")
-  userAgent   String?   @map("user_agent")
-  referer     String?
-  country     String?
-  createdAt   DateTime  @default(now()) @map("created_at")
-  eventName   EventName @default(VIEW) @map("event_name")
-  sessionId   String    @default("legacy") @map("session_id")
-  targetUrl   String?   @map("target_url")
-  url         String?
+// 1. RICH TRAFFIC LOG (For Admin Dashboard)
+model TrafficLog {
+  id        String   @id @default(cuid())
+  path      String
+  referrer  String?
+  userAgent String?
+  country   String?
+  ip        String?
+  programId String?  @map("program_id")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  @@index([programId])
-  @@index([programId, fingerprint])
-  @@index([programId, createdAt])
-  @@index([fingerprint, ipHash, programId])
   @@index([createdAt])
-  @@index([sessionId])
-  @@index([country])
-  @@map("analytics_events")
+  @@map("traffic_logs")
+}
+
+// 2. STRICT PROGRAM STATS (For Public Leaderboard & Charts)
+model ProgramEvent {
+  id        String   @id @default(cuid())
+  programId String   @map("program_id")
+  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  type      String   // "VIEW" or "CLICK"
+  dateKey   String   @map("date_key") // "YYYY-MM-DD"
+  visitorId String   // FingerprintJS ID (formerly fingerprint)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([programId, visitorId, type, dateKey])
+  @@index([programId, type, dateKey])
+  @@map("program_events")
 }
 
 model SearchLog {
@@ -77,9 +82,11 @@ model Program {
   slug                 String?         @unique
   qualityScore         Int             @default(0) @map("quality_score")
   totalViews           Int             @default(0) @map("total_views")
+  clicks               Int             @default(0)
   trendingScore        Float           @default(0) @map("trending_score")
   manualScoreBoost     Int             @default(0) @map("manual_score_boost")
   reports              ProgramReport[]
+  events               ProgramEvent[]
 
   @@index([approvalStatus, trendingScore, createdAt])
   @@index([isFeatured, featuredExpiresAt])

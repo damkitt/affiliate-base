@@ -17,6 +17,7 @@ type AvailabilityData = {
   isFull: boolean;
   count?: number;
   max?: number;
+  nextAvailableDate?: string;
 };
 
 export function AdvertiseFlow() {
@@ -132,6 +133,11 @@ function PricingStep({
               <div className={styles.soldOutBanner}>
                 All 3 slots are currently taken
               </div>
+              {data.nextAvailableDate && (
+                <p className={styles.nextAvailableText}>
+                  Next slot available: {new Date(data.nextAvailableDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </p>
+              )}
               <button disabled className={styles.soldOutButton}>
                 Sold Out
               </button>

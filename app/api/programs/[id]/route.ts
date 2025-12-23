@@ -69,10 +69,18 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    
+
     // Remove id and createdAt from update payload (only keep updateable fields)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _discardId, createdAt: _discardCreatedAt, ...updateData } = body;
+
+    // Validate program name length (max 30 characters)
+    if (updateData.programName && updateData.programName.length > 30) {
+      return NextResponse.json(
+        { error: "Program name must be 30 characters or less." },
+        { status: 400 }
+      );
+    }
 
     const program = await prisma.program.update({
       where: { id },

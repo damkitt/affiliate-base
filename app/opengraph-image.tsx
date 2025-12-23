@@ -55,8 +55,8 @@ export default async function Image() {
                         right: 0,
                         bottom: 0,
                         display: 'flex',
-                        backgroundImage: 'linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px)',
-                        backgroundSize: '40px 40px',
+                        backgroundImage: 'linear-gradient(rgba(16, 185, 129, 0.05) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1.5px, transparent 1.5px)',
+                        backgroundSize: '60px 60px',
                     }}
                 />
 
@@ -67,16 +67,16 @@ export default async function Image() {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    top: '40%',
+                    top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    width: '800px',
-                    height: '800px',
+                    width: '1200px',
+                    height: '1200px',
                 }}>
                     <div style={{
-                        width: '400px',
-                        height: '400px',
-                        background: 'radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%)',
+                        width: '800px',
+                        height: '800px',
+                        background: 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)',
                         display: 'flex',
                     }} />
                 </div>

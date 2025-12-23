@@ -1,12 +1,14 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://affiliatebase.co';
+
     return {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: ['/admin/', '/private/'],
+            disallow: ['/admin/', '/private/', '/api/auth/'],
         },
-        sitemap: 'https://affiliatebase.co/sitemap.xml',
+        sitemap: `${baseUrl}/sitemap.xml`,
     };
 }

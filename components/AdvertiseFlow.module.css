@@ -302,9 +302,11 @@
   font-weight: 500;
 }
 
-.nextAvailable {
-  font-size: 0.75rem;
-  color: var(--text-tertiary);
+.nextAvailableText {
+  font-size: 0.8125rem;
+  color: var(--accent-solid);
+  font-weight: 500;
+  padding: 0.5rem 0;
 }
 
 .soldOutButton {

@@ -44,7 +44,7 @@ export default function RootLayout({
       <body className={`${inter.className} ${dmSerif.variable}`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

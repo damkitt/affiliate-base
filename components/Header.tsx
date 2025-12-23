@@ -1,7 +1,7 @@
 "use client";
 
 import { HiPlus, HiMagnifyingGlass } from "react-icons/hi2";
-import { ThemeToggle } from "./ThemeToggle";
+
 import { useState, useEffect } from "react";
 
 const ROTATING_WORDS = ["Premium", "High-Paying", "SaaS", "Transparent"];
@@ -24,10 +24,7 @@ export function Header({ onAddProgram, search, setSearch }: HeaderProps) {
 
   return (
     <header className="relative pt-32 pb-12 px-6 animate-fade-in-up">
-      {/* Theme Toggle - Fixed Position in viewport */}
-      <div className="fixed top-6 right-6 z-50">
-        <ThemeToggle />
-      </div>
+
 
       <div className="relative max-w-[700px] mx-auto text-center">
         {/* Logo - Simple text with link to home */}

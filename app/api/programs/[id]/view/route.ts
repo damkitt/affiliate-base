@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { pageViewsTotal, fraudBlockedTotal, pushMetrics } from "@/lib/metrics";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const ANTI_FRAUD_WINDOW_MINUTES = 60;
 const MIN_FINGERPRINT_LENGTH = 32;
@@ -30,45 +31,72 @@ interface AnalyticsResponse {
 // в App Router params обычно не Promise, но если у тебя уже так — можно оставить
 type RouteContext = { params: Promise<{ id: string }> };
 
-const hashIP = (ip: string) => require("crypto").createHash("sha256").update(ip + (process.env.IP_SALT || "affiliatebase-salt")).digest("hex").slice(0, 32);
-const getIP = (req: Request) => ["cf-connecting-ip", "x-real-ip", "x-forwarded-for"].map(h => req.headers.get(h)).find(v => v)?.split(",")[0].trim() || "unknown";
-
-export async function POST(request: Request, { params }: RouteContext) {
-  try {
-    const { id: programId } = await params;
-    const body = await request.json().catch(() => ({}));
-    if (!body?.fingerprint || body.fingerprint.length < 32) return NextResponse.json({ error: "Invalid fingerprint" }, { status: 400 });
-
-    const ipHash = hashIP(getIP(request)), window = new Date(Date.now() - 60 * 60 * 1000);
-    const isDup = await prisma.analyticsEvent.findFirst({ where: { programId, fingerprint: body.fingerprint, ipHash, createdAt: { gte: window } }, select: { id: true } });
-
-    if (isDup) return NextResponse.json({ success: true, duplicate: true });
-
-    await prisma.analyticsEvent.create({ data: { programId, eventType: "view", fingerprint: body.fingerprint, ipHash, userAgent: request.headers.get("user-agent"), referer: request.headers.get("referer") } });
-    pageViewsTotal.labels({ program_id: programId, program_name: "unknown" }).inc();
-    await pushMetrics("views", { outcome: "ok", route: "/api/programs/[id]/view" });
-
-    return NextResponse.json({ success: true, duplicate: false });
-  } catch (err) {
-    return NextResponse.json({ error: "Failed" }, { status: 500 });
-  }
-}
-
 export async function GET(_req: Request, { params }: RouteContext) {
   try {
-    const { id: programId } = await params, sevenDays = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), today = new Date(); today.setHours(0, 0, 0, 0);
-    const [weekly, total, todayCount] = await Promise.all([
-      prisma.analyticsEvent.findMany({ where: { programId, eventType: { in: ["view", "click"] }, createdAt: { gte: sevenDays } }, select: { createdAt: true } }),
-      prisma.analyticsEvent.count({ where: { programId, eventType: { in: ["view", "click"] } } }),
-      prisma.analyticsEvent.count({ where: { programId, eventType: { in: ["view", "click"] }, createdAt: { gte: today } } }),
-    ]);
+    const { id: programId } = await params;
+    const today = new Date();
+    const dateKey = today.toISOString().split('T')[0];
 
-    const chartData = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(); d.setDate(d.getDate() - (6 - i));
-      const dayName = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getDay()];
-      return { day: dayName, clicks: weekly.filter(e => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][e.createdAt.getDay()] === dayName).length };
+    // 1. Get totals from Program (fast access from "Current Totals" requirement)
+    const program = await prisma.program.findUnique({
+      where: { id: programId },
+      select: { totalViews: true, clicks: true }
     });
 
-    return NextResponse.json({ chartData, totalViews: total, todayViews: todayCount, weeklyViews: weekly.length });
-  } catch { return NextResponse.json({ error: "Failed" }, { status: 500 }); }
+    // 2. Get Today's Activity (Strict ProgramEvent - Views only per user request)
+    const todayCount = await prisma.programEvent.count({
+      where: {
+        programId,
+        dateKey,
+        type: 'VIEW'
+      }
+    });
+
+    // 3. Get Last 7 Days Chart Data (Strict ProgramEvent - Views only)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    const minDateKey = sevenDaysAgo.toISOString().split('T')[0];
+
+    // Group by DateKey from strict table
+    const dailyStats = await prisma.programEvent.groupBy({
+      by: ['dateKey'],
+      where: {
+        programId,
+        dateKey: { gte: minDateKey },
+        type: 'VIEW'
+      },
+      _count: { _all: true }
+    });
+
+    // Map to chart format, filling in missing days with 0
+    const formatter = new Intl.DateTimeFormat('en-US', { weekday: 'short' });
+    const chartData = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const k = d.toISOString().split('T')[0];
+      const dayName = formatter.format(d);
+
+      const stat = dailyStats.find(s => s.dateKey === k);
+      chartData.push({
+        day: dayName,
+        clicks: stat ? stat._count._all : 0 // "clicks" key kept for frontend compatibility, but reflects Views
+      });
+    }
+
+    const weeklyViews = dailyStats.reduce((acc, curr) => acc + curr._count._all, 0);
+    // Total Activity for the line is just Views as requested for the chart context
+    const totalActivity = program?.totalViews || 0;
+
+    return NextResponse.json({
+      chartData,
+      totalViews: totalActivity,
+      todayViews: todayCount,
+      weeklyViews
+    });
+  } catch (error) {
+    console.error("Analytics fetch failed:", error);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
+  }
 }

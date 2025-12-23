@@ -82,7 +82,7 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                         fontFamily: '"Inter"',
                     }}
                 >
-                    {/* Background Layer: Spotlight */}
+                    {/* Layer 0: Background & Grid (Standardized) */}
                     <div
                         style={{
                             position: 'absolute',
@@ -90,25 +90,40 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            backgroundImage: 'radial-gradient(circle at 50% -20%, #202022 0%, #000000 50%)',
+                            background: '#050505',
                             display: 'flex',
+                        }}
+                    />
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            display: 'flex',
+                            backgroundImage: 'linear-gradient(rgba(16, 185, 129, 0.05) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1.5px, transparent 1.5px)',
+                            backgroundSize: '60px 60px',
                         }}
                     />
 
-                    {/* Background Layer: Grid (Simplified) */}
-                    <div
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
+                    {/* Layer 1: Central Spotlight */}
+                    <div style={{
+                        position: 'absolute',
+                        display: 'flex',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '1200px',
+                        height: '1200px',
+                    }}>
+                        <div style={{
+                            width: '800px',
+                            height: '800px',
+                            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)',
                             display: 'flex',
-                            opacity: 0.04,
-                            backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
-                            backgroundSize: '40px 40px',
-                        }}
-                    />
+                        }} />
+                    </div>
 
                     {/* Top Branding Pill (Absolute Centered) */}
                     <div style={{
@@ -192,12 +207,15 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 {/* Program Name */}
                                 <div style={{
-                                    fontSize: '84px',
+                                    fontSize: '80px',
                                     fontWeight: 800,
                                     color: 'white',
                                     lineHeight: '1',
-                                    display: 'flex',
-                                    wordBreak: 'break-word',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
                                 }}>
                                     {program.programName}
                                 </div>

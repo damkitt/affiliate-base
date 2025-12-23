@@ -18,11 +18,25 @@ export async function GET() {
     const count = featuredPrograms.length;
     const isFull = count >= config.advertising.maxSlots;
 
+    // Calculate the next available date (earliest expiry) if full
+    let nextAvailableDate: string | null = null;
+    if (isFull && featuredPrograms.length > 0) {
+      const expiryDates = featuredPrograms
+        .map((p) => p.featuredExpiresAt)
+        .filter((d): d is Date => d !== null)
+        .sort((a, b) => a.getTime() - b.getTime());
+
+      if (expiryDates.length > 0) {
+        nextAvailableDate = expiryDates[0].toISOString();
+      }
+    }
+
     return NextResponse.json(
       {
         count,
         max: config.advertising.maxSlots,
         isFull,
+        nextAvailableDate,
       },
       {
         headers: {

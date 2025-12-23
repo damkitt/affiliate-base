@@ -66,27 +66,6 @@ export function ProgramSidebar({ program, onApply, onOpenCalculator, onOpenEditM
                     Income Calculator
                 </button>
 
-                {/* Share Button */}
-                <button
-                    onClick={handleShare}
-                    className={`w-full py-4 px-6 rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all group border ${copied
-                            ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
-                            : "bg-black/40 border-white/10 hover:border-white/20 text-white"
-                        }`}
-                >
-                    {copied ? (
-                        <>
-                            <HiCheck className="w-5 h-5" />
-                            <span>Copied</span>
-                        </>
-                    ) : (
-                        <>
-                            <HiShare className="w-5 h-5 text-[var(--text-tertiary)] group-hover:text-white transition-colors" />
-                            <span>Share</span>
-                        </>
-                    )}
-                </button>
-
                 <p className="text-xs text-[var(--text-tertiary)] text-center mt-4 font-medium">Free to join • No credit card required</p>
 
                 {/* Divider */}

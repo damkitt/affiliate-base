@@ -1,5 +1,7 @@
 import { CATEGORIES } from "@/constants";
 import type { Program } from "@/types";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/Tooltip";
+import { HiPencilSquare, HiQuestionMarkCircle } from "react-icons/hi2";
 
 interface EditFormProps {
   program: Partial<Program>;
@@ -22,17 +24,24 @@ export function EditForm({
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
-            Program Name *
-          </label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-xs font-semibold text-[var(--text-tertiary)]">
+              Program Name *
+            </label>
+            <span className={`text-[10px] font-medium ${(program.programName?.length || 0) >= 30 ? "text-red-500" : "text-[var(--text-tertiary)]"}`}>
+              {program.programName?.length || 0}/30
+            </span>
+          </div>
           <input
             className="w-full px-4 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)]"
             value={program.programName || ""}
             onChange={(e) => onChange("programName", e.target.value)}
+            maxLength={30}
+            placeholder="30 characters max"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
             Category *
           </label>
           <select
@@ -51,8 +60,30 @@ export function EditForm({
 
       <div>
         <div className="flex justify-between items-center mb-2">
-          <label className="block text-xs font-medium text-[var(--text-tertiary)]">
-            Tagline * <span className="text-[10px] text-[var(--accent-solid)]">(50 characters max)</span>
+          <label className="text-xs font-semibold text-[var(--text-tertiary)] flex items-center gap-1.5">
+            Tagline *
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="cursor-help outline-none">
+                    <HiQuestionMarkCircle className="w-4 h-4 text-[var(--text-tertiary)] hover:text-white transition-colors" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={8} className="max-w-[260px] bg-[#0A0A0A] border border-white/10 shadow-2xl rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-1.5 rounded-lg bg-emerald-500/10 shrink-0">
+                      <HiPencilSquare className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-white">Tagline</p>
+                      <p className="text-[11px] text-gray-400 leading-relaxed font-medium">
+                        Describe your product in <span className="text-white">5-7 words</span>. Keep it punchy and clear.
+                      </p>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </label>
           <span className={`text-[10px] font-medium ${(program.tagline?.length || 0) >= 50 ? "text-red-500" : "text-[var(--text-tertiary)]"
             }`}>
@@ -69,19 +100,78 @@ export function EditForm({
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
-          Description *
-        </label>
+        <div className="flex justify-between items-center mb-2">
+          <label className="text-xs font-semibold text-[var(--text-tertiary)] flex items-center gap-1.5">
+            About This Program *
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="cursor-help outline-none">
+                    <HiQuestionMarkCircle className="w-4 h-4 text-[var(--text-tertiary)] hover:text-white transition-colors" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={8} className="max-w-[310px] bg-[#0A0A0A] border border-white/10 shadow-2xl rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-1.5 rounded-lg bg-emerald-500/10 shrink-0 mt-0.5">
+                      <HiPencilSquare className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <div className="space-y-4">
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-white">Quick Tip</p>
+                        <p className="text-[11px] text-gray-400 leading-relaxed font-medium">
+                          Don&apos;t just copy your homepage. Treat this as a briefing for your partners.
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-2.5">
+                          <span className="text-emerald-500/50 mt-1.5">•</span>
+                          <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
+                            <span className="text-white font-bold">The Fit:</span> Who buys your product and why?
+                          </p>
+                        </div>
+                        <div className="flex items-start gap-2.5">
+                          <span className="text-emerald-500/50 mt-1.5">•</span>
+                          <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
+                            <span className="text-white font-bold">The Partner:</span> Who can join? Any restrictions?
+                          </p>
+                        </div>
+                        <div className="flex items-start gap-2.5">
+                          <span className="text-emerald-500/50 mt-1.5">•</span>
+                          <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
+                            <span className="text-white font-bold">The Playbook:</span> What formats convert best?
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-white/5">
+                        <p className="text-[11px] text-emerald-400 font-bold leading-relaxed">
+                          Give creators the blueprint to succeed.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </label>
+          <span className={`text-[10px] font-medium ${(program.description?.length || 0) >= 2000 ? "text-red-500" : "text-[var(--text-tertiary)]"
+            }`}>
+            {program.description?.length || 0}/2000
+          </span>
+        </div>
         <textarea
           className="w-full px-4 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] min-h-[100px]"
           value={program.description || ""}
           onChange={(e) => onChange("description", e.target.value)}
+          maxLength={2000}
+          placeholder="Tell partners about your program, ideal customers, and what content works best..."
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
             Website URL *
           </label>
           <input
@@ -92,7 +182,7 @@ export function EditForm({
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
             Affiliate URL *
           </label>
           <input
@@ -106,7 +196,7 @@ export function EditForm({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
             Commission Rate *
           </label>
           <input
@@ -120,7 +210,7 @@ export function EditForm({
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
             Cookie Duration (days)
           </label>
           <input
@@ -133,7 +223,7 @@ export function EditForm({
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
             Country
           </label>
           <input
@@ -146,7 +236,7 @@ export function EditForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
             X Handle
           </label>
           <input
@@ -157,7 +247,7 @@ export function EditForm({
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
             Email
           </label>
           <input
@@ -170,7 +260,7 @@ export function EditForm({
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+        <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
           Logo URL
         </label>
         <input
@@ -184,7 +274,7 @@ export function EditForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
             Affiliates Count Range
           </label>
           <input
@@ -195,7 +285,7 @@ export function EditForm({
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
             Payouts Total Range
           </label>
           <input
@@ -208,7 +298,7 @@ export function EditForm({
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-[var(--text-tertiary)] mb-2">
+        <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
           Additional Info
         </label>
         <textarea
