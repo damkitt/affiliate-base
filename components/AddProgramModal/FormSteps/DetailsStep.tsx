@@ -226,10 +226,10 @@ export function DetailsStep({
 
         {/* Min Payout */}
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
-            <HiBanknotes className="w-3.5 h-3.5" /> Min Payout
-            <span className="text-[var(--text-secondary)] font-normal normal-case">
-              (optional)
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+            <span className="flex items-center gap-1.5">
+              <HiBanknotes className="w-3.5 h-3.5" />
+              <span className="uppercase tracking-wide">Min Payout</span>
             </span>
           </label>
           <div className="relative">
@@ -249,29 +249,32 @@ export function DetailsStep({
 
         {/* Payout Method (Refined Chips with Spacing) */}
         <div className="relative" ref={payoutDropdownRef}>
-          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
-            <HiBanknotes className="w-3.5 h-3.5" /> Payout Method
-            <span className="text-[var(--text-secondary)] font-normal normal-case">
-              (optional)
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+            <span className="flex items-center gap-1.5">
+              <HiBanknotes className="w-3.5 h-3.5" />
+              <span className="uppercase tracking-wide">Payout Method</span>
             </span>
           </label>
           <button
             type="button"
             onClick={() => setPayoutDropdownOpen(!payoutDropdownOpen)}
-            className="w-full min-h-[50px] px-3 py-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-start justify-between focus:outline-none hover:bg-[var(--bg)] transition-all duration-300"
+            className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-left flex items-center justify-between focus:outline-none hover:bg-[var(--bg)] transition-all duration-300"
           >
-            <div className="flex flex-wrap gap-2.5 items-center w-full pr-2">
+            <div className="flex flex-wrap gap-2 items-center flex-1">
               {formData.payoutMethod ? (
                 formData.payoutMethod.split(",").map((method, idx) => (
-                  <span key={idx} className="inline-flex items-center px-3 py-1 rounded-full bg-[var(--accent-dim)] text-[var(--accent-solid)] text-[11px] font-bold border border-[var(--accent-solid)]/20 shadow-sm transition-all duration-300">
+                  <span
+                    key={idx}
+                    className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500/15 to-teal-500/10 text-emerald-400 text-[11px] font-bold border border-emerald-500/30 backdrop-blur-sm transition-all duration-200"
+                  >
                     {method.trim()}
                   </span>
                 ))
               ) : (
-                <span className="text-[var(--text-tertiary)] px-1 py-0.5">Select methods</span>
+                <span className="text-[var(--text-tertiary)]">Select methods</span>
               )}
             </div>
-            <HiChevronDown className={`w-4 h-4 text-[var(--text-secondary)] shrink-0 transition-transform mt-1.5 ${payoutDropdownOpen ? "rotate-180" : ""}`} />
+            <HiChevronDown className={`w-4 h-4 text-[var(--text-secondary)] shrink-0 transition-transform ml-2 ${payoutDropdownOpen ? "rotate-180" : ""}`} />
           </button>
 
           {/* Dropdown */}
@@ -344,47 +347,45 @@ export function DetailsStep({
         </div>
 
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
-            <HiBanknotes className="w-3.5 h-3.5" /> Total Payouts
-            <span className="text-[var(--text-secondary)] font-normal normal-case">
-              (optional)
-            </span>
-          </label>
-          <select
-            name="payoutsTotalRange"
+          <CustomSelect
+            label={
+              <span className="flex items-center gap-1.5">
+                <HiBanknotes className="w-3.5 h-3.5" /> Total Payouts
+                <span className="text-[var(--text-secondary)] font-normal normal-case ml-0.5">(optional)</span>
+              </span>
+            }
+            placeholder="Select range"
             value={formData.payoutsTotalRange}
-            onChange={onFormChange}
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 appearance-none bg-transparent"
-          >
-            <option value="" className="text-zinc-500 bg-white dark:bg-zinc-900">Select range</option>
-            {PAYOUT_RANGES.map((range) => (
-              <option key={range} value={range} className="text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-900">
-                {range}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => {
+              const syntheticEvent = {
+                target: { name: "payoutsTotalRange", value: val },
+              } as React.ChangeEvent<HTMLSelectElement>;
+              onFormChange(syntheticEvent);
+            }}
+            options={PAYOUT_RANGES.map(r => ({ label: r, value: r }))}
+            position="top"
+          />
         </div>
 
         <div>
-          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
-            <HiUsers className="w-3.5 h-3.5" /> Affiliates Count
-            <span className="text-[var(--text-secondary)] font-normal normal-case">
-              (optional)
-            </span>
-          </label>
-          <select
-            name="affiliatesCountRange"
+          <CustomSelect
+            label={
+              <span className="flex items-center gap-1.5">
+                <HiUsers className="w-3.5 h-3.5" /> Affiliates Count
+                <span className="text-[var(--text-secondary)] font-normal normal-case ml-0.5">(optional)</span>
+              </span>
+            }
+            placeholder="Select range"
             value={formData.affiliatesCountRange}
-            onChange={onFormChange}
-            className="w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 appearance-none bg-transparent"
-          >
-            <option value="" className="text-zinc-500 bg-white dark:bg-zinc-900">Select range</option>
-            {AFFILIATE_RANGES.map((range) => (
-              <option key={range} value={range} className="text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-900">
-                {range}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => {
+              const syntheticEvent = {
+                target: { name: "affiliatesCountRange", value: val },
+              } as React.ChangeEvent<HTMLSelectElement>;
+              onFormChange(syntheticEvent);
+            }}
+            options={AFFILIATE_RANGES.map(r => ({ label: r, value: r }))}
+            position="top"
+          />
         </div>
 
       </div>

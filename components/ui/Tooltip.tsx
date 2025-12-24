@@ -6,9 +6,57 @@ import { cn } from "@/lib/utils"
 
 const TooltipProvider = TooltipPrimitive.Provider
 
-const Tooltip = TooltipPrimitive.Root
+// Mobile-friendly Tooltip that uses click on touch devices
+const Tooltip = React.forwardRef<
+    HTMLDivElement,
+    React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root> & {
+        children: React.ReactNode
+    }
+>(({ children, ...props }, ref) => {
+    const [open, setOpen] = React.useState(false)
+    const [isTouchDevice, setIsTouchDevice] = React.useState(false)
 
-const TooltipTrigger = TooltipPrimitive.Trigger
+    React.useEffect(() => {
+        setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0)
+    }, [])
+
+    // On touch devices, control via state (click to toggle)
+    // On desktop, let Radix handle hover behavior
+    if (isTouchDevice) {
+        return (
+            <TooltipPrimitive.Root open={open} onOpenChange={setOpen} {...props}>
+                {children}
+            </TooltipPrimitive.Root>
+        )
+    }
+
+    return (
+        <TooltipPrimitive.Root {...props}>
+            {children}
+        </TooltipPrimitive.Root>
+    )
+})
+Tooltip.displayName = "Tooltip"
+
+const TooltipTrigger = React.forwardRef<
+    React.ElementRef<typeof TooltipPrimitive.Trigger>,
+    React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Trigger>
+>(({ onClick, ...props }, ref) => {
+    return (
+        <TooltipPrimitive.Trigger
+            ref={ref}
+            onClick={(e) => {
+                // On touch devices, prevent default and let Radix handle the state
+                if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                    e.preventDefault()
+                }
+                onClick?.(e)
+            }}
+            {...props}
+        />
+    )
+})
+TooltipTrigger.displayName = TooltipPrimitive.Trigger.displayName
 
 const TooltipContent = React.forwardRef<
     React.ElementRef<typeof TooltipPrimitive.Content>,
@@ -27,3 +75,4 @@ const TooltipContent = React.forwardRef<
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+
