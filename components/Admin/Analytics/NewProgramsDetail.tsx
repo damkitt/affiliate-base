@@ -1,5 +1,6 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { DashboardStats } from "@/lib/analytics";
+import { ChartErrorBoundary } from "../../ChartErrorBoundary";
 
 interface NewProgramsDetailProps {
     data?: DashboardStats;
@@ -52,81 +53,83 @@ export function NewProgramsDetail({ data, isLoading, range }: NewProgramsDetailP
                     </div>
                 </div>
                 <div className="h-[200px]">
-                    {isLoading ? (
-                        <div className="h-full flex items-center justify-center text-white/30 text-xs">
-                            Loading timeline...
-                        </div>
-                    ) : (data?.newProgramsChart?.length ?? 0) === 0 ? (
-                        <div className="h-full flex items-center justify-center text-white/30 text-xs">
-                            No program additions in this period
-                        </div>
-                    ) : (
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={data?.newProgramsChart ?? []}>
-                                <defs>
-                                    <linearGradient id="colorNew" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <XAxis
-                                    dataKey="date"
-                                    stroke="#333"
-                                    fontSize={10}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tickFormatter={(value) => {
-                                        if (range === "24h" && value.includes("T")) {
-                                            return value.split("T")[1];
-                                        }
-                                        const date = new Date(value);
-                                        return `${date.getMonth() + 1}/${date.getDate()}`;
-                                    }}
-                                />
-                                <YAxis
-                                    stroke="#333"
-                                    fontSize={10}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    width={40}
-                                    allowDecimals={false}
-                                />
-                                <Tooltip
-                                    content={({ active, payload }) => {
-                                        if (active && payload && payload.length) {
-                                            const data = payload[0].payload;
-                                            return (
-                                                <div className="bg-black/90 border border-white/10 p-3 rounded-lg shadow-xl backdrop-blur-md">
-                                                    <p className="text-[10px] text-white/40 uppercase tracking-widest mb-2 font-bold">
-                                                        {range === "24h" ? data.date.split("T")[1] : data.date}
-                                                    </p>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center justify-between gap-8">
-                                                            <span className="text-[11px] text-white/60">Total Programs</span>
-                                                            <span className="text-[11px] font-bold text-white">{data.total}</span>
-                                                        </div>
-                                                        <div className="flex items-center justify-between gap-8">
-                                                            <span className="text-[11px] text-emerald-500/60 font-medium">Additions</span>
-                                                            <span className="text-[11px] font-bold text-emerald-400">+{data.added}</span>
+                    <ChartErrorBoundary>
+                        {isLoading ? (
+                            <div className="h-full flex items-center justify-center text-white/30 text-xs">
+                                Loading timeline...
+                            </div>
+                        ) : (data?.newProgramsChart?.length ?? 0) === 0 ? (
+                            <div className="h-full flex items-center justify-center text-white/30 text-xs">
+                                No program additions in this period
+                            </div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={data?.newProgramsChart ?? []}>
+                                    <defs>
+                                        <linearGradient id="colorNew" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <XAxis
+                                        dataKey="date"
+                                        stroke="#333"
+                                        fontSize={10}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickFormatter={(value) => {
+                                            if (range === "24h" && value.includes("T")) {
+                                                return value.split("T")[1];
+                                            }
+                                            const date = new Date(value);
+                                            return `${date.getMonth() + 1}/${date.getDate()}`;
+                                        }}
+                                    />
+                                    <YAxis
+                                        stroke="#333"
+                                        fontSize={10}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        width={40}
+                                        allowDecimals={false}
+                                    />
+                                    <Tooltip
+                                        content={({ active, payload }) => {
+                                            if (active && payload && payload.length) {
+                                                const data = payload[0].payload;
+                                                return (
+                                                    <div className="bg-black/90 border border-white/10 p-3 rounded-lg shadow-xl backdrop-blur-md">
+                                                        <p className="text-[10px] text-white/40 uppercase tracking-widest mb-2 font-bold">
+                                                            {range === "24h" ? data.date.split("T")[1] : data.date}
+                                                        </p>
+                                                        <div className="space-y-1">
+                                                            <div className="flex items-center justify-between gap-8">
+                                                                <span className="text-[11px] text-white/60">Total Programs</span>
+                                                                <span className="text-[11px] font-bold text-white">{data.total}</span>
+                                                            </div>
+                                                            <div className="flex items-center justify-between gap-8">
+                                                                <span className="text-[11px] text-emerald-500/60 font-medium">Additions</span>
+                                                                <span className="text-[11px] font-bold text-emerald-400">+{data.added}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            );
-                                        }
-                                        return null;
-                                    }}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="total"
-                                    stroke="#10b981"
-                                    strokeWidth={2}
-                                    fill="url(#colorNew)"
-                                    name="Total Programs"
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    )}
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="total"
+                                        stroke="#10b981"
+                                        strokeWidth={2}
+                                        fill="url(#colorNew)"
+                                        name="Total Programs"
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        )}
+                    </ChartErrorBoundary>
                 </div>
             </div>
         </div>

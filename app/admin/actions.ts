@@ -13,15 +13,15 @@ export async function updateProgramBoost(id: string, boost: number) {
 
         if (!program) throw new Error("Program not found");
 
-        // 2. Get 14-day engagement for recalculation
-        const fourteenDaysAgo = new Date();
-        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+        // 2. Get 7-day engagement for recalculation
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
         const stats = await prisma.programEvent.groupBy({
             by: ["type"],
             where: {
                 programId: id,
-                createdAt: { gte: fourteenDaysAgo },
+                createdAt: { gte: sevenDaysAgo },
             },
             _count: true,
         });
@@ -31,7 +31,7 @@ export async function updateProgramBoost(id: string, boost: number) {
 
         // 3. Calculate new score including the NEW boost
         const newTrendingScore = calculateTrendingScore(
-            { ...(program as any), manualScoreBoost: boost },
+            { manualScoreBoost: boost },
             views,
             clicks
         );
@@ -82,15 +82,15 @@ export async function updateProgramData(id: string, data: any) {
             data,
         });
 
-        // 2. Recalculate score
-        const fourteenDaysAgo = new Date();
-        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+        // 2. Recalculate score based on 7-day window
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
         const stats = await prisma.programEvent.groupBy({
             by: ["type"],
             where: {
                 programId: id,
-                createdAt: { gte: fourteenDaysAgo },
+                createdAt: { gte: sevenDaysAgo },
             },
             _count: true,
         });

@@ -2,6 +2,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { HiArrowRight } from "react-icons/hi2";
+import { ProgramLogo } from "../ProgramLogo";
 
 interface RelatedProgramsProps {
     category: string;
@@ -9,35 +10,17 @@ interface RelatedProgramsProps {
 }
 
 export async function RelatedPrograms({ category, currentId }: RelatedProgramsProps) {
-    // 1. Fetch by Category
-    let programs = await prisma.program.findMany({
-        where: {
-            category,
-            id: { not: currentId },
-            approvalStatus: true,
-        },
-        take: 3,
-        orderBy: { trendingScore: 'desc' },
-        select: {
-            id: true,
-            programName: true,
-            logoUrl: true,
-            commissionRate: true,
-            slug: true,
-            commissionDuration: true,
-        },
-    });
-
-    // 2. Fallback if not enough
-    if (programs.length < 3) {
-        const existingIds = [currentId, ...programs.map((p) => p.id)];
-        const fallbackPrograms = await prisma.program.findMany({
+    let programs: any[] = [];
+    try {
+        // 1. Fetch by Category
+        programs = await prisma.program.findMany({
             where: {
-                id: { notIn: existingIds },
+                category,
+                id: { not: currentId },
                 approvalStatus: true,
             },
-            orderBy: { trendingScore: 'desc' }, // Highest trend
-            take: 3 - programs.length,
+            take: 3,
+            orderBy: { trendingScore: 'desc' },
             select: {
                 id: true,
                 programName: true,
@@ -47,7 +30,31 @@ export async function RelatedPrograms({ category, currentId }: RelatedProgramsPr
                 commissionDuration: true,
             },
         });
-        programs = [...programs, ...fallbackPrograms];
+
+        // 2. Fallback if not enough
+        if (programs.length < 3) {
+            const existingIds = [currentId, ...programs.map((p) => p.id)];
+            const fallbackPrograms = await prisma.program.findMany({
+                where: {
+                    id: { notIn: existingIds },
+                    approvalStatus: true,
+                },
+                orderBy: { trendingScore: 'desc' }, // Highest trend
+                take: 3 - programs.length,
+                select: {
+                    id: true,
+                    programName: true,
+                    logoUrl: true,
+                    commissionRate: true,
+                    slug: true,
+                    commissionDuration: true,
+                },
+            });
+            programs = [...programs, ...fallbackPrograms];
+        }
+    } catch (error) {
+        console.error("[RelatedPrograms] Error:", error);
+        return null; // Don't crash the whole page if related programs fail
     }
 
     if (programs.length === 0) return null;
@@ -74,20 +81,12 @@ export async function RelatedPrograms({ category, currentId }: RelatedProgramsPr
                         className="group block p-5 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border)] hover:border-[var(--accent-solid)] transition-all duration-300"
                     >
                         <div className="flex items-center gap-4 mb-4">
-                            {/* Logo */}
-                            <div className="w-12 h-12 shrink-0 rounded-xl bg-white flex items-center justify-center overflow-hidden border border-zinc-100 shadow-sm">
-                                {program.logoUrl ? (
-                                    <img
-                                        src={program.logoUrl}
-                                        alt={program.programName}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <span className="text-xl font-bold text-zinc-400">
-                                        {program.programName.charAt(0)}
-                                    </span>
-                                )}
-                            </div>
+                            <ProgramLogo
+                                src={program.logoUrl}
+                                name={program.programName}
+                                size="lg"
+                                className="shrink-0 rounded-xl"
+                            />
 
                             <div>
                                 <h4 className="font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-solid)] transition-colors line-clamp-1">

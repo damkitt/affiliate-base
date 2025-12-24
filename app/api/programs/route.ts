@@ -11,16 +11,29 @@ import {
 } from "@/lib/scoring";
 import { cleanAndValidateUrl } from "@/lib/url-validator";
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  const { searchParams } = new URL(request.url);
+  const search = searchParams.get("search")?.trim();
+
   const now = new Date();
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-  // Fetch all active programs to handle sorting and filtering in memory
-  // In a larger app, we'd do this via Prisma queries, but for this size, 
-  // memory sorting allows for more complex "zipper" logic easily.
+  // Construct Prisma Filter
+  const where: Prisma.ProgramWhereInput = { approvalStatus: true };
+  if (search) {
+    where.OR = [
+      { programName: { contains: search, mode: 'insensitive' } },
+      { category: { contains: search, mode: 'insensitive' } },
+      { tagline: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } }
+    ];
+  }
+
+  // Fetch results with capping for extreme performance
   const allPrograms = await prisma.program.findMany({
-    where: { approvalStatus: true },
+    where,
     orderBy: [{ trendingScore: "desc" }, { createdAt: "desc" }],
+    take: 200, // Limit to top 200 results for scalability
     select: {
       id: true,
       programName: true,
@@ -30,7 +43,6 @@ export async function GET(): Promise<NextResponse> {
       commissionDuration: true,
       category: true,
       tagline: true,
-      description: true, // Keep for search
       isFeatured: true,
       featuredExpiresAt: true,
       createdAt: true,
@@ -43,13 +55,10 @@ export async function GET(): Promise<NextResponse> {
     .filter(p => p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now)
     .slice(0, 3);
 
-  // Query B: Organic Leaders (All non-sponsored active programs)
-  // These are already sorted by trendingScore DESC from the DB query
+  // Query B: Organic Leaders
   const organic = allPrograms.filter(p => !sponsored.some(s => s.id === p.id));
 
   // Query C: The Injection Queue (Underdogs - Newcomers < 24h)
-  // RULE: If a program is already in the Top 20 organically, it appears naturally.
-  // We only inject those who are outside the Top 20.
   const top20OrganicIds = new Set(organic.slice(0, 20).map(p => p.id));
   const newcomers = organic
     .filter(p => p.createdAt >= twentyFourHoursAgo && !top20OrganicIds.has(p.id))
@@ -64,14 +73,12 @@ export async function GET(): Promise<NextResponse> {
 
   let organicIndex = 0;
   let newcomerIndex = 0;
-  const injectionSlots = [8, 13, 18, 23, 28, 33, 38, 43, 48]; // Target slots (1-indexed)
+  const injectionSlots = [8, 13, 18, 23, 28, 33, 38, 43, 48];
 
   while (finalList.length < allPrograms.length) {
     const nextSlot = finalList.length + 1;
 
-    // Check for Injection Slot
     if (injectionSlots.includes(nextSlot) && newcomerIndex < newcomers.length) {
-      // Find the next unique newcomer
       let candidate = newcomers[newcomerIndex++];
       while (candidate && seenIds.has(candidate.id) && newcomerIndex < newcomers.length) {
         candidate = newcomers[newcomerIndex++];
@@ -80,11 +87,10 @@ export async function GET(): Promise<NextResponse> {
       if (candidate && !seenIds.has(candidate.id)) {
         finalList.push({ ...candidate, isInjected: true });
         seenIds.add(candidate.id);
-        continue; // Move to next slot
+        continue;
       }
     }
 
-    // Standard Organic Flow
     if (organicIndex < organic.length) {
       const p = organic[organicIndex++];
       if (!seenIds.has(p.id)) {
@@ -92,19 +98,38 @@ export async function GET(): Promise<NextResponse> {
         seenIds.add(p.id);
       }
     } else {
-      break; // No more programs
+      break;
     }
   }
 
   activeProgramsGauge.set(finalList.length);
 
-  return NextResponse.json(finalList);
+  return NextResponse.json(finalList, {
+    headers: {
+      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      "CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      "Vercel-CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+    }
+  });
 }
+
+import { programSchema } from "@/lib/validation-schemas";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const body = await request.json();
+    const rawBody = await request.json();
 
+    // 1. Strict Validation & Sanitization with Zod
+    const validation = programSchema.safeParse(rawBody);
+
+    if (!validation.success) {
+      const error = validation.error.issues[0]?.message || "Invalid input data";
+      return NextResponse.json({ error }, { status: 400 });
+    }
+
+    const body = validation.data;
+
+    // 2. Further URL Hardening
     try {
       if (body.websiteUrl)
         body.websiteUrl = cleanAndValidateUrl(body.websiteUrl);
@@ -112,28 +137,6 @@ export async function POST(request: Request): Promise<NextResponse> {
         body.affiliateUrl = cleanAndValidateUrl(body.affiliateUrl);
     } catch (error: any) {
       return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
-    const requiredFields = [
-      "programName",
-      "websiteUrl",
-      "affiliateUrl",
-      "category",
-      "commissionRate",
-      "logoUrl",
-    ];
-
-    const missingFields = requiredFields.filter((field) => {
-      const value = body[field];
-      if (typeof value === "string") return !value.trim();
-      return value === null || value === undefined;
-    });
-
-    if (missingFields.length > 0) {
-      return NextResponse.json(
-        { error: `Missing required fields: ${missingFields.join(", ")}` },
-        { status: 400 }
-      );
     }
 
     const {
@@ -161,30 +164,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       approvalTimeRange,
     } = body;
 
-    // Validate tagline length (max 50 characters)
-    if (tagline && tagline.length > 50) {
-      return NextResponse.json(
-        { error: "Tagline must be 50 characters or less." },
-        { status: 400 }
-      );
-    }
-
-    // Validate program name length (max 30 characters)
-    if (programName && programName.length > 30) {
-      return NextResponse.json(
-        { error: "Program name must be 30 characters or less." },
-        { status: 400 }
-      );
-    }
-
-    // Validate description length (max 2000 characters)
-    if (description && description.length > 2000) {
-      return NextResponse.json(
-        { error: "Description must be 2000 characters or less." },
-        { status: 400 }
-      );
-    }
-
+    // 3. Slug Generation with Collision Protection
     const baseSlug = programName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -198,19 +178,19 @@ export async function POST(request: Request): Promise<NextResponse> {
       counter++;
     }
 
-    const programData = {
-      programName: programName.trim(),
+    const programData: any = {
+      programName,
       slug,
-      tagline: tagline?.trim() || "No tagline provided.",
-      description: description?.trim() || "No description provided.",
-      category: category || "Not specified",
-      websiteUrl: websiteUrl.trim(),
-      affiliateUrl: affiliateUrl.trim(),
+      tagline,
+      description,
+      category,
+      websiteUrl,
+      affiliateUrl,
       country: validateCountry(country),
-      xHandle: xHandle?.trim() || null,
-      email: email?.trim() || null,
-      logoUrl: logoUrl?.trim() || null,
-      commissionRate: commissionRate ?? 0,
+      xHandle: xHandle || null,
+      email: email || null,
+      logoUrl: logoUrl || null,
+      commissionRate,
       commissionDuration: commissionDuration || null,
       cookieDuration: cookieDuration ?? null,
       payoutMethod: payoutMethod || null,

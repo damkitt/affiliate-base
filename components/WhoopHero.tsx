@@ -88,14 +88,13 @@ export function WhoopHero() {
             ctx.clearRect(0, 0, width, height);
 
             // Set fixed color once if possible, but we have per-particle opacity
-            // Optimization: Cache shared strings or use globalAlpha
+            ctx.fillStyle = "#00F0A0"; // Whoop Green set once
             for (let i = 0; i < particles.length; i++) {
                 const p = particles[i];
                 p.update(width, height);
 
                 const visibilityFactor = Math.max(0, 1 - (p.y / (height * 0.8)));
                 ctx.globalAlpha = p.opacity * visibilityFactor;
-                ctx.fillStyle = "#00F0A0"; // Whoop Green
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                 ctx.fill();

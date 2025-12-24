@@ -14,33 +14,48 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        console.log("[CRON] Starting trending score update...");
+        console.log("[CRON] Starting trending score update & data sync...");
 
-        // 1. Get stats for last 7 days
+        // 1. Get stats for last 7 days (for trendingScore)
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-        const stats = await prisma.programEvent.groupBy({
+        const rollingStats = await prisma.programEvent.groupBy({
             by: ["programId", "type"],
             where: {
                 createdAt: { gte: sevenDaysAgo },
                 type: { in: ["VIEW", "CLICK"] },
             },
-            _count: {
-                _all: true,
-            },
+            _count: { _all: true },
         });
 
-        // 2. Map stats to program IDs
-        const engagementMap = new Map<string, { views: number; clicks: number }>();
-        for (const stat of stats) {
-            const entry = engagementMap.get(stat.programId) || { views: 0, clicks: 0 };
+        // 2. Get Lifetime stats (Source of Truth for counters)
+        const lifetimeStats = await prisma.programEvent.groupBy({
+            by: ["programId", "type"],
+            where: {
+                type: { in: ["VIEW", "CLICK"] },
+            },
+            _count: { _all: true },
+        });
+
+        // 3. Map stats to program IDs
+        const rollingMap = new Map<string, { views: number; clicks: number }>();
+        for (const stat of rollingStats) {
+            const entry = rollingMap.get(stat.programId) || { views: 0, clicks: 0 };
             if (stat.type === "VIEW") entry.views = stat._count._all;
             if (stat.type === "CLICK") entry.clicks = stat._count._all;
-            engagementMap.set(stat.programId, entry);
+            rollingMap.set(stat.programId, entry);
         }
 
-        // 3. Fetch all programs that need updating
+        const lifetimeMap = new Map<string, { views: number; clicks: number }>();
+        for (const stat of lifetimeStats) {
+            const entry = lifetimeMap.get(stat.programId) || { views: 0, clicks: 0 };
+            if (stat.type === "VIEW") entry.views = stat._count._all;
+            if (stat.type === "CLICK") entry.clicks = stat._count._all;
+            lifetimeMap.set(stat.programId, entry);
+        }
+
+        // 4. Fetch all programs
         const programs = await prisma.program.findMany({
             select: {
                 id: true,
@@ -49,28 +64,38 @@ export async function GET(request: Request) {
             },
         });
 
-        console.log(`[CRON] Updating ${programs.length} programs...`);
+        console.log(`[CRON] Updating ${programs.length} programs in batches of 50...`);
 
-        // 4. Update programs using a transaction or batch updates
-        // For smaller scale, Promise.all with individual updates is fine.
-        // In a massive app, we'd use raw SQL or more sophisticated batching.
-        const updates = programs.map((program) => {
-            const { views, clicks } = engagementMap.get(program.id) || {
-                views: 0,
-                clicks: 0,
-            };
+        // 5. Batch Updates (to avoid connection pool exhaustion)
+        const CHUNK_SIZE = 50;
+        let updatedCount = 0;
 
-            const newScore = calculateTrendingScore(program, views, clicks);
+        for (let i = 0; i < programs.length; i += CHUNK_SIZE) {
+            const chunk = programs.slice(i, i + CHUNK_SIZE);
 
-            return prisma.program.update({
-                where: { id: program.id },
-                data: { trendingScore: newScore },
-            });
-        });
+            await Promise.all(
+                chunk.map(async (program) => {
+                    const rolling = rollingMap.get(program.id) || { views: 0, clicks: 0 };
+                    const lifetime = lifetimeMap.get(program.id) || { views: 0, clicks: 0 };
 
-        await Promise.all(updates);
+                    const newScore = calculateTrendingScore(program, rolling.views, rolling.clicks);
 
-        console.log("[CRON] Successfully updated all program scores.");
+                    return prisma.program.update({
+                        where: { id: program.id },
+                        data: {
+                            trendingScore: newScore,
+                            totalViews: lifetime.views, // Sync lifetime source of truth
+                            clicks: lifetime.clicks     // Sync lifetime source of truth
+                        },
+                    });
+                })
+            );
+
+            updatedCount += chunk.length;
+            console.log(`[CRON] Processed ${updatedCount}/${programs.length} programs...`);
+        }
+
+        console.log("[CRON] Successfully updated all program scores and healed counters.");
 
         return NextResponse.json({
             success: true,

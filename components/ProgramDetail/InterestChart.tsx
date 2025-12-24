@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { HiEye, HiArrowTrendingUp } from "react-icons/hi2";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import type { AnalyticsData } from "@/types";
+import { AnalyticsData } from "@/types";
 import { cn } from "@/lib/utils";
+import { ChartErrorBoundary } from "../ChartErrorBoundary";
 
 interface InterestChartProps {
   readonly programId: string;
@@ -113,92 +114,94 @@ export function InterestChart({ programId, totalClicks }: InterestChartProps) {
         className="relative h-64 w-full mb-8 select-none touch-none"
         onMouseLeave={() => setHoveredIndex(null)}
       >
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={chartData}
-            margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
-            onMouseMove={(e: any) => {
-              if (e.activeTooltipIndex !== undefined) {
-                setHoveredIndex(e.activeTooltipIndex);
-              }
-            }}
-          >
-            <defs>
-              <linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
-                <stop offset="75%" stopColor="#10b981" stopOpacity={0.05} />
-                <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="clicksGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
-                <stop offset="75%" stopColor="#3b82f6" stopOpacity={0.05} />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              strokeDasharray="4 4"
-              vertical={false}
-              stroke="#71717a"
-              strokeOpacity={0.2}
-            />
-            <XAxis
-              dataKey="day"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: "#71717a", fontSize: 10, fontWeight: 500 }}
-              dy={10}
-            />
-            <YAxis
-              hide
-              domain={[0, 'dataMax + 5']}
-            />
-            <Tooltip
-              cursor={{ stroke: '#10b981', strokeWidth: 1, strokeDasharray: '4 4', strokeOpacity: 0.5 }}
-              content={({ active, payload, label }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl p-3 flex flex-col min-w-[120px] transform -translate-y-4">
-                      <span className="text-zinc-500 text-[10px] font-medium uppercase tracking-wider mb-2">
-                        {label}
-                      </span>
-                      <div className="flex flex-col gap-1.5">
-                        <div className="flex items-center justify-between gap-4">
-                          <span className="text-emerald-500 text-[10px] font-bold uppercase">Views</span>
-                          <span className="text-zinc-900 dark:text-white text-base font-bold tabular-nums">
-                            {payload.find(p => p.dataKey === 'views')?.value?.toLocaleString() ?? 0}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between gap-4">
-                          <span className="text-blue-500 text-[10px] font-bold uppercase">Clicks</span>
-                          <span className="text-zinc-900 dark:text-white text-base font-bold tabular-nums">
-                            {payload.find(p => p.dataKey === 'clicks')?.value?.toLocaleString() ?? 0}
-                          </span>
+        <ChartErrorBoundary>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={chartData}
+              margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
+              onMouseMove={(e: any) => {
+                if (e.activeTooltipIndex !== undefined) {
+                  setHoveredIndex(e.activeTooltipIndex);
+                }
+              }}
+            >
+              <defs>
+                <linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
+                  <stop offset="75%" stopColor="#10b981" stopOpacity={0.05} />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="clicksGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
+                  <stop offset="75%" stopColor="#3b82f6" stopOpacity={0.05} />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                strokeDasharray="4 4"
+                vertical={false}
+                stroke="#71717a"
+                strokeOpacity={0.2}
+              />
+              <XAxis
+                dataKey="day"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#71717a", fontSize: 10, fontWeight: 500 }}
+                dy={10}
+              />
+              <YAxis
+                hide
+                domain={[0, 'dataMax + 5']}
+              />
+              <Tooltip
+                cursor={{ stroke: '#10b981', strokeWidth: 1, strokeDasharray: '4 4', strokeOpacity: 0.5 }}
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl p-3 flex flex-col min-w-[120px] transform -translate-y-4">
+                        <span className="text-zinc-500 text-[10px] font-medium uppercase tracking-wider mb-2">
+                          {label}
+                        </span>
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-center justify-between gap-4">
+                            <span className="text-emerald-500 text-[10px] font-bold uppercase">Views</span>
+                            <span className="text-zinc-900 dark:text-white text-base font-bold tabular-nums">
+                              {payload.find(p => p.dataKey === 'views')?.value?.toLocaleString() ?? 0}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-4">
+                            <span className="text-blue-500 text-[10px] font-bold uppercase">Clicks</span>
+                            <span className="text-zinc-900 dark:text-white text-base font-bold tabular-nums">
+                              {payload.find(p => p.dataKey === 'clicks')?.value?.toLocaleString() ?? 0}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="views"
-              stroke="#10b981"
-              strokeWidth={3}
-              fill="url(#viewsGradient)"
-              activeDot={{ r: 5, fill: "#10b981", stroke: "#ffffff", strokeWidth: 2 }}
-            />
-            <Area
-              type="monotone"
-              dataKey="clicks"
-              stroke="#3b82f6"
-              strokeWidth={3}
-              fill="url(#clicksGradient)"
-              activeDot={{ r: 5, fill: "#3b82f6", stroke: "#ffffff", strokeWidth: 2 }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="views"
+                stroke="#10b981"
+                strokeWidth={3}
+                fill="url(#viewsGradient)"
+                activeDot={{ r: 5, fill: "#10b981", stroke: "#ffffff", strokeWidth: 2 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="clicks"
+                stroke="#3b82f6"
+                strokeWidth={3}
+                fill="url(#clicksGradient)"
+                activeDot={{ r: 5, fill: "#3b82f6", stroke: "#ffffff", strokeWidth: 2 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </ChartErrorBoundary>
       </div>
 
       {/* Footer Separator & Live Tracking */}

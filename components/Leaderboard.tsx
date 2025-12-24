@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { Program } from "@/types";
 import { HiArrowUpRight, HiStar } from "react-icons/hi2";
@@ -16,13 +16,31 @@ interface LeaderboardProps {
 export function Leaderboard({ programs }: LeaderboardProps) {
   const [visibleCount, setVisibleCount] = useState(12);
 
+  // Separate sponsored and organic programs
+  const now = useMemo(() => new Date(), []);
+
+  const sponsoredPrograms = useMemo(() => {
+    return programs.filter(
+      (p) => p.isFeatured && p.featuredExpiresAt && new Date(p.featuredExpiresAt) > now
+    ).slice(0, 3);
+  }, [programs, now]);
+
+  const organicPrograms = useMemo(() => {
+    const sponsoredIds = new Set(sponsoredPrograms.map((p) => p.id));
+    return programs.filter((p) => !sponsoredIds.has(p.id));
+  }, [programs, sponsoredPrograms]);
+
+  const displayOrganicPrograms = useMemo(() => {
+    return organicPrograms.slice(0, visibleCount);
+  }, [organicPrograms, visibleCount]);
+
   // Scrollbar logic
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isScrollbarVisible, setIsScrollbarVisible] = useState(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (!scrollContainerRef.current) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
@@ -38,17 +56,8 @@ export function Leaderboard({ programs }: LeaderboardProps) {
 
     scrollTimeoutRef.current = setTimeout(() => {
       setIsScrollbarVisible(false);
-    }, 1000); // Fade out after 1 second
-  };
-
-  // Separate featured and organic
-  const now = new Date();
-  const featuredPrograms = programs.filter(p => p.isFeatured && p.featuredExpiresAt && new Date(p.featuredExpiresAt) > now);
-  const regularPrograms = programs.filter(p => !featuredPrograms.find(f => f.id === p.id));
-
-  // Carousel logic removed - only showing top 3
-
-  const displayRegular = regularPrograms.slice(0, visibleCount);
+    }, 1000);
+  }, []);
 
   return (
     <div className="max-w-[1000px] mx-auto px-4 md:px-6 relative group/list pb-24">
@@ -79,41 +88,36 @@ export function Leaderboard({ programs }: LeaderboardProps) {
               <div className="col-span-1"></div>
             </div>
 
+            {/* Sponsored Section */}
+            {sponsoredPrograms.length > 0 && (
+              <div className="divide-y divide-zinc-100 dark:divide-white/[0.04] bg-gradient-to-b from-amber-500/[0.03] to-transparent dark:from-amber-500/[0.05]">
+                {sponsoredPrograms.map((program) => (
+                  <ProgramCard
+                    key={program.id}
+                    program={program}
+                    variant="row"
+                    rank={undefined} // No rank for sponsored
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Divider between Sponsored and Organic */}
+            {sponsoredPrograms.length > 0 && organicPrograms.length > 0 && (
+              <div className="h-px bg-gradient-to-r from-transparent via-zinc-300 dark:via-white/20 to-transparent" />
+            )}
+
+            {/* Organic Leaderboard */}
             <div className="divide-y divide-zinc-100 dark:divide-white/[0.04] perspective-[600px]">
               <AnimatePresence mode="popLayout">
-                {/* Featured Section */}
-                {featuredPrograms.slice(0, 3).map((program) => {
-                  return (
-                    <motion.div
-                      layout="position"
-                      initial={{ opacity: 0, scale: 0.95, y: -20 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 200,
-                        damping: 25,
-                        mass: 1
-                      }}
-                      key={`featured-${program.id}`}
-                    >
-                      <ProgramCard
-                        program={program}
-                        variant="row"
-                      />
-                    </motion.div>
-                  );
-                })}
-
-                {/* Regular Table Rows */}
-                {displayRegular.map((program, index) => (
+                {displayOrganicPrograms.map((program, index) => (
                   <motion.div
                     layout="position"
                     initial={{ opacity: 0, scale: 0.98, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{
-                      layout: { type: "spring", stiffness: 200, damping: 25, mass: 1 }, // "Expensive" weight
+                      layout: { type: "spring", stiffness: 200, damping: 25, mass: 1 },
                       opacity: { duration: 0.3, ease: "easeOut" }
                     }}
                     key={program.id}
@@ -121,7 +125,7 @@ export function Leaderboard({ programs }: LeaderboardProps) {
                     <ProgramCard
                       program={program}
                       variant="row"
-                      rank={index + 1}
+                      rank={index + 1} // Organic ranks start from 1
                     />
                   </motion.div>
                 ))}
@@ -149,16 +153,11 @@ export function Leaderboard({ programs }: LeaderboardProps) {
 
       {/* See More Button */}
       {
-        visibleCount < regularPrograms.length && (
+        displayOrganicPrograms.length < organicPrograms.length && (
           <div className="mt-8 flex justify-center">
             <button
               onClick={() => {
-                // Pre-increment to show items immediately, then maybe fetch more if needed in future
                 setVisibleCount((prev) => prev + 12);
-              }}
-              onMouseEnter={() => {
-                // If we had a paginated API, we'd prefetch here. 
-                // Since it's in-memory, we just ensure the render is fast.
               }}
               className="px-6 py-2 rounded-full border border-white/10 text-sm text-zinc-400 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all duration-200"
             >
@@ -170,3 +169,4 @@ export function Leaderboard({ programs }: LeaderboardProps) {
     </div >
   );
 }
+

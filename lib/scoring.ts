@@ -136,13 +136,15 @@ export function calculatePureStatsScore(
     views: number,
     clicks: number
 ): number {
-    // 1. Base Score
-    const baseScore = (views * 1) + (clicks * 10);
+    // 1. Base Score (Safely handle potentially NaN or null inputs)
+    const safeViews = Math.max(0, views || 0);
+    const safeClicks = Math.max(0, clicks || 0);
+    const baseScore = (safeViews * 1) + (safeClicks * 10);
 
     // 2. Multiplier logic (Quality Bonus based on CTR)
     let multiplier = 1.0;
-    if (views > 30) {
-        const ctr = clicks / views;
+    if (safeViews > 30) {
+        const ctr = safeClicks / safeViews;
         if (ctr > 0.10) {
             multiplier = 1.3;
         } else if (ctr > 0.05) {

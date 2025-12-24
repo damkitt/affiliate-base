@@ -19,6 +19,7 @@ model TrafficLog {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([createdAt])
+  @@index([country, createdAt])
   @@map("traffic_logs")
 }
 
@@ -90,6 +91,7 @@ model Program {
 
   @@index([approvalStatus, trendingScore, createdAt])
   @@index([isFeatured, featuredExpiresAt])
+  @@index([programName, category])
 }
 
 model ProgramReport {

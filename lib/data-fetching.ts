@@ -7,28 +7,44 @@ import { unstable_cache } from "next/cache";
  */
 export const getLeaderboardPrograms = unstable_cache(
     async () => {
-        return await prisma.program.findMany({
-            where: { approvalStatus: true },
-            orderBy: [{ trendingScore: "desc" }, { createdAt: "desc" }],
-            take: 50,
-            select: {
-                id: true,
-                programName: true,
-                slug: true,
-                logoUrl: true,
-                commissionRate: true,
-                commissionDuration: true,
-                category: true,
-                tagline: true,
-                description: true,
-                isFeatured: true,
-                featuredExpiresAt: true,
-                createdAt: true,
-                trendingScore: true,
-            },
-        });
+        try {
+            const allPrograms = await prisma.program.findMany({
+                where: { approvalStatus: true },
+                orderBy: [{ trendingScore: "desc" }, { createdAt: "desc" }],
+                take: 50,
+                select: {
+                    id: true,
+                    programName: true,
+                    slug: true,
+                    logoUrl: true,
+                    commissionRate: true,
+                    commissionDuration: true,
+                    category: true,
+                    tagline: true,
+                    isFeatured: true,
+                    featuredExpiresAt: true,
+                    createdAt: true,
+                    trendingScore: true,
+                },
+            });
+
+            // Apply Sponsored-First Logic (must match API behavior)
+            const now = new Date();
+            const sponsored = allPrograms.filter(
+                (p) => p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now
+            ).slice(0, 3);
+
+            const organic = allPrograms.filter(
+                (p) => !sponsored.some((s) => s.id === p.id)
+            );
+
+            return [...sponsored, ...organic];
+        } catch (error) {
+            console.error("[getLeaderboardPrograms] DB Error:", error);
+            return []; // Fail gracefully with empty list
+        }
     },
-    ["leaderboard-programs-v2"],
+    ["leaderboard-programs-v3"], // Bump cache key version
     { revalidate: 60, tags: ["programs"] }
 );
 
@@ -37,31 +53,30 @@ export const getLeaderboardPrograms = unstable_cache(
  */
 export const getProgramBySlug = unstable_cache(
     async (slug: string) => {
-        return await prisma.program.findUnique({
-            where: { slug },
-        });
+        try {
+            return await prisma.program.findUnique({
+                where: { slug },
+            });
+        } catch (error) {
+            console.error("[getProgramBySlug] DB Error:", error);
+            return null;
+        }
     },
-    ["program-by-slug"], // Note: Dynamic key part handled by caller usually, but unstable_cache wraps a function.
-    // Actually unstable_cache handles arguments if passed.
-    // However, for variable arguments, it's safer to rely on the function signature.
-    // Next.js unstable_cache automatically uses arguments as part of the key if configured? 
-    // No, we need to pass dynamic keys if the function takes args.
-    // But here we'll define the cached function inside or just wrapping the logic.
-    // Actually, let's just export the raw function wrapped.
-    // The cache key needs to be unique per slug.
-    // `unstable_cache` supports variadic args, they become part of the key.
-    {
-        revalidate: 60,
-        tags: ["program-detail"],
-    }
+    ["program-by-slug"],
+    { revalidate: 60, tags: ["program-detail"] }
 );
 
 // Correct usage for dynamic args with unstable_cache:
 export const getCachedProgramBySlug = unstable_cache(
     async (slug: string) => {
-        return await prisma.program.findUnique({
-            where: { slug, approvalStatus: true },
-        });
+        try {
+            return await prisma.program.findUnique({
+                where: { slug, approvalStatus: true },
+            });
+        } catch (error) {
+            console.error("[getCachedProgramBySlug] DB Error:", error);
+            return null;
+        }
     },
     ["program-by-slug-v1"],
     { revalidate: 60 }
@@ -70,12 +85,13 @@ export const getCachedProgramBySlug = unstable_cache(
 
 export const getCachedClicks = unstable_cache(
     async () => {
-        // This might be a heavy aggregation, caching is good.
-        // For now, we return empty or implement the actual logic if needed.
-        // The original used an API route. 
-        // We'll stick to API for metrics for now as they change often?
-        // Actually, metrics shouldn't block the page load.
-        return {};
+        try {
+            // Placeholder for actual metrics logic
+            return {};
+        } catch (error) {
+            console.error("[getCachedClicks] Error:", error);
+            return {};
+        }
     },
     ["metrics-clicks"],
     { revalidate: 300 }

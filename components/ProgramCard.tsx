@@ -1,6 +1,4 @@
-"use client";
-
-import { memo } from "react";
+import { useState, useEffect, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { HiArrowUpRight, HiStar, HiChartBar, HiInformationCircle } from "react-icons/hi2";
@@ -14,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/Tooltip";
+import { ProgramLogo } from "./ProgramLogo";
 import styles from "./ProgramCard.module.css";
 
 interface ProgramCardProps {
@@ -29,7 +28,13 @@ export const ProgramCard = memo(function ProgramCard({
   rank,
   highlightNew = true,
 }: ProgramCardProps) {
-  const isNew = highlightNew && isProgramNew(program.createdAt);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isNew = mounted && highlightNew && isProgramNew(program.createdAt);
   const isSponsored =
     program.isFeatured &&
     program.featuredExpiresAt &&
@@ -39,28 +44,13 @@ export const ProgramCard = memo(function ProgramCard({
     CATEGORY_ICONS[program.category as keyof typeof CATEGORY_ICONS] || "HiCube";
 
   const Logo = (
-    <div
-      className={`${styles.logo} ${variant === "row" ? styles.logoRow : styles.logoCard
-        }`}
-    >
-      {program.logoUrl ? (
-        <Image
-          src={program.logoUrl}
-          alt={program.programName}
-          fill
-          priority={isSponsored || (rank !== undefined && rank <= 3)}
-          sizes="(max-width: 768px) 48px, 64px"
-          className="object-cover"
-        />
-      ) : (
-        <div
-          className={`${styles.logoPlaceholder} ${variant === "card" ? styles.logoPlaceholderCard : ""
-            }`}
-        >
-          {program.programName[0]}
-        </div>
-      )}
-    </div>
+    <ProgramLogo
+      src={program.logoUrl}
+      name={program.programName || "Unknown"}
+      size={variant === "row" ? "md" : "lg"}
+      priority={isSponsored || (rank !== undefined && rank <= 3)}
+      className={variant === "row" ? styles.logoRow : styles.logoCard}
+    />
   );
 
   const NewDot = isNew ? (
@@ -90,7 +80,7 @@ export const ProgramCard = memo(function ProgramCard({
         : styles.commissionPillDefault
         }`}
     >
-      <span className={styles.commissionRate}>{program.commissionRate}%</span>
+      <span className={styles.commissionRate}>{program.commissionRate ?? 0}%</span>
       <span className={styles.commissionDuration}>
         {program.commissionDuration === "Recurring" ? "recurring" : "one-time"}
       </span>

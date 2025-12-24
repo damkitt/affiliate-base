@@ -1,5 +1,6 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { DashboardStats } from "@/lib/analytics";
+import { ChartErrorBoundary } from "../../ChartErrorBoundary";
 
 // Chart colors for pie charts
 const CHART_COLORS = [
@@ -75,43 +76,45 @@ export function SearchAnalytics({ data, isLoading }: SearchAnalyticsProps) {
                     <div className="flex flex-col items-center">
                         {/* Large Pie Chart */}
                         <div className="w-full h-48">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={data.categoryTrends as unknown as Record<string, unknown>[]}
-                                        dataKey="percentage"
-                                        nameKey="category"
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={50}
-                                        outerRadius={80}
-                                        paddingAngle={2}
-                                    >
-                                        {data.categoryTrends.map((_, index) => (
-                                            <Cell
-                                                key={`cell-${index}`}
-                                                fill={CHART_COLORS[index % CHART_COLORS.length]}
-                                                className="transition-all duration-200 hover:opacity-80"
-                                                style={{ cursor: "pointer" }}
-                                            />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        content={({ active, payload }) => {
-                                            if (active && payload && payload.length) {
-                                                const d = payload[0].payload as any; // Cast for simplicity in this context
-                                                return (
-                                                    <div className="bg-black border border-white/20 rounded-lg px-3 py-2 shadow-lg">
-                                                        <div className="text-sm font-medium text-white">{d.category}</div>
-                                                        <div className="text-xs text-white/60">{d.percentage}%</div>
-                                                    </div>
-                                                );
-                                            }
-                                            return null;
-                                        }}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
+                            <ChartErrorBoundary>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={data.categoryTrends as unknown as Record<string, unknown>[]}
+                                            dataKey="percentage"
+                                            nameKey="category"
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={50}
+                                            outerRadius={80}
+                                            paddingAngle={2}
+                                        >
+                                            {data.categoryTrends.map((_, index) => (
+                                                <Cell
+                                                    key={`cell-${index}`}
+                                                    fill={CHART_COLORS[index % CHART_COLORS.length]}
+                                                    className="transition-all duration-200 hover:opacity-80"
+                                                    style={{ cursor: "pointer" }}
+                                                />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip
+                                            content={({ active, payload }) => {
+                                                if (active && payload && payload.length) {
+                                                    const d = payload[0].payload as any; // Cast for simplicity in this context
+                                                    return (
+                                                        <div className="bg-black border border-white/20 rounded-lg px-3 py-2 shadow-lg">
+                                                            <div className="text-sm font-medium text-white">{d.category}</div>
+                                                            <div className="text-xs text-white/60">{d.percentage}%</div>
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </ChartErrorBoundary>
                         </div>
                         {/* Legend below */}
                         <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2">
