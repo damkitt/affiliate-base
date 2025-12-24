@@ -15,7 +15,7 @@ interface CustomSelectProps {
     value: string;
     onChange: (value: string) => void;
     placeholder?: string;
-    label?: string; // Optional label above the input
+    label?: React.ReactNode; // Optional label above the input
     searchable?: boolean;
     position?: "top" | "bottom";
     className?: string; // Wrapper class
