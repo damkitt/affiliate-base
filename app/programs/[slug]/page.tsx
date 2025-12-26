@@ -17,12 +17,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const program = await getCachedProgramBySlug(slug);
   if (!program) return {};
 
-  // Build title dynamically using high-converting template
-  // Template: "Program Affiliate Program: X% Recurring & Review"
-  const title = `${program.programName} Affiliate Program: ${program.commissionRate}% ${program.commissionDuration || ''} & Review`;
-
-  // Build description dynamically
-  const description = `Join the ${program.programName} affiliate program. Earn ${program.commissionRate}% ${program.commissionDuration || ''}. Verified details, cookie duration, and payout info for creators.`;
+  // New Template
+  // Title: ${program.name} Affiliate Program Details
+  // Description: View commission rates, cookie duration, and payout terms for the ${program.name} affiliate program.
+  const title = `${program.programName} Affiliate Program Details`;
+  const description = `View commission rates, cookie duration, and payout terms for the ${program.programName} affiliate program.`;
 
   const canonicalUrl = `https://affiliatebase.co/programs/${slug}`;
 
