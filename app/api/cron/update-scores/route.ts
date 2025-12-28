@@ -84,8 +84,9 @@ export async function GET(request: Request) {
                         where: { id: program.id },
                         data: {
                             trendingScore: newScore,
-                            totalViews: lifetime.views, // Sync lifetime source of truth
-                            clicks: lifetime.clicks     // Sync lifetime source of truth
+                            // We no longer sync totalViews/clicks here from ProgramEvent
+                            // because ProgramEvent logs are pruned after 90 days,
+                            // while Program.totalViews/clicks are the permanent lifetime source of truth.
                         },
                     });
                 })

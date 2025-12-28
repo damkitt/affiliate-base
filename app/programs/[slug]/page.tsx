@@ -1,12 +1,28 @@
-import { getCachedProgramBySlug } from "@/lib/data-fetching";
+import { getCachedProgramBySlug, getLeaderboardPrograms } from "@/lib/data-fetching";
 import { ProgramDetailContent } from "@/components/ProgramDetail/ProgramDetailContent";
 import { RelatedPrograms } from "@/components/ProgramDetail/RelatedPrograms";
 import { Footer } from "@/components/Footer";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 // Revalidate every 60 seconds
 export const revalidate = 60;
+
+// Pre-render the top 50 programs at build time
+export async function generateStaticParams() {
+  try {
+    const programs = await getLeaderboardPrograms();
+    return programs
+      .filter((p) => p.slug) // Defensive: Ensure slug exists
+      .map((p) => ({
+        slug: p.slug!,
+      }));
+  } catch (error) {
+    console.error("[generateStaticParams] Build-time error:", error);
+    return [];
+  }
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -134,10 +150,28 @@ export default async function ProgramPage({ params }: PageProps) {
       <ProgramDetailContent
         program={serializedProgram}
         relatedProgramsSlot={
-          <RelatedPrograms category={program.category || "SaaS"} currentId={program.id} />
+          <Suspense fallback={<RelatedProgramsSkeleton />}>
+            <RelatedPrograms category={program.category || "SaaS"} currentId={program.id} />
+          </Suspense>
         }
       />
       <Footer />
     </>
+  );
+}
+
+function RelatedProgramsSkeleton() {
+  return (
+    <div className="mt-24 border-t border-[var(--border)] pt-12 animate-pulse">
+      <div className="flex justify-between mb-8">
+        <div className="h-7 w-48 bg-[var(--bg-secondary)] rounded-lg"></div>
+        <div className="h-5 w-20 bg-[var(--bg-secondary)] rounded-lg"></div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-32 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border)]"></div>
+        ))}
+      </div>
+    </div>
   );
 }

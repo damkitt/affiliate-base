@@ -12,13 +12,13 @@ export function Footer({ onAddProgram }: FooterProps) {
   const handleAdvertiseClick = async () => {
     try {
       const fp = await generateFingerprint();
-      fetch("/api/analytics/collect", {
+      fetch("/api/track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          type: "VIEW",
           fingerprint: fp,
-          url: "/advertise",
-          referer: window.location.href,
+          path: "/advertise",
         }),
       }).catch(() => { });
     } catch (err) {

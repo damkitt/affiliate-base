@@ -33,28 +33,33 @@ export async function GET(request: Request) {
         // Let's use TrafficLog IP distinct count for "Impressions".
         const totalVisitorsResult = await prisma.trafficLog.findMany({
             where: { createdAt: { gte: rangeStart } },
-            select: { ip: true },
-            distinct: ["ip"],
+            select: { ip: true, visitorId: true } as any,
         });
-        const impressions = totalVisitorsResult.length;
+        const impressions = new Set(totalVisitorsResult.map((v: any) => v.visitorId || v.ip)).size;
 
-        // Program-specific views (Strict)
-        const programViews = await prisma.programEvent.count({
+        // Program-specific views (Unique Visitors)
+        const programViewsRes = await prisma.programEvent.findMany({
             where: {
                 createdAt: { gte: rangeStart },
                 programId: programId,
                 type: "VIEW",
             },
+            select: { visitorId: true },
+            distinct: ["visitorId"],
         });
+        const programViews = programViewsRes.length;
 
-        // Program-specific clicks (Strict)
-        const programClicks = await prisma.programEvent.count({
+        // Program-specific clicks (Unique Visitors)
+        const programClicksRes = await prisma.programEvent.findMany({
             where: {
                 createdAt: { gte: rangeStart },
                 programId: programId,
-                type: "CLICK", // "outbound" is handled as CLICK in new system
+                type: "CLICK",
             },
+            select: { visitorId: true },
+            distinct: ["visitorId"],
         });
+        const programClicks = programClicksRes.length;
 
         // Calculate conversion rates
         const viewConversion = impressions > 0 ? Math.round((programViews / impressions) * 100 * 10) / 10 : 0;

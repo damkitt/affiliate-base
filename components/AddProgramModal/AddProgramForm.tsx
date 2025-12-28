@@ -43,6 +43,7 @@ export function AddProgramForm({
     );
     const [showSuccess, setShowSuccess] = useState(false);
     const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
+    const [hasStepErrors, setHasStepErrors] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -217,6 +218,7 @@ export function AddProgramForm({
                             onCategorySelect={(category) =>
                                 setFormData((prev) => ({ ...prev, category }))
                             }
+                            onValidityChange={setHasStepErrors}
                         />
                     )}
 
@@ -267,8 +269,8 @@ export function AddProgramForm({
                     <button
                         type="button"
                         onClick={handleNext}
-                        disabled={!canProceedToStep(currentStep + 1, formData)}
-                        className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${canProceedToStep(currentStep + 1, formData)
+                        disabled={hasStepErrors || !canProceedToStep(currentStep + 1, formData)}
+                        className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${!hasStepErrors && canProceedToStep(currentStep + 1, formData)
                             ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
                             : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
                             }`}

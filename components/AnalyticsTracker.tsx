@@ -38,13 +38,13 @@ export function AnalyticsTracker() {
             const referer = document.referrer;
 
             // Use the universal collector
-            fetch("/api/analytics/collect", {
+            fetch("/api/track", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    type: "VIEW",
                     fingerprint: fp,
-                    url: path,
-                    referer: referer || undefined,
+                    path: path,
                 }),
             }).catch(err => console.error("[Analytics] Background tracking failed:", err));
         } catch (err) {

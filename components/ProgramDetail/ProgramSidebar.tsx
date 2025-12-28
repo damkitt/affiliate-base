@@ -127,19 +127,28 @@ export function ProgramSidebar({ program, onApply, onOpenCalculator, onOpenEditM
             <div className="card-premium p-6 rounded-[2rem] animate-fade-in-up delay-300">
                 <h3 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-5 pl-2">Links</h3>
                 <div className="space-y-2">
-                    {program.websiteUrl && (
-                        <a
-                            href={program.websiteUrl}
-                            target="_blank"
-                            rel="nofollow sponsored noopener noreferrer"
-                            className="flex items-center gap-4 p-3 rounded-xl hover:bg-[var(--bg-secondary)] transition-all group"
-                        >
-                            <div className="w-8 h-8 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-center text-[var(--text-tertiary)] group-hover:text-[var(--accent-solid)] group-hover:bg-[var(--accent-dim)] transition-all">
-                                <HiGlobeAlt className="w-4 h-4" />
-                            </div>
-                            <span className="text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] truncate transition-colors font-medium">{new URL(program.websiteUrl).hostname}</span>
-                        </a>
-                    )}
+                    {program.websiteUrl && (() => {
+                        try {
+                            const url = new URL(program.websiteUrl);
+                            return (
+                                <a
+                                    href={program.websiteUrl}
+                                    target="_blank"
+                                    rel="nofollow sponsored noopener noreferrer"
+                                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-[var(--bg-secondary)] transition-all group"
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-center text-[var(--text-tertiary)] group-hover:text-[var(--accent-solid)] group-hover:bg-[var(--accent-dim)] transition-all">
+                                        <HiGlobeAlt className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] truncate transition-colors font-medium">
+                                        {url.hostname}
+                                    </span>
+                                </a>
+                            );
+                        } catch (e) {
+                            return null;
+                        }
+                    })()}
                     {program.xHandle && (
                         <a
                             href={`https://twitter.com/${program.xHandle.replace('@', '')}`}

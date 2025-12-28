@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 /**
  * GET /api/metrics/clicks
- * Returns a mapping of program_id -> click count from Prometheus registry.
+ * Returns a mapping of program_id -> click count from Database.
  */
 export async function GET(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);

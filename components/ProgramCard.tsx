@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { HiArrowUpRight, HiStar, HiChartBar, HiInformationCircle } from "react-icons/hi2";
 import { Program } from "@/types";
-import { isProgramNew } from "@/lib/utils";
+import { isProgramNew, isProgramSponsored } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { CATEGORY_ICONS } from "@/constants";
 import {
@@ -20,6 +20,7 @@ interface ProgramCardProps {
   variant?: "row" | "card";
   rank?: number;
   highlightNew?: boolean;
+  hideAction?: boolean;
 }
 
 export const ProgramCard = memo(function ProgramCard({
@@ -27,6 +28,7 @@ export const ProgramCard = memo(function ProgramCard({
   variant = "row",
   rank,
   highlightNew = true,
+  hideAction = false,
 }: ProgramCardProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -35,10 +37,7 @@ export const ProgramCard = memo(function ProgramCard({
   }, []);
 
   const isNew = mounted && highlightNew && isProgramNew(program.createdAt);
-  const isSponsored =
-    program.isFeatured &&
-    program.featuredExpiresAt &&
-    new Date(program.featuredExpiresAt) > new Date();
+  const isSponsored = isProgramSponsored(program);
 
   const categoryIconName =
     CATEGORY_ICONS[program.category as keyof typeof CATEGORY_ICONS] || "HiCube";
@@ -166,7 +165,7 @@ export const ProgramCard = memo(function ProgramCard({
           <div className={styles.commissionCol}>{CommissionPill}</div>
 
           <div className={styles.actionCol}>
-            <HiArrowUpRight className={styles.actionIcon} />
+            {!hideAction && <HiArrowUpRight className={styles.actionIcon} />}
           </div>
         </div>
       </Link>

@@ -33,6 +33,7 @@ interface BasicInfoStepProps {
   ) => void;
   onLogoUpload: (e: ChangeEvent<HTMLInputElement>) => void;
   onCategorySelect: (category: string) => void;
+  onValidityChange?: (hasError: boolean) => void;
 }
 
 // Debounce hook
@@ -53,6 +54,7 @@ export function BasicInfoStep({
   onFormChange,
   onLogoUpload,
   onCategorySelect,
+  onValidityChange,
 }: BasicInfoStepProps) {
   const websiteError = getUrlValidationError(formData.websiteUrl);
   const affiliateError = getUrlValidationError(formData.affiliateUrl);
@@ -61,6 +63,19 @@ export function BasicInfoStep({
   const [duplicateErrors, setDuplicateErrors] = useState<DuplicateErrors>({});
   const [validationErrors, setValidationErrors] = useState<DuplicateErrors>({});
   const [checkingFields, setCheckingFields] = useState<Set<string>>(new Set());
+
+  // Report validity to parent
+  useEffect(() => {
+    if (!onValidityChange) return;
+
+    const hasDuplicateErrors = Object.values(duplicateErrors).some(error => !!error);
+    const hasValidationErrors = Object.values(validationErrors).some(error => !!error);
+    const isChecking = checkingFields.size > 0;
+    const hasSyncErrors = !!websiteError || !!affiliateError;
+
+    // Report true if ANY error exists or if we are currently checking
+    onValidityChange(hasDuplicateErrors || hasValidationErrors || isChecking || hasSyncErrors);
+  }, [duplicateErrors, validationErrors, checkingFields, websiteError, affiliateError, onValidityChange]);
 
   const debouncedProgramName = useDebounce(formData.programName, 500);
   const debouncedWebsiteUrl = useDebounce(formData.websiteUrl, 500);

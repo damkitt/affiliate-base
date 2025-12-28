@@ -52,3 +52,8 @@ export function isProgramNew(createdAt: Date | string | undefined | null): boole
   const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
   return diffInHours <= 24;
 }
+
+export function isProgramSponsored(program: { isFeatured?: boolean | null; featuredExpiresAt?: Date | string | null }): boolean {
+  if (!program.isFeatured || !program.featuredExpiresAt) return false;
+  return new Date(program.featuredExpiresAt) > new Date();
+}

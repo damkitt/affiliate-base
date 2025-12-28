@@ -6,6 +6,7 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { cleanAndValidateUrl } from "@/lib/url-validator";
 
 // =============================================================================
 // Types
@@ -70,11 +71,22 @@ export async function PATCH(
 
     const body = await request.json();
 
-    // Remove id and createdAt from update payload (only keep updateable fields)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // Remove id and createdAt from update payload
     const { id: _discardId, createdAt: _discardCreatedAt, ...updateData } = body;
 
-    // Validate program name length (max 30 characters)
+    // 1. Data Hardening: Normalize URLs if provided
+    try {
+      if (updateData.websiteUrl) {
+        updateData.websiteUrl = cleanAndValidateUrl(updateData.websiteUrl);
+      }
+      if (updateData.affiliateUrl) {
+        updateData.affiliateUrl = cleanAndValidateUrl(updateData.affiliateUrl);
+      }
+    } catch (error: any) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    // 2. Validate program name length (max 30 characters)
     if (updateData.programName && updateData.programName.length > 30) {
       return NextResponse.json(
         { error: "Program name must be 30 characters or less." },

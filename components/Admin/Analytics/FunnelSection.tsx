@@ -57,13 +57,13 @@ export function FunnelSection({ data, programFunnel, isLoading, selectedProgram,
                             </div>
                             <div className="text-center">
                                 <div className="text-xs text-white/40 uppercase tracking-wide mb-1">{step2.name}</div>
-                                <div className="text-2xl font-light tabular-nums">{step2.value.toLocaleString()}</div>
-                                <div className="text-xs text-white/30">{step2.conversion}% conv.</div>
+                                <div className="text-2xl font-bold tabular-nums text-white/90">{step2.value.toLocaleString()}</div>
+                                <div className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full inline-block mt-1">{step2.conversion}% conversion</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-xs text-white/40 uppercase tracking-wide mb-1">{step3.name}</div>
-                                <div className="text-2xl font-light tabular-nums">{step3.value.toLocaleString()}</div>
-                                <div className="text-xs text-white/30">{step3.conversion}% conv.</div>
+                                <div className="text-2xl font-bold tabular-nums text-white/90">{step3.value.toLocaleString()}</div>
+                                <div className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full inline-block mt-1">{step3.conversion}% CTR</div>
                             </div>
                         </div>
 
@@ -76,12 +76,12 @@ export function FunnelSection({ data, programFunnel, isLoading, selectedProgram,
                             >
                                 <defs>
                                     <linearGradient id="barGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                        <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
-                                        <stop offset="100%" stopColor="rgba(255,255,255,0.15)" />
+                                        <stop offset="0%" stopColor="rgba(16, 185, 129, 0.4)" />
+                                        <stop offset="100%" stopColor="rgba(16, 185, 129, 0.1)" />
                                     </linearGradient>
                                     <linearGradient id="connectorGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                        <stop offset="0%" stopColor="rgba(255,255,255,0.2)" />
-                                        <stop offset="100%" stopColor="rgba(255,255,255,0.08)" />
+                                        <stop offset="0%" stopColor="rgba(16, 185, 129, 0.15)" />
+                                        <stop offset="100%" stopColor="rgba(16, 185, 129, 0.05)" />
                                     </linearGradient>
                                 </defs>
 

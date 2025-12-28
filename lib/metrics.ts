@@ -131,17 +131,25 @@ export const apiErrorsTotal = getOrCreateCounter(
   }
 );
 
-// ---------- Pushgateway ----------
+// ---------- Pushgateway (Non-blocking) ----------
 
 const gateway = new client.Pushgateway(
-  process.env.PUSHGATEWAY_URL!,
+  process.env.PUSHGATEWAY_URL || "http://localhost:9091",
   {},
   register
 );
 
-export async function pushMetrics(
+/**
+ * Push metrics to Prometheus Pushgateway (non-blocking).
+ * This function fires and forgets - it does NOT await the result.
+ * Errors are logged but do not affect the user experience.
+ */
+export function pushMetrics(
   jobName: string,
   groupings?: Record<string, string>
 ) {
-  await gateway.pushAdd({ jobName, groupings });
+  // Fire and forget - do not await
+  gateway.pushAdd({ jobName, groupings }).catch((err) => {
+    console.warn(`[Metrics] Non-blocking push failed for job '${jobName}':`, err?.message || err);
+  });
 }

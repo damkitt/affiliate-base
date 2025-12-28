@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import useSWR from "swr";
+import { useEffect } from "react";
 import Link from "next/link";
-import type { DashboardStats, FunnelData } from "@/lib/analytics";
+import { AnalyticsProvider, useAnalytics } from "@/components/Admin/Analytics/AnalyticsProvider";
 
 // Components
 import { StatsCards } from "@/components/Admin/Analytics/StatsCards";
@@ -13,16 +12,21 @@ import { TopProgramsTable } from "@/components/Admin/Analytics/TopProgramsTable"
 import { SearchAnalytics } from "@/components/Admin/Analytics/SearchAnalytics";
 import { ReferrerTable } from "@/components/Admin/Analytics/ReferrerTable";
 import { NewProgramsDetail } from "@/components/Admin/Analytics/NewProgramsDetail";
+import { DeviceOSSection } from "@/components/Admin/Analytics/DeviceOSSection";
 
-const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then((res) => res.json());
+function DashboardContent() {
+    // Consume data and state from the Single Source of Truth Provider
+    const {
+        data,
+        programFunnel,
+        isLoading,
+        range,
+        setRange,
+        selectedProgram,
+        setSelectedProgram
+    } = useAnalytics();
 
-type TimeRange = "24h" | "7d" | "30d";
-
-export default function AnalyticsPage() {
-    const [range, setRange] = useState<TimeRange>("7d");
-    const [selectedProgram, setSelectedProgram] = useState<string>("global");
-
-    // Remove green gradient on this page
+    // Remove green gradient on this page (UI effect)
     useEffect(() => {
         document.body.classList.add("no-spotlight");
         return () => {
@@ -30,29 +34,9 @@ export default function AnalyticsPage() {
         };
     }, []);
 
-    const { data, error, isLoading } = useSWR<DashboardStats>(
-        `/api/admin/analytics?range=${range}`,
-        fetcher,
-        { refreshInterval: 30000 }
-    );
-
-    // Fetch program-specific funnel when a program is selected
-    const { data: programFunnel } = useSWR<FunnelData>(
-        selectedProgram !== "global" ? `/api/admin/analytics/funnel?programId=${selectedProgram}&range=${range}` : null,
-        fetcher
-    );
-
-    if (error) {
-        return (
-            <div className="min-h-screen bg-black text-white flex items-center justify-center font-mono">
-                <p className="text-red-400">Failed to load analytics</p>
-            </div>
-        );
-    }
-
     return (
         <div className="min-h-screen bg-black text-white font-sans">
-            {/* Header */}
+            {/* Header - Always visible to prevent layout shift */}
             <header className="border-b border-white/10 px-6 py-4">
                 <div className="max-w-6xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-6">
@@ -66,14 +50,15 @@ export default function AnalyticsPage() {
                     </div>
                     {/* Time Range Tabs */}
                     <div className="flex items-center gap-1 p-0.5 bg-white/5 rounded-md border border-white/10">
-                        {(["24h", "7d", "30d"] as TimeRange[]).map((r) => (
+                        {(["24h", "7d", "30d"] as const).map((r) => (
                             <button
                                 key={r}
                                 onClick={() => setRange(r)}
+                                disabled={isLoading && !data} // Disable while initial loading
                                 className={`px-3 py-1 text-xs font-medium rounded transition-all ${range === r
                                     ? "bg-white text-black"
                                     : "text-white/50 hover:text-white"
-                                    }`}
+                                    } ${isLoading && !data ? "opacity-50 cursor-not-allowed" : ""}`}
                             >
                                 {r.toUpperCase()}
                             </button>
@@ -82,34 +67,70 @@ export default function AnalyticsPage() {
                 </div>
             </header>
 
-            <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-                {/* Row 1: KPI Cards */}
-                <StatsCards data={data} isLoading={isLoading} />
+            <main className="max-w-6xl mx-auto px-6 py-8">
+                {/* Unified Loading State */}
+                {isLoading && !data ? (
+                    <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
+                        <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-white/40 text-xs tracking-widest uppercase font-medium">Loading Dashboard...</p>
+                    </div>
+                ) : (
+                    <div className="space-y-8 animate-in fade-in duration-500">
+                        {/* DB Health Warning */}
+                        {data?.health?.dbSizeWarning && (
+                            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="text-yellow-500">⚠️</div>
+                                    <div>
+                                        <h3 className="text-yellow-500 font-medium text-sm">High Traffic Volume</h3>
+                                        <p className="text-white/60 text-xs">
+                                            Traffic logs have exceeded 50,000 records ({data.health.dbRows.toLocaleString()}). Performance may degrade.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
-                {/* Row 2: New Programs Detail */}
-                <NewProgramsDetail data={data} isLoading={isLoading} range={range} />
+                        {/* Row 1: KPI Cards */}
+                        <StatsCards data={data} isLoading={isLoading} />
 
-                {/* Row 3: Traffic Chart */}
-                <TrafficChart data={data} isLoading={isLoading} range={range} />
+                        {/* Row 2: New Programs Detail */}
+                        <NewProgramsDetail data={data} isLoading={isLoading} range={range} />
 
-                {/* Row 3: Conversion Funnel */}
-                <FunnelSection
-                    data={data}
-                    programFunnel={programFunnel}
-                    isLoading={isLoading}
-                    selectedProgram={selectedProgram}
-                    onProgramChange={setSelectedProgram}
-                />
+                        {/* Row 3: Traffic Chart */}
+                        <TrafficChart data={data} isLoading={isLoading} range={range} />
 
-                {/* Row 4: Programs & Clicks */}
-                <TopProgramsTable data={data} isLoading={isLoading} />
+                        {/* Row 3: Conversion Funnel */}
+                        <FunnelSection
+                            data={data}
+                            programFunnel={programFunnel}
+                            isLoading={isLoading}
+                            selectedProgram={selectedProgram}
+                            onProgramChange={setSelectedProgram}
+                        />
 
-                {/* Row 5: Search & Categories */}
-                <SearchAnalytics data={data} isLoading={isLoading} />
+                        {/* Row 4: Programs & Clicks */}
+                        <TopProgramsTable data={data} isLoading={isLoading} />
 
-                {/* Row 6: Sources & Geo */}
-                <ReferrerTable data={data} isLoading={isLoading} />
+                        {/* Row 5: Search & Categories */}
+                        <SearchAnalytics data={data} isLoading={isLoading} />
+
+                        {/* Row 6: Sources & Geo */}
+                        <ReferrerTable data={data} isLoading={isLoading} />
+
+                        {/* Row 7: Devices & OS */}
+                        <DeviceOSSection data={data} isLoading={isLoading} />
+                    </div>
+                )}
             </main>
         </div>
+    );
+}
+
+export default function AnalyticsPage() {
+    return (
+        <AnalyticsProvider>
+            <DashboardContent />
+        </AnalyticsProvider>
     );
 }

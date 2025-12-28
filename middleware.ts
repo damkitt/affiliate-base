@@ -98,6 +98,15 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       const limits = (globalThis as any)._rateLimits;
       const current = limits.get(rateLimitKey) || { count: 0, start: now };
 
+      // Periodic cleanup (1 in 100 requests) to prevent memory leaks
+      if (Math.random() < 0.01) {
+        for (const [key, value] of limits.entries()) {
+          if (now - value.start > 60000) {
+            limits.delete(key);
+          }
+        }
+      }
+
       if (now - current.start > 60000) {
         current.count = 1;
         current.start = now;

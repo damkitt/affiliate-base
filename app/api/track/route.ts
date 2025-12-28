@@ -24,6 +24,16 @@ export async function POST(request: Request) {
         const { programId, type, fingerprint, path } = result.data;
         const finalPath = path || '/';
         const finalFingerprint = fingerprint || 'unknown_visitor';
+
+        // Helper to get client IP
+        const getIP = () => {
+            const h = request.headers;
+            return h.get('cf-connecting-ip') ||
+                h.get('x-real-ip') ||
+                h.get('x-forwarded-for')?.split(',')[0].trim() ||
+                'unknown';
+        };
+        const ip = getIP();
         const headers = request.headers;
 
         // 1. ALWAYS write to Rich Traffic Log (Non-blocking)
@@ -33,9 +43,11 @@ export async function POST(request: Request) {
                     path: finalPath,
                     referrer: headers.get('referer') || null,
                     userAgent: headers.get('user-agent') || null,
-                    country: headers.get('x-vercel-ip-country') || null,
+                    country: headers.get('x-vercel-ip-country') || headers.get('cf-ipcountry') || null,
+                    ip: ip,
+                    visitorId: finalFingerprint,
                     programId: programId || null,
-                }
+                } as any
             });
         } catch (err) {
             console.error("[API/Track] TrafficLog Write Failed:", err);

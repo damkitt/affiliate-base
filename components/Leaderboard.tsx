@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Program } from "@/types";
 import { HiArrowUpRight, HiStar } from "react-icons/hi2";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, isProgramSponsored } from "@/lib/utils";
 import { ProgramCard } from "./ProgramCard";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -17,13 +17,16 @@ export function Leaderboard({ programs }: LeaderboardProps) {
   const [visibleCount, setVisibleCount] = useState(12);
 
   // Separate sponsored and organic programs
-  const now = useMemo(() => new Date(), []);
-
+  // Use a stable reference for 'now' to prevent hydration mismatches if possible, 
+  // but for sponsored checks using the helper is cleaner. 
+  // We'll rely on the helper which uses new Date(). 
+  // To avoid hydration mismatch, we strictly should render based on props or use a mounted check,
+  // but since this is a high-traffic page, we want SSR for SEO.
+  // The 'isFeatured' flag in DB is the source of truth, but expiration matters.
+  // We'll assume the server time and client time are close enough for the minute-resolution of expiration.
   const sponsoredPrograms = useMemo(() => {
-    return programs.filter(
-      (p) => p.isFeatured && p.featuredExpiresAt && new Date(p.featuredExpiresAt) > now
-    ).slice(0, 3);
-  }, [programs, now]);
+    return programs.filter(isProgramSponsored).slice(0, 3);
+  }, [programs]);
 
   const organicPrograms = useMemo(() => {
     const sponsoredIds = new Set(sponsoredPrograms.map((p) => p.id));
@@ -39,24 +42,40 @@ export function Leaderboard({ programs }: LeaderboardProps) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isScrollbarVisible, setIsScrollbarVisible] = useState(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const rafRef = useRef<number | null>(null);
 
   const handleScroll = useCallback(() => {
     if (!scrollContainerRef.current) return;
 
-    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-    const maxScroll = scrollWidth - clientWidth;
-    const progress = maxScroll > 0 ? (scrollLeft / maxScroll) * 100 : 0;
-
-    setScrollProgress(progress);
-    setIsScrollbarVisible(true);
-
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
     }
 
-    scrollTimeoutRef.current = setTimeout(() => {
-      setIsScrollbarVisible(false);
-    }, 1000);
+    rafRef.current = requestAnimationFrame(() => {
+      if (!scrollContainerRef.current) return;
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      const maxScroll = scrollWidth - clientWidth;
+      const progress = maxScroll > 0 ? (scrollLeft / maxScroll) * 100 : 0;
+
+      setScrollProgress(progress);
+      setIsScrollbarVisible(true);
+
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrollbarVisible(false);
+      }, 1000);
+    });
+  }, []);
+
+  // Cleanup RAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
   }, []);
 
   return (

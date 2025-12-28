@@ -1,5 +1,4 @@
-
-import { prisma } from "@/lib/prisma";
+import { getCachedRelatedPrograms } from "@/lib/data-fetching";
 import Link from "next/link";
 import { HiArrowRight } from "react-icons/hi2";
 import { ProgramLogo } from "../ProgramLogo";
@@ -10,52 +9,7 @@ interface RelatedProgramsProps {
 }
 
 export async function RelatedPrograms({ category, currentId }: RelatedProgramsProps) {
-    let programs: any[] = [];
-    try {
-        // 1. Fetch by Category
-        programs = await prisma.program.findMany({
-            where: {
-                category,
-                id: { not: currentId },
-                approvalStatus: true,
-            },
-            take: 3,
-            orderBy: { trendingScore: 'desc' },
-            select: {
-                id: true,
-                programName: true,
-                logoUrl: true,
-                commissionRate: true,
-                slug: true,
-                commissionDuration: true,
-            },
-        });
-
-        // 2. Fallback if not enough
-        if (programs.length < 3) {
-            const existingIds = [currentId, ...programs.map((p) => p.id)];
-            const fallbackPrograms = await prisma.program.findMany({
-                where: {
-                    id: { notIn: existingIds },
-                    approvalStatus: true,
-                },
-                orderBy: { trendingScore: 'desc' }, // Highest trend
-                take: 3 - programs.length,
-                select: {
-                    id: true,
-                    programName: true,
-                    logoUrl: true,
-                    commissionRate: true,
-                    slug: true,
-                    commissionDuration: true,
-                },
-            });
-            programs = [...programs, ...fallbackPrograms];
-        }
-    } catch (error) {
-        console.error("[RelatedPrograms] Error:", error);
-        return null; // Don't crash the whole page if related programs fail
-    }
+    const programs = await getCachedRelatedPrograms(category, currentId);
 
     if (programs.length === 0) return null;
 
@@ -74,7 +28,7 @@ export async function RelatedPrograms({ category, currentId }: RelatedProgramsPr
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {programs.map((program) => (
+                {programs.map((program: any) => (
                     <Link
                         key={program.id}
                         href={`/programs/${program.slug}`}

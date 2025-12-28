@@ -73,24 +73,33 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   let organicIndex = 0;
   let newcomerIndex = 0;
-  const injectionSlots = [8, 13, 18, 23, 28, 33, 38, 43, 48];
 
+  // We continue until we've processed all programs up to the limit
   while (finalList.length < allPrograms.length) {
-    const nextSlot = finalList.length + 1;
+    const nextPosition = finalList.length + 1;
 
-    if (injectionSlots.includes(nextSlot) && newcomerIndex < newcomers.length) {
-      let candidate = newcomers[newcomerIndex++];
-      while (candidate && seenIds.has(candidate.id) && newcomerIndex < newcomers.length) {
-        candidate = newcomers[newcomerIndex++];
+    // Inject newcomers at positions 8, 13, 18, 23... (every 5th spot starting from 8)
+    const isInjectionSlot = nextPosition >= 8 && (nextPosition - 8) % 5 === 0;
+
+    if (isInjectionSlot && newcomerIndex < newcomers.length) {
+      // Find the next newcomer that hasn't been seen yet
+      let candidate = null;
+      while (newcomerIndex < newcomers.length) {
+        const potential = newcomers[newcomerIndex++];
+        if (!seenIds.has(potential.id)) {
+          candidate = potential;
+          break;
+        }
       }
 
-      if (candidate && !seenIds.has(candidate.id)) {
+      if (candidate) {
         finalList.push({ ...candidate, isInjected: true });
         seenIds.add(candidate.id);
         continue;
       }
     }
 
+    // Default: Pull from organic list
     if (organicIndex < organic.length) {
       const p = organic[organicIndex++];
       if (!seenIds.has(p.id)) {
@@ -98,6 +107,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         seenIds.add(p.id);
       }
     } else {
+      // If we run out of organic programs (unlikely due to allPrograms.length), we break
       break;
     }
   }

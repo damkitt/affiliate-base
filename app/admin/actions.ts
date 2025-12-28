@@ -13,21 +13,10 @@ export async function updateProgramBoost(id: string, boost: number) {
 
         if (!program) throw new Error("Program not found");
 
-        // 2. Get 7-day engagement for recalculation
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-        const stats = await prisma.programEvent.groupBy({
-            by: ["type"],
-            where: {
-                programId: id,
-                createdAt: { gte: sevenDaysAgo },
-            },
-            _count: true,
-        });
-
-        const views = stats.find(s => s.type === 'VIEW')?._count || 0;
-        const clicks = stats.find(s => s.type === 'CLICK')?._count || 0;
+        // 2. Get 7-day stats using shared helper
+        const stats = await getProgramStats(id, "7d");
+        const views = stats.views;
+        const clicks = stats.clicks;
 
         // 3. Calculate new score including the NEW boost
         const newTrendingScore = calculateTrendingScore(
@@ -83,26 +72,15 @@ export async function updateProgramData(id: string, data: any) {
         });
 
         // 2. Recalculate score based on 7-day window
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-        const stats = await prisma.programEvent.groupBy({
-            by: ["type"],
-            where: {
-                programId: id,
-                createdAt: { gte: sevenDaysAgo },
-            },
-            _count: true,
-        });
-
-        const views = stats.find(s => s.type === 'VIEW')?._count || 0;
-        const clicks = stats.find(s => s.type === 'CLICK')?._count || 0;
+        const stats = await getProgramStats(id, "7d");
 
         const newTrendingScore = calculateTrendingScore(
             updatedProgram as any,
-            views,
-            clicks
+            stats.views,
+            stats.clicks
         );
+
+
 
         // 3. Update score in DB
         await prisma.program.update({

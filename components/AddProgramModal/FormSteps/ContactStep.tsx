@@ -1,7 +1,8 @@
 import { ChangeEvent } from "react";
 import Image from "next/image";
-import { HiChatBubbleLeftRight, HiEnvelope, HiPhoto } from "react-icons/hi2";
+import { HiChatBubbleLeftRight, HiEnvelope } from "react-icons/hi2";
 import type { FormData } from "../types";
+import { ProgramCard } from "@/components/ProgramCard";
 
 interface ContactStepProps {
   formData: FormData;
@@ -73,39 +74,48 @@ export function ContactStep({
       </div>
 
       {/* Preview */}
-      <div className="p-4 bg-[var(--bg-secondary)] rounded-xl">
-        <h4 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wide mb-3">
+      <div className="space-y-3">
+        <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide px-1">
           Preview
         </h4>
-        <div className="flex items-center gap-3">
-          {logoPreview ? (
-            <div className="relative w-12 h-12 rounded-xl overflow-hidden">
-              <Image
-                src={logoPreview}
-                alt="Logo"
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            </div>
-          ) : (
-            <div className="w-12 h-12 rounded-xl bg-[var(--border)] flex items-center justify-center">
-              <HiPhoto className="w-6 h-6 text-[var(--text-secondary)]" />
-            </div>
-          )}
-          <div>
-            <h5 className="font-semibold text-[var(--text-primary)]">
-              {formData.programName || "Program Name"}
-            </h5>
-            <p className="text-sm text-[var(--text-secondary)]">
-              {formData.tagline || "Your tagline"}
-            </p>
+        <div className="border border-zinc-200/60 dark:border-white/[0.1] rounded-2xl bg-white dark:bg-[#0A0A0A] overflow-hidden shadow-sm">
+          {/* Mock Table Header for context */}
+          <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-zinc-200 dark:border-white/[0.08] bg-zinc-50/50 dark:bg-white/[0.02] text-[11px] font-bold text-zinc-900 dark:text-zinc-300 uppercase tracking-widest backdrop-blur-sm opacity-50 pointer-events-none">
+            <div className="col-span-1 text-center opacity-40">#</div>
+            <div className="col-span-5">Program</div>
+            <div className="col-span-3 opacity-60">Category</div>
+            <div className="col-span-2 text-left opacity-60">Commission</div>
+            <div className="col-span-1"></div>
           </div>
-          {formData.commissionRate && (
-            <div className="ml-auto px-3 py-1 bg-emerald-500/20 text-emerald-500 text-sm font-medium rounded-full">
-              {formData.commissionRate}
-            </div>
-          )}
+
+          <div className="pointer-events-none">
+            <ProgramCard
+              program={{
+                id: "preview",
+                programName: formData.programName || "Program Name",
+                tagline: formData.tagline || "Your tagline goes here",
+                description: formData.description || "",
+                category: (formData.category as any) || "SaaS",
+                websiteUrl: formData.websiteUrl || "#",
+                affiliateUrl: formData.affiliateUrl || "#",
+                country: formData.country || "US",
+                logoUrl: logoPreview || null,
+                commissionRate: parseInt(formData.commissionRate) || 0,
+                commissionDuration: formData.commissionDuration || "Recurring",
+                cookieDuration: parseInt(formData.cookieDuration) || 30,
+                approvalStatus: true,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                clicks: 0,
+                clicksCount: 0,
+                isFeatured: false,
+                // Add other required fields with defaults
+              } as any}
+              variant="row"
+              rank={12} // Mock rank as seen in screenshot
+              hideAction={true}
+            />
+          </div>
         </div>
       </div>
     </div>

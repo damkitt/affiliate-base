@@ -15,6 +15,7 @@ model TrafficLog {
   userAgent String?
   country   String?
   ip        String?
+  visitorId String?  @map("visitor_id")
   programId String?  @map("program_id")
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -35,6 +36,7 @@ model ProgramEvent {
 
   @@unique([programId, visitorId, type, dateKey])
   @@index([programId, type, dateKey])
+  @@index([createdAt])
   @@map("program_events")
 }
 

@@ -12,6 +12,7 @@ import {
     HiInformationCircle
 } from "react-icons/hi2";
 import { Program } from "@/types";
+import { getCountryFlag, getFullCountryName } from "@/lib/analytics-helpers";
 
 interface ProgramStatsGridProps {
     program: Program;
@@ -19,15 +20,24 @@ interface ProgramStatsGridProps {
 
 export function ProgramStatsGrid({ program }: ProgramStatsGridProps) {
     const commissionLabel = program.commissionDuration === "Recurring" ? "recurring" : program.commissionDuration === "One-time" ? "one-time" : null;
+
     const programDetails = [
         { icon: HiBanknotes, label: "Commission", value: program.commissionRate != null ? `${program.commissionRate}%${commissionLabel ? ` ${commissionLabel}` : ""}` : null },
         { icon: HiClock, label: "Cookie Duration", value: program.cookieDuration != null ? `${program.cookieDuration} days` : null },
-        { icon: HiMapPin, label: "Region", value: program.country ?? null },
+        {
+            icon: HiMapPin,
+            label: "Country",
+            value: program.country ? `${getCountryFlag(program.country)} ${getFullCountryName(program.country)}` : null
+        },
         { icon: HiUserGroup, label: "Affiliates", value: program.affiliatesCountRange ?? null },
         { icon: HiCurrencyDollar, label: "Min Payout", value: program.minPayoutValue != null ? `$${program.minPayoutValue}` : null },
-        { icon: HiBolt, label: "Approval Time", value: program.approvalTimeRange ?? null },
+        { icon: HiBolt, label: "Approval Time", value: program.approvalTimeRange ? `${program.approvalTimeRange} days` : null },
         { icon: HiUserGroup, label: "Target Audience", value: program.targetAudience ?? null },
-        { icon: HiCalendar, label: "Founded", value: program.foundingDate ? new Date(program.foundingDate).getFullYear() : null },
+        {
+            icon: HiCalendar,
+            label: program.payoutsTotalRange ? "Payouts Total" : "Founded",
+            value: program.payoutsTotalRange ?? (program.foundingDate ? new Date(program.foundingDate).getFullYear() : null)
+        },
         { icon: HiChartBar, label: "Avg Order", value: program.avgOrderValue != null ? `$${program.avgOrderValue}` : null },
     ].filter(item => item.value != null);
 

@@ -210,12 +210,13 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                                     fontSize: '80px',
                                     fontWeight: 800,
                                     color: 'white',
-                                    lineHeight: '1',
+                                    lineHeight: 1.15, // Increased from 1 to 1.15 to prevent descender clipping
                                     display: '-webkit-box',
                                     WebkitLineClamp: 2,
                                     WebkitBoxOrient: 'vertical',
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
+                                    paddingBottom: '10px', // Extra buffer for the descenders
                                 }}>
                                     {program.programName}
                                 </div>
@@ -226,7 +227,8 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                                     fontWeight: 500,
                                     color: '#a1a1aa',
                                     display: 'flex',
-                                    marginTop: '16px',
+                                    marginTop: '8px',
+                                    lineHeight: 1.4, // Give tagline some vertical air
                                 }}>
                                     {program.tagline || 'Verified Affiliate Program'}
                                 </div>

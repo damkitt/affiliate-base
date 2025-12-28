@@ -45,7 +45,7 @@ export function AdvertiseFlow() {
     setState(s => ({ ...s, step: 1 }));
     try {
       const fp = await generateFingerprint();
-      fetch("/api/analytics/collect", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fingerprint: fp, url: "/advertise/start-flow", referer: window.location.href }) });
+      fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "VIEW", fingerprint: fp, path: "/advertise/start-flow" }) });
     } catch { }
   };
 
