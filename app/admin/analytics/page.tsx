@@ -20,11 +20,28 @@ function DashboardContent() {
         data,
         programFunnel,
         isLoading,
+        isError,
         range,
         setRange,
         selectedProgram,
         setSelectedProgram
     } = useAnalytics();
+
+    if (isError) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <p className="text-red-500 font-medium">Failed to load analytics data.</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-md text-sm text-white transition-colors"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     // Remove green gradient on this page (UI effect)
     useEffect(() => {
