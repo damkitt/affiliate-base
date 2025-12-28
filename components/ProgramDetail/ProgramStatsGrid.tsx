@@ -12,7 +12,7 @@ import {
     HiInformationCircle
 } from "react-icons/hi2";
 import { Program } from "@/types";
-import { getCountryFlag, getFullCountryName } from "@/lib/analytics-helpers";
+import { getCountryFlag, getFullCountryName } from "@/lib/country-helpers";
 
 interface ProgramStatsGridProps {
     program: Program;
