@@ -575,7 +575,7 @@ export const getDashboardStats = unstable_cache(
     async (range: "24h" | "7d" | "30d" = "7d"): Promise<DashboardStats> => {
         return calculateDashboardStats(range);
     },
-    ["dashboard-stats-v15-funnelfix"],
+    ["dashboard-stats-v16-prod-fix"], // Bump version to clear cache
     { revalidate: 30, tags: ["analytics"] }
 );
 
