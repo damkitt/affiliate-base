@@ -20,10 +20,11 @@ export function validateEnv() {
         const missingVars = result.error.issues.map(i => i.path.join('.')).join(', ');
         console.warn(`⚠️  Missing or invalid environment variables: ${missingVars}`);
 
-        // During actual production runtime, we want to fail fast.
-        // However, during the 'next build' phase, secrets like CRON_SECRET 
-        // might not be present, so we only throw if we are SURE we are running.
-        if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PHASE?.includes('build')) {
+        // on Client side, process.env is restricted, so this check will always fail.
+        // We must skip this check if running in the browser.
+        const isServer = typeof window === 'undefined';
+
+        if (isServer && process.env.NODE_ENV === 'production' && !process.env.NEXT_PHASE?.includes('build')) {
             throw new Error(`Critical environment variables missing: ${missingVars}. Please check your deployment settings.`);
         }
     }
