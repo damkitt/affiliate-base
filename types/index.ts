@@ -1,5 +1,5 @@
 import { CATEGORIES, COUNTRIES, VALID_COUNTRIES } from "@/constants";
-import { type JWTPayload } from "jose";
+import { JWTPayload } from "jose";
 
 export type Program = {
   readonly id: string;
@@ -31,7 +31,7 @@ export type Program = {
   readonly manualScoreBoost?: number;
   readonly totalViews?: number;
   readonly clicks: number;
-  readonly clicksCount: number; // Deprecated, mapped to clicks? Or just keep for compatibility.
+  readonly clicksCount: number;
   readonly approvalStatus: boolean;
   readonly isFeatured?: boolean;
   readonly featuredExpiresAt?: Date | null;

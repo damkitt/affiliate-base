@@ -9,6 +9,7 @@ export async function GET() {
     const featuredPrograms = await prisma.program.findMany({
       where: {
         isFeatured: true,
+        approvalStatus: true,
       },
       select: {
         featuredExpiresAt: true,
@@ -18,7 +19,6 @@ export async function GET() {
     const count = featuredPrograms.length;
     const isFull = count >= config.advertising.maxSlots;
 
-    // Calculate the next available date (earliest expiry) if full
     let nextAvailableDate: string | null = null;
     if (isFull && featuredPrograms.length > 0) {
       const expiryDates = featuredPrograms

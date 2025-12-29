@@ -2,275 +2,209 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { programsCreatedTotal, activeProgramsGauge } from "@/lib/metrics";
-import { validateCountry, validateCreateBody } from "@/lib/utils";
-import {
-  calculateQualityScore,
-  calculateTrendingScore,
-  calculateTrustScore,
-  calculateRecencyBoost,
-} from "@/lib/scoring";
+import { validateCountry } from "@/lib/utils";
+import { calculateQualityScore, calculateTrendingScore } from "@/lib/scoring";
 import { cleanAndValidateUrl } from "@/lib/url-validator";
+import { programSchema } from "@/lib/validation-schemas";
+import { Program } from "@/types";
+
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+  "CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+  "Vercel-CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+};
+
+const PROGRAM_SELECT = {
+  id: true,
+  programName: true,
+  slug: true,
+  logoUrl: true,
+  commissionRate: true,
+  commissionDuration: true,
+  category: true,
+  tagline: true,
+  isFeatured: true,
+  featuredExpiresAt: true,
+  createdAt: true,
+  trendingScore: true,
+} as const;
+
+type ProgramListItem = Prisma.ProgramGetPayload<{
+  select: typeof PROGRAM_SELECT;
+}>;
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const { searchParams } = new URL(request.url);
-  const search = searchParams.get("search")?.trim();
-
+  const search = new URL(request.url).searchParams.get("search")?.trim();
   const now = new Date();
-  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const dayAgo = new Date(now.getTime() - 86400000);
 
-  // Construct Prisma Filter
-  const where: Prisma.ProgramWhereInput = { approvalStatus: true };
-  if (search) {
-    where.OR = [
-      { programName: { contains: search, mode: 'insensitive' } },
-      { category: { contains: search, mode: 'insensitive' } },
-      { tagline: { contains: search, mode: 'insensitive' } },
-      { description: { contains: search, mode: 'insensitive' } }
-    ];
-  }
+  const where: Prisma.ProgramWhereInput = {
+    approvalStatus: true,
+    ...(search && {
+      OR: [
+        { programName: { contains: search, mode: "insensitive" } },
+        { category: { contains: search, mode: "insensitive" } },
+        { tagline: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ],
+    }),
+  };
 
-  // Fetch results with capping for extreme performance
   const allPrograms = await prisma.program.findMany({
     where,
     orderBy: [{ trendingScore: "desc" }, { createdAt: "desc" }],
-    take: 200, // Limit to top 200 results for scalability
-    select: {
-      id: true,
-      programName: true,
-      slug: true,
-      logoUrl: true,
-      commissionRate: true,
-      commissionDuration: true,
-      category: true,
-      tagline: true,
-      isFeatured: true,
-      featuredExpiresAt: true,
-      createdAt: true,
-      trendingScore: true,
-    }
+    take: 200,
+    select: PROGRAM_SELECT,
   });
 
-  // Query A: Sponsored (Top 3)
   const sponsored = allPrograms
-    .filter(p => p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now)
+    .filter(
+      (p) => p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now
+    )
     .slice(0, 3);
 
-  // Query B: Organic Leaders
-  const organic = allPrograms.filter(p => !sponsored.some(s => s.id === p.id));
+  const sponsoredIds = new Set(sponsored.map((p) => p.id));
+  const organic = allPrograms.filter((p) => !sponsoredIds.has(p.id));
 
-  // Query C: The Injection Queue (Underdogs - Newcomers < 24h)
-  const top20OrganicIds = new Set(organic.slice(0, 20).map(p => p.id));
+  const top20Ids = new Set(organic.slice(0, 20).map((p) => p.id));
   const newcomers = organic
-    .filter(p => p.createdAt >= twentyFourHoursAgo && !top20OrganicIds.has(p.id))
-    .sort((a, b) => {
-      if (b.trendingScore !== a.trendingScore) return b.trendingScore - a.trendingScore;
-      return b.createdAt.getTime() - a.createdAt.getTime();
-    });
+    .filter((p) => p.createdAt >= dayAgo && !top20Ids.has(p.id))
+    .sort(
+      (a, b) =>
+        b.trendingScore - a.trendingScore ||
+        b.createdAt.getTime() - a.createdAt.getTime()
+    );
 
-  // Smart Zipper Merge Logic
-  const finalList: any[] = [...sponsored];
-  const seenIds = new Set(sponsored.map(p => p.id));
+  const finalList = mergeWithNewcomers(sponsored, organic, newcomers);
 
-  let organicIndex = 0;
-  let newcomerIndex = 0;
+  activeProgramsGauge.set(finalList.length);
 
-  // We continue until we've processed all programs up to the limit
-  while (finalList.length < allPrograms.length) {
-    const nextPosition = finalList.length + 1;
+  return NextResponse.json(finalList, { headers: CACHE_HEADERS });
+}
 
-    // Inject newcomers at positions 8, 13, 18, 23... (every 5th spot starting from 8)
-    const isInjectionSlot = nextPosition >= 8 && (nextPosition - 8) % 5 === 0;
+function mergeWithNewcomers(
+  sponsored: ProgramListItem[],
+  organic: ProgramListItem[],
+  newcomers: ProgramListItem[]
+) {
+  const result: (ProgramListItem & { isInjected?: boolean })[] = [...sponsored];
+  const seen = new Set(sponsored.map((p) => p.id));
 
-    if (isInjectionSlot && newcomerIndex < newcomers.length) {
-      // Find the next newcomer that hasn't been seen yet
-      let candidate = null;
-      while (newcomerIndex < newcomers.length) {
-        const potential = newcomers[newcomerIndex++];
-        if (!seenIds.has(potential.id)) {
-          candidate = potential;
-          break;
-        }
-      }
+  let oi = 0;
+  let ni = 0;
 
-      if (candidate) {
-        finalList.push({ ...candidate, isInjected: true });
-        seenIds.add(candidate.id);
+  while (result.length < sponsored.length + organic.length) {
+    const pos = result.length + 1;
+    const isInjectionSlot = pos >= 8 && (pos - 8) % 5 === 0;
+
+    if (isInjectionSlot) {
+      while (ni < newcomers.length && seen.has(newcomers[ni].id)) ni++;
+      if (ni < newcomers.length) {
+        result.push({ ...newcomers[ni], isInjected: true });
+        seen.add(newcomers[ni++].id);
         continue;
       }
     }
 
-    // Default: Pull from organic list
-    if (organicIndex < organic.length) {
-      const p = organic[organicIndex++];
-      if (!seenIds.has(p.id)) {
-        finalList.push(p);
-        seenIds.add(p.id);
-      }
-    } else {
-      // If we run out of organic programs (unlikely due to allPrograms.length), we break
-      break;
-    }
+    while (oi < organic.length && seen.has(organic[oi].id)) oi++;
+    if (oi >= organic.length) break;
+
+    result.push(organic[oi]);
+    seen.add(organic[oi++].id);
   }
 
-  activeProgramsGauge.set(finalList.length);
-
-  return NextResponse.json(finalList, {
-    headers: {
-      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-      "CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-      "Vercel-CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-    }
-  });
+  return result;
 }
-
-import { programSchema } from "@/lib/validation-schemas";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const rawBody = await request.json();
-
-    // 1. Strict Validation & Sanitization with Zod
-    const validation = programSchema.safeParse(rawBody);
+    const validation = programSchema.safeParse(await request.json());
 
     if (!validation.success) {
-      const error = validation.error.issues[0]?.message || "Invalid input data";
-      return NextResponse.json({ error }, { status: 400 });
+      return NextResponse.json(
+        { error: validation.error.issues[0]?.message || "Invalid input" },
+        { status: 400 }
+      );
     }
 
     const body = validation.data;
 
-    // 2. Further URL Hardening
     try {
-      if (body.websiteUrl)
-        body.websiteUrl = cleanAndValidateUrl(body.websiteUrl);
-      if (body.affiliateUrl)
-        body.affiliateUrl = cleanAndValidateUrl(body.affiliateUrl);
-    } catch (error: any) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      body.websiteUrl = cleanAndValidateUrl(body.websiteUrl);
+      body.affiliateUrl = cleanAndValidateUrl(body.affiliateUrl);
+    } catch (e) {
+      return NextResponse.json(
+        { error: (e as Error).message },
+        { status: 400 }
+      );
     }
 
-    const {
-      programName,
-      websiteUrl,
-      affiliateUrl,
-      country,
-      category,
-      tagline,
-      description,
-      xHandle,
-      email,
-      logoUrl,
-      commissionRate,
-      commissionDuration,
-      cookieDuration,
-      payoutMethod,
-      minPayoutValue,
-      avgOrderValue,
-      targetAudience,
-      additionalInfo,
-      affiliatesCountRange,
-      payoutsTotalRange,
-      foundingDate,
-      approvalTimeRange,
-    } = body;
+    const slug = await generateUniqueSlug(body.programName);
 
-    // 3. Slug Generation with Collision Protection
-    const baseSlug = programName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-
-    let slug = baseSlug;
-    let counter = 1;
-
-    while (await prisma.program.findFirst({ where: { slug } })) {
-      slug = `${baseSlug}-${counter}`;
-      counter++;
-    }
-
-    const programData: any = {
-      programName,
+    const programData = {
+      ...body,
       slug,
-      tagline,
-      description,
-      category,
-      websiteUrl,
-      affiliateUrl,
-      country: validateCountry(country),
-      xHandle: xHandle || null,
-      email: email || null,
-      logoUrl: logoUrl || null,
-      commissionRate,
-      commissionDuration: commissionDuration || null,
-      cookieDuration: cookieDuration ?? null,
-      payoutMethod: payoutMethod || null,
-      minPayoutValue: minPayoutValue ?? null,
-      avgOrderValue: avgOrderValue ?? null,
-      targetAudience: targetAudience || null,
-      additionalInfo: additionalInfo || null,
-      affiliatesCountRange: affiliatesCountRange || null,
-      payoutsTotalRange: payoutsTotalRange || null,
-      foundingDate: foundingDate ? new Date(foundingDate) : null,
-      approvalTimeRange: approvalTimeRange || null,
+      country: validateCountry(body.country),
+      foundingDate: body.foundingDate ? new Date(body.foundingDate) : null,
       approvalStatus: true,
       manualScoreBoost: 0,
     };
 
-    const qualityScore = calculateQualityScore(programData);
-    const trendingScore = calculateTrendingScore(programData, 0, 0);
-
     const program = await prisma.program.create({
       data: {
         ...programData,
-        qualityScore,
-        trendingScore,
+        qualityScore: calculateQualityScore(programData as Program),
+        trendingScore: calculateTrendingScore(programData as Program, 0, 0),
       },
     });
 
     programsCreatedTotal.inc();
 
     return NextResponse.json(program, { status: 201 });
-  } catch (error: any) {
-    console.error("[API] POST Error:", error);
+  } catch (error) {
+    console.error("[POST /api/programs]", error);
 
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        const target = error.meta?.target as string[];
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      const target = error.meta?.target as string[] | undefined;
+      const messages: Record<string, string> = {
+        program_name: "A program with this name already exists.",
+        website_url: "This Website URL is already registered.",
+        affiliate_url: "This Affiliate Link is already registered.",
+      };
 
-        if (target && Array.isArray(target)) {
-          if (target.includes("program_name")) {
-            return NextResponse.json(
-              {
-                error:
-                  "A program with this name already exists. Please choose a different name.",
-              },
-              { status: 409 }
-            );
-          }
-          if (target.includes("website_url")) {
-            return NextResponse.json(
-              { error: "This Website URL is already registered." },
-              { status: 409 }
-            );
-          }
-          if (target.includes("affiliate_url")) {
-            return NextResponse.json(
-              { error: "This Affiliate Link is already registered." },
-              { status: 409 }
-            );
-          }
-        }
-
-        return NextResponse.json(
-          { error: "A program with these details already exists." },
-          { status: 409 }
-        );
-      }
+      const field = target?.find((t) => messages[t]);
+      return NextResponse.json(
+        {
+          error: field
+            ? messages[field]
+            : "A program with these details already exists.",
+        },
+        { status: 409 }
+      );
     }
 
     return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
+      { error: "Something went wrong." },
       { status: 500 }
     );
   }
+}
+
+async function generateUniqueSlug(name: string): Promise<string> {
+  const base = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+  let slug = base;
+  let i = 1;
+
+  while (await prisma.program.findFirst({ where: { slug } })) {
+    slug = `${base}-${i++}`;
+  }
+
+  return slug;
 }

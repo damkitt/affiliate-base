@@ -1,6 +1,5 @@
 {
-    "WillLuke.nextjs.hasPrompted": true,
-    "cSpell.words": [
-        "affiliatebase"
-    ]
+  "WillLuke.nextjs.hasPrompted": true,
+  "cSpell.words": ["affiliatebase"],
+  "prisma.pinToPrisma6": true
 }

@@ -62,16 +62,11 @@ async function hashString(str: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export function getSessionId(): string {
+export function getSessionId(): string | undefined {
   const key = SESSION_STORAGE_KEYS.SESSION_ID;
-  let sessionId = sessionStorage.getItem(key);
+  const sessionId = sessionStorage.getItem(key);
 
-  if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    sessionStorage.setItem(key, sessionId);
-  }
-
-  return sessionId;
+  return sessionId || undefined;
 }
 
 export function wasViewedInSession(programId: string): boolean {

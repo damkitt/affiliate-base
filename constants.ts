@@ -151,3 +151,10 @@ export const COUNTRIES = [
   { code: "NG", name: "Nigeria", flag: "🇳🇬" },
   { code: "KE", name: "Kenya", flag: "🇰🇪" },
 ] as const;
+
+export const middlewareConstants = {
+  COOKIE_NAME: "affiliatebase_admin_token",
+  LOGIN_PATH: "/admin/login",
+  PROTECTED_PATHS: ["/admin", "/api/admin"],
+  PUBLIC_PATHS: ["/admin/login", "/api/auth/login"],
+};

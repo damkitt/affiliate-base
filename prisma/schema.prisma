@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 1. RICH TRAFFIC LOG (For Admin Dashboard)
 model TrafficLog {
   id        String   @id @default(cuid())
   path      String
@@ -24,14 +23,13 @@ model TrafficLog {
   @@map("traffic_logs")
 }
 
-// 2. STRICT PROGRAM STATS (For Public Leaderboard & Charts)
 model ProgramEvent {
   id        String   @id @default(cuid())
   programId String   @map("program_id")
   program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
-  type      String   // "VIEW" or "CLICK"
-  dateKey   String   @map("date_key") // "YYYY-MM-DD"
-  visitorId String   // FingerprintJS ID (formerly fingerprint)
+  type      String
+  dateKey   String   @map("date_key")
+  visitorId String   @default(uuid()) @map("visitor_id")
   createdAt DateTime @default(now()) @map("created_at")
 
   @@unique([programId, visitorId, type, dateKey])
@@ -44,7 +42,7 @@ model SearchLog {
   id           String   @id @default(uuid())
   query        String
   resultsCount Int      @map("results_count")
-  sessionId    String   @default("anonymous") @map("session_id")
+  sessionId    String   @default(uuid()) @map("session_id")
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@index([query])

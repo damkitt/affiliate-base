@@ -1,29 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-/**
- * GET /api/metrics/clicks
- * Returns a mapping of program_id -> click count from Database.
- */
 export async function GET(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
-  const period = searchParams.get("period") || "week"; // Default to week
+  const period = searchParams.get("period") || "week"; 
 
   const now = new Date();
   const startDate = new Date();
 
   if (period === "day") {
-    // Start of today (00:00:00)
     startDate.setHours(0, 0, 0, 0);
   } else {
-    // Start of this week (Sunday 00:00:00)
-    const day = now.getDay(); // 0 is Sunday
+    const day = now.getDay(); 
     const diff = now.getDate() - day;
     startDate.setDate(diff);
     startDate.setHours(0, 0, 0, 0);
   }
 
-  // Aggregate clicks from Database (Strict ProgramEvent)
   const aggregations = await prisma.programEvent.groupBy({
     by: ["programId"],
     where: {

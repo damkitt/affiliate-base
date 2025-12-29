@@ -1,4 +1,10 @@
-import { ChangeEvent, RefObject, useState, useEffect, useCallback } from "react";
+import {
+  ChangeEvent,
+  RefObject,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import Image from "next/image";
 import {
   HiChevronRight,
@@ -9,13 +15,18 @@ import {
   HiPencilSquare,
   HiPhoto,
   HiGlobeAlt,
-  HiLink
-} from 'react-icons/hi2';
+  HiLink,
+} from "react-icons/hi2";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import type { FormData } from "../types";
 import { CATEGORIES, CATEGORY_ICONS } from "@/constants";
 import { getUrlValidationError } from "../error-utils";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/Tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/Tooltip";
 
 interface DuplicateErrors {
   programName?: string;
@@ -68,14 +79,27 @@ export function BasicInfoStep({
   useEffect(() => {
     if (!onValidityChange) return;
 
-    const hasDuplicateErrors = Object.values(duplicateErrors).some(error => !!error);
-    const hasValidationErrors = Object.values(validationErrors).some(error => !!error);
+    const hasDuplicateErrors = Object.values(duplicateErrors).some(
+      (error) => !!error
+    );
+    const hasValidationErrors = Object.values(validationErrors).some(
+      (error) => !!error
+    );
     const isChecking = checkingFields.size > 0;
     const hasSyncErrors = !!websiteError || !!affiliateError;
 
     // Report true if ANY error exists or if we are currently checking
-    onValidityChange(hasDuplicateErrors || hasValidationErrors || isChecking || hasSyncErrors);
-  }, [duplicateErrors, validationErrors, checkingFields, websiteError, affiliateError, onValidityChange]);
+    onValidityChange(
+      hasDuplicateErrors || hasValidationErrors || isChecking || hasSyncErrors
+    );
+  }, [
+    duplicateErrors,
+    validationErrors,
+    checkingFields,
+    websiteError,
+    affiliateError,
+    onValidityChange,
+  ]);
 
   const debouncedProgramName = useDebounce(formData.programName, 500);
   const debouncedWebsiteUrl = useDebounce(formData.websiteUrl, 500);
@@ -83,25 +107,29 @@ export function BasicInfoStep({
 
   const checkDuplicate = useCallback(async (field: string, value: string) => {
     if (!value || value.length < 3) {
-      setDuplicateErrors(prev => ({ ...prev, [field]: undefined }));
+      setDuplicateErrors((prev) => ({ ...prev, [field]: undefined }));
       return;
     }
 
-    setCheckingFields(prev => new Set(prev).add(field));
+    setCheckingFields((prev) => new Set(prev).add(field));
 
     try {
-      const res = await fetch(`/api/programs/check-duplicate?field=${field}&value=${encodeURIComponent(value)}`);
+      const res = await fetch(
+        `/api/programs/check-duplicate?field=${field}&value=${encodeURIComponent(
+          value
+        )}`
+      );
       const data = await res.json();
 
       if (data.exists) {
-        setDuplicateErrors(prev => ({ ...prev, [field]: data.message }));
+        setDuplicateErrors((prev) => ({ ...prev, [field]: data.message }));
       } else {
-        setDuplicateErrors(prev => ({ ...prev, [field]: undefined }));
+        setDuplicateErrors((prev) => ({ ...prev, [field]: undefined }));
       }
     } catch {
       // Silently fail - don't block user
     } finally {
-      setCheckingFields(prev => {
+      setCheckingFields((prev) => {
         const next = new Set(prev);
         next.delete(field);
         return next;
@@ -109,41 +137,44 @@ export function BasicInfoStep({
     }
   }, []);
 
-  const validateUrl = useCallback(async (field: "websiteUrl" | "affiliateUrl", value: string) => {
-    if (!value) {
-      setValidationErrors(prev => ({ ...prev, [field]: undefined }));
-      return;
-    }
-
-    setCheckingFields(prev => new Set(prev).add(`${field}-valid`));
-
-    try {
-      const type = field === "affiliateUrl" ? "affiliate" : "website";
-      const res = await fetch("/api/validate-url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: value, type }),
-      });
-
-      const data = await res.json();
-
-      if (!data.isValid) {
-        setValidationErrors(prev => ({ ...prev, [field]: data.error }));
-      } else {
-        setValidationErrors(prev => ({ ...prev, [field]: undefined }));
-        // Optional: Update with cleaned URL if needed, but might be annoying while typing
-        // if (data.cleanedUrl !== value) { ... }
+  const validateUrl = useCallback(
+    async (field: "websiteUrl" | "affiliateUrl", value: string) => {
+      if (!value) {
+        setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
+        return;
       }
-    } catch {
-      // Ignore network errors here
-    } finally {
-      setCheckingFields(prev => {
-        const next = new Set(prev);
-        next.delete(`${field}-valid`);
-        return next;
-      });
-    }
-  }, []);
+
+      setCheckingFields((prev) => new Set(prev).add(`${field}-valid`));
+
+      try {
+        const type = field === "affiliateUrl" ? "affiliate" : "website";
+        const res = await fetch("/api/validate-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: value, type }),
+        });
+
+        const data = await res.json();
+
+        if (!data.isValid) {
+          setValidationErrors((prev) => ({ ...prev, [field]: data.error }));
+        } else {
+          setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
+          // Optional: Update with cleaned URL if needed, but might be annoying while typing
+          // if (data.cleanedUrl !== value) { ... }
+        }
+      } catch {
+        // Ignore network errors here
+      } finally {
+        setCheckingFields((prev) => {
+          const next = new Set(prev);
+          next.delete(`${field}-valid`);
+          return next;
+        });
+      }
+    },
+    []
+  );
 
   // Check for duplicates when debounced values change
   useEffect(() => {
@@ -171,7 +202,11 @@ export function BasicInfoStep({
     }
   };
 
-  const renderFieldError = (fieldName: string, error?: string, isChecking?: boolean) => {
+  const renderFieldError = (
+    fieldName: string,
+    error?: string,
+    isChecking?: boolean
+  ) => {
     if (isChecking) {
       return (
         <p className="text-xs text-gray-400 mt-1.5 font-medium animate-pulse flex items-center gap-1">
@@ -197,10 +232,11 @@ export function BasicInfoStep({
       <div className="flex items-start gap-5">
         <div
           onClick={() => !isUploading && fileInputRef.current?.click()}
-          className={`group relative w-20 h-20 rounded-lg bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border)] flex items-center justify-center overflow-hidden transition-all duration-200 flex-shrink-0 ${isUploading
-            ? "opacity-50 cursor-wait"
-            : "hover:border-[var(--accent-solid)] hover:bg-[var(--accent-dim)] cursor-pointer"
-            }`}
+          className={`group relative w-20 h-20 rounded-lg bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border)] flex items-center justify-center overflow-hidden transition-all duration-200 flex-shrink-0 ${
+            isUploading
+              ? "opacity-50 cursor-wait"
+              : "hover:border-[var(--accent-solid)] hover:bg-[var(--accent-dim)] cursor-pointer"
+          }`}
         >
           {logoPreview ? (
             <Image
@@ -213,8 +249,9 @@ export function BasicInfoStep({
           ) : (
             <div className="text-center">
               <HiPhoto
-                className={`w-8 h-8 mx-auto text-[var(--text-secondary)] transition-colors duration-300 ${!isUploading && "group-hover:text-[var(--accent-solid)]"
-                  }`}
+                className={`w-8 h-8 mx-auto text-[var(--text-secondary)] transition-colors duration-300 ${
+                  !isUploading && "group-hover:text-[var(--accent-solid)]"
+                }`}
               />
               <span className="text-[10px] text-[var(--text-secondary)] mt-1 block font-medium">
                 {isUploading ? (
@@ -242,7 +279,13 @@ export function BasicInfoStep({
               <label className="block text-xs font-semibold text-[var(--text-secondary)]">
                 Program Name <span className="text-red-500">*</span>
               </label>
-              <span className={`text-[10px] font-medium ${(formData.programName?.length || 0) >= 30 ? "text-red-500" : "text-[var(--text-tertiary)]"}`}>
+              <span
+                className={`text-[10px] font-medium ${
+                  (formData.programName?.length || 0) >= 30
+                    ? "text-red-500"
+                    : "text-[var(--text-tertiary)]"
+                }`}
+              >
                 {formData.programName?.length || 0}/30
               </span>
             </div>
@@ -254,12 +297,17 @@ export function BasicInfoStep({
               placeholder="e.g. Stripe, Notion, Figma..."
               required
               maxLength={30}
-              className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${duplicateErrors.programName
-                ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
-                : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
-                }`}
+              className={`w-full h-11 px-4 rounded-lg outline-none bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${
+                duplicateErrors.programName
+                  ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+                  : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
+              }`}
             />
-            {renderFieldError("programName", duplicateErrors.programName, checkingFields.has("programName"))}
+            {renderFieldError(
+              "programName",
+              duplicateErrors.programName,
+              checkingFields.has("programName")
+            )}
           </div>
           <div>
             <label className="flex items-center justify-between text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
@@ -268,19 +316,30 @@ export function BasicInfoStep({
                 <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button type="button" className="cursor-help outline-none">
+                      <button
+                        type="button"
+                        className="cursor-help outline-none"
+                      >
                         <HiQuestionMarkCircle className="w-4 h-4 text-[var(--text-tertiary)] hover:text-white transition-colors" />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent side="top" sideOffset={8} className="max-w-[260px] bg-[#0A0A0A] border border-white/10 shadow-2xl rounded-xl p-4">
+                    <TooltipContent
+                      side="top"
+                      sideOffset={8}
+                      className="max-w-[260px] bg-[#0A0A0A] border border-white/10 shadow-2xl rounded-xl p-4"
+                    >
                       <div className="flex items-start gap-3">
                         <div className="p-1.5 rounded-lg bg-emerald-500/10 shrink-0">
                           <HiInformationCircle className="w-4 h-4 text-emerald-500" />
                         </div>
                         <div className="space-y-1">
-                          <p className="text-xs font-bold text-white">Quick Tip</p>
+                          <p className="text-xs font-bold text-white">
+                            Quick Tip
+                          </p>
                           <p className="text-[11px] text-gray-400 leading-relaxed font-medium">
-                            Describe your product in <span className="text-white">5-7 words</span>. Keep it punchy and clear.
+                            Describe your product in{" "}
+                            <span className="text-white">5-7 words</span>. Keep
+                            it punchy and clear.
                           </p>
                         </div>
                       </div>
@@ -288,7 +347,13 @@ export function BasicInfoStep({
                   </Tooltip>
                 </TooltipProvider>
               </span>
-              <span className={`text-[10px] font-bold tabular-nums ${formData.tagline.length >= 50 ? 'text-red-500' : 'text-[var(--text-tertiary)]'}`}>
+              <span
+                className={`text-[10px] font-bold tabular-nums ${
+                  formData.tagline.length >= 50
+                    ? "text-red-500"
+                    : "text-[var(--text-tertiary)]"
+                }`}
+              >
                 {formData.tagline.length}/50
               </span>
             </label>
@@ -319,10 +384,11 @@ export function BasicInfoStep({
                 key={cat}
                 type="button"
                 onClick={() => onCategorySelect(cat)}
-                className={`px-3 py-2 rounded-md text-xs font-semibold transition-colors duration-150 flex items-center gap-1.5 ${isSelected
-                  ? "bg-[var(--accent-solid)] text-white shadow-md"
-                  : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--accent-solid)]"
-                  }`}
+                className={`px-3 py-2 rounded-full text-xs font-semibold transition-colors duration-150 flex items-center gap-1.5 ${
+                  isSelected
+                    ? "bg-[var(--accent-solid)] text-white shadow-md"
+                    : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--accent-solid)]"
+                }`}
               >
                 <CategoryIcon iconName={iconName} className="w-4 h-4" />
                 {cat}
@@ -344,16 +410,23 @@ export function BasicInfoStep({
                     <HiQuestionMarkCircle className="w-4 h-4 text-[var(--text-tertiary)] hover:text-white transition-colors" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="top" sideOffset={8} className="max-w-[310px] bg-[#0A0A0A] border border-white/10 shadow-2xl rounded-xl p-4">
+                <TooltipContent
+                  side="top"
+                  sideOffset={8}
+                  className="max-w-[310px] bg-[#0A0A0A] border border-white/10 shadow-2xl rounded-xl p-4"
+                >
                   <div className="flex items-start gap-3">
                     <div className="p-1.5 rounded-lg bg-emerald-500/10 shrink-0 mt-0.5">
                       <HiPencilSquare className="w-4 h-4 text-emerald-500" />
                     </div>
                     <div className="space-y-4">
                       <div className="space-y-1">
-                        <p className="text-xs font-bold text-white">Quick Tip</p>
+                        <p className="text-xs font-bold text-white">
+                          Quick Tip
+                        </p>
                         <p className="text-[11px] text-gray-400 leading-relaxed font-medium">
-                          Don&apos;t just copy your homepage. Treat this as a briefing for your partners.
+                          Don&apos;t just copy your homepage. Treat this as a
+                          briefing for your partners.
                         </p>
                       </div>
 
@@ -361,19 +434,28 @@ export function BasicInfoStep({
                         <div className="flex items-start gap-2.5">
                           <span className="text-emerald-500/50 mt-1.5">•</span>
                           <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
-                            <span className="text-white font-bold">The Fit:</span> Who buys your product and why?
+                            <span className="text-white font-bold">
+                              The Fit:
+                            </span>{" "}
+                            Who buys your product and why?
                           </p>
                         </div>
                         <div className="flex items-start gap-2.5">
                           <span className="text-emerald-500/50 mt-1.5">•</span>
                           <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
-                            <span className="text-white font-bold">The Partner:</span> Who can join? Any restrictions?
+                            <span className="text-white font-bold">
+                              The Partner:
+                            </span>{" "}
+                            Who can join? Any restrictions?
                           </p>
                         </div>
                         <div className="flex items-start gap-2.5">
                           <span className="text-emerald-500/50 mt-1.5">•</span>
                           <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
-                            <span className="text-white font-bold">The Playbook:</span> What formats convert best?
+                            <span className="text-white font-bold">
+                              The Playbook:
+                            </span>{" "}
+                            What formats convert best?
                           </p>
                         </div>
                       </div>
@@ -389,7 +471,13 @@ export function BasicInfoStep({
               </Tooltip>
             </TooltipProvider>
           </span>
-          <span className={`text-[10px] font-bold tabular-nums ${formData.description.length >= 2000 ? 'text-red-500' : 'text-[var(--text-tertiary)]'}`}>
+          <span
+            className={`text-[10px] font-bold tabular-nums ${
+              formData.description.length >= 2000
+                ? "text-red-500"
+                : "text-[var(--text-tertiary)]"
+            }`}
+          >
             {formData.description.length}/2000
           </span>
         </label>
@@ -418,15 +506,22 @@ export function BasicInfoStep({
             onChange={onFormChange}
             onBlur={() => handleBlur("websiteUrl")}
             placeholder="https://..."
-            className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${websiteError || duplicateErrors.websiteUrl || validationErrors.websiteUrl
-              ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
-              : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
-              }`}
+            className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${
+              websiteError ||
+              duplicateErrors.websiteUrl ||
+              validationErrors.websiteUrl
+                ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+                : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
+            }`}
           />
           {renderFieldError(
             "websiteUrl",
-            websiteError || duplicateErrors.websiteUrl || validationErrors.websiteUrl,
-            !websiteError && (checkingFields.has("websiteUrl") || checkingFields.has("websiteUrl-valid"))
+            websiteError ||
+              duplicateErrors.websiteUrl ||
+              validationErrors.websiteUrl,
+            !websiteError &&
+              (checkingFields.has("websiteUrl") ||
+                checkingFields.has("websiteUrl-valid"))
           )}
         </div>
         <div>
@@ -441,15 +536,22 @@ export function BasicInfoStep({
             onChange={onFormChange}
             onBlur={() => handleBlur("affiliateUrl")}
             placeholder="https://..."
-            className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${affiliateError || duplicateErrors.affiliateUrl || validationErrors.affiliateUrl
-              ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
-              : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
-              }`}
+            className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${
+              affiliateError ||
+              duplicateErrors.affiliateUrl ||
+              validationErrors.affiliateUrl
+                ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+                : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
+            }`}
           />
           {renderFieldError(
             "affiliateUrl",
-            affiliateError || duplicateErrors.affiliateUrl || validationErrors.affiliateUrl,
-            !affiliateError && (checkingFields.has("affiliateUrl") || checkingFields.has("affiliateUrl-valid"))
+            affiliateError ||
+              duplicateErrors.affiliateUrl ||
+              validationErrors.affiliateUrl,
+            !affiliateError &&
+              (checkingFields.has("affiliateUrl") ||
+                checkingFields.has("affiliateUrl-valid"))
           )}
         </div>
       </div>

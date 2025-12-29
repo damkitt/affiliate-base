@@ -20,7 +20,9 @@ import { CustomSelect } from "@/components/ui/CustomSelect";
 interface DetailsStepProps {
   formData: FormData;
   onFormChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => void;
   onSetMonth: (month: string) => void;
   onSetYear: (year: string) => void;
@@ -34,7 +36,6 @@ export function DetailsStep({
   onSetYear,
   onSetCountry,
 }: DetailsStepProps) {
-
   // Local state for Payout Method dropdown (kept custom due to multi-select nature)
   const [payoutDropdownOpen, setPayoutDropdownOpen] = useState(false);
   const payoutDropdownRef = useRef<HTMLDivElement>(null);
@@ -42,7 +43,10 @@ export function DetailsStep({
   // Handle click outside for local dropdowns
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (payoutDropdownRef.current && !payoutDropdownRef.current.contains(event.target as Node)) {
+      if (
+        payoutDropdownRef.current &&
+        !payoutDropdownRef.current.contains(event.target as Node)
+      ) {
         setPayoutDropdownOpen(false);
       }
     }
@@ -51,10 +55,15 @@ export function DetailsStep({
   }, []);
 
   const handlePayoutMethodToggle = (method: string) => {
-    const currentMethods = formData.payoutMethod ? formData.payoutMethod.split(",").map(s => s.trim()).filter(Boolean) : [];
+    const currentMethods = formData.payoutMethod
+      ? formData.payoutMethod
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
     let newMethods;
     if (currentMethods.includes(method)) {
-      newMethods = currentMethods.filter(m => m !== method);
+      newMethods = currentMethods.filter((m) => m !== method);
     } else {
       newMethods = [...currentMethods, method];
     }
@@ -77,13 +86,16 @@ export function DetailsStep({
             placeholder="Select month"
             value={formData.foundingMonth}
             onChange={onSetMonth}
-            options={MONTHS.map(m => ({ label: m, value: m }))}
+            options={MONTHS.map((m) => ({ label: m, value: m }))}
           />
           <CustomSelect
             placeholder="Select year"
             value={formData.foundingYear}
             onChange={onSetYear}
-            options={YEARS.map(y => ({ label: y.toString(), value: y.toString() }))}
+            options={YEARS.map((y) => ({
+              label: y.toString(),
+              value: y.toString(),
+            }))}
           />
         </div>
       </div>
@@ -109,7 +121,7 @@ export function DetailsStep({
               }}
               placeholder="30"
               maxLength={2}
-              className="w-full h-11 px-3 pr-7 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 text-center"
+              className="w-full h-11 px-3 pr-7 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 text-center"
             />
             <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] font-medium pointer-events-none">
               %
@@ -117,7 +129,7 @@ export function DetailsStep({
           </div>
 
           {/* Commission Type Toggle */}
-          <div className="flex items-center h-11 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] p-1">
+          <div className="flex items-center h-11 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] px-1.5 gap-1.5">
             <button
               type="button"
               onClick={() => {
@@ -126,10 +138,12 @@ export function DetailsStep({
                 } as React.ChangeEvent<HTMLInputElement>;
                 onFormChange(syntheticEvent);
               }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${formData.commissionDuration === "One-time" || !formData.commissionDuration
-                ? "bg-[var(--accent-solid)] text-white shadow-sm"
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                }`}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                formData.commissionDuration === "One-time" ||
+                !formData.commissionDuration
+                  ? "bg-[var(--accent-solid)] text-white shadow-sm"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
             >
               One-time
             </button>
@@ -141,10 +155,11 @@ export function DetailsStep({
                 } as React.ChangeEvent<HTMLInputElement>;
                 onFormChange(syntheticEvent);
               }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${formData.commissionDuration === "Recurring"
-                ? "bg-[var(--accent-solid)] text-white shadow-sm"
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                }`}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                formData.commissionDuration === "Recurring"
+                  ? "bg-[var(--accent-solid)] text-white shadow-sm"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
             >
               Recurring
             </button>
@@ -153,7 +168,7 @@ export function DetailsStep({
       </div>
 
       {/* Trust Booster */}
-      <div className="p-4 rounded-xl bg-[var(--accent-dim)] border border-[var(--accent-solid)]/30 flex items-start gap-3">
+      <div className="p-4 rounded-xl bg-[var(--accent-dim)] border-none flex items-start gap-3">
         <div className="p-1.5 rounded-full bg-[var(--accent-solid)]/20 text-[var(--accent-solid)] mt-0.5">
           <HiSparkles className="w-4 h-4" />
         </div>
@@ -164,7 +179,9 @@ export function DetailsStep({
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
             Note: These fields are optional, but programs with complete details
             get{" "}
-            <span className="text-[var(--accent-solid)] font-semibold">3x more referrals</span>{" "}
+            <span className="text-[var(--accent-solid)] font-semibold">
+              3x more referrals
+            </span>{" "}
             and higher trust from creators.
           </p>
         </div>
@@ -277,18 +294,27 @@ export function DetailsStep({
                   </span>
                 ))
               ) : (
-                <span className="text-[var(--text-tertiary)]">Select methods</span>
+                <span className="text-[var(--text-tertiary)]">
+                  Select methods
+                </span>
               )}
             </div>
-            <HiChevronDown className={`w-4 h-4 text-[var(--text-secondary)] shrink-0 transition-transform ml-2 ${payoutDropdownOpen ? "rotate-180" : ""}`} />
+            <HiChevronDown
+              className={`w-4 h-4 text-[var(--text-secondary)] shrink-0 transition-transform ml-2 ${
+                payoutDropdownOpen ? "rotate-180" : ""
+              }`}
+            />
           </button>
 
           {/* Dropdown */}
           {payoutDropdownOpen && (
             <div className="absolute z-50 top-full left-0 right-0 mt-2 p-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl animate-fadeIn ring-1 ring-black/5">
               <div className="grid grid-cols-1">
-                {PAYOUT_METHODS.map(method => {
-                  const isSelected = formData.payoutMethod?.split(",").map(s => s.trim()).includes(method);
+                {PAYOUT_METHODS.map((method) => {
+                  const isSelected = formData.payoutMethod
+                    ?.split(",")
+                    .map((s) => s.trim())
+                    .includes(method);
                   return (
                     <button
                       key={method}
@@ -297,7 +323,9 @@ export function DetailsStep({
                       className={`flex items-center justify-between w-full px-3 py-2.5 text-sm rounded-lg transition-colors text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50`}
                     >
                       {method}
-                      {isSelected && <HiCheck className="w-4 h-4 text-emerald-500" />}
+                      {isSelected && (
+                        <HiCheck className="w-4 h-4 text-emerald-500" />
+                      )}
                     </button>
                   );
                 })}
@@ -324,7 +352,7 @@ export function DetailsStep({
               className="w-full h-11 pl-4 pr-14 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--text-tertiary)] tabular-nums pointer-events-none">
-              {(formData.targetAudience?.length || 0)}/30
+              {formData.targetAudience?.length || 0}/30
             </span>
           </div>
         </div>
@@ -363,7 +391,9 @@ export function DetailsStep({
             label={
               <span className="flex items-center gap-1.5">
                 <HiBanknotes className="w-3.5 h-3.5" /> Total Payouts
-                <span className="text-[var(--text-secondary)] font-normal normal-case ml-0.5">(optional)</span>
+                <span className="text-[var(--text-secondary)] font-normal normal-case ml-0.5">
+                  (optional)
+                </span>
               </span>
             }
             placeholder="Select range"
@@ -374,7 +404,7 @@ export function DetailsStep({
               } as React.ChangeEvent<HTMLSelectElement>;
               onFormChange(syntheticEvent);
             }}
-            options={PAYOUT_RANGES.map(r => ({ label: r, value: r }))}
+            options={PAYOUT_RANGES.map((r) => ({ label: r, value: r }))}
             position="top"
           />
         </div>
@@ -384,7 +414,9 @@ export function DetailsStep({
             label={
               <span className="flex items-center gap-1.5">
                 <HiUsers className="w-3.5 h-3.5" /> Affiliates Count
-                <span className="text-[var(--text-secondary)] font-normal normal-case ml-0.5">(optional)</span>
+                <span className="text-[var(--text-secondary)] font-normal normal-case ml-0.5">
+                  (optional)
+                </span>
               </span>
             }
             placeholder="Select range"
@@ -395,11 +427,10 @@ export function DetailsStep({
               } as React.ChangeEvent<HTMLSelectElement>;
               onFormChange(syntheticEvent);
             }}
-            options={AFFILIATE_RANGES.map(r => ({ label: r, value: r }))}
+            options={AFFILIATE_RANGES.map((r) => ({ label: r, value: r }))}
             position="top"
           />
         </div>
-
       </div>
 
       <CustomSelect
@@ -407,7 +438,11 @@ export function DetailsStep({
         placeholder="Select country"
         value={formData.country}
         onChange={(val) => onSetCountry(val)}
-        options={COUNTRIES.map(c => ({ label: c.name, value: c.name, icon: c.flag }))}
+        options={COUNTRIES.map((c) => ({
+          label: c.name,
+          value: c.name,
+          icon: c.flag,
+        }))}
         searchable
         position="top"
       />

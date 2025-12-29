@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 /**
- * POST /api/programs/[id]/report
- * Creates a new edit suggestion or report for a program
+ * Create a report for a program
+ * @param request
+ * @param param1
+ * @returns
  */
 export async function POST(
   request: Request,
@@ -15,7 +17,6 @@ export async function POST(
 
     const { type, reason, message, email, isFounder } = body;
 
-    // Validate required fields
     if (!type || !message) {
       return NextResponse.json(
         { error: "Type and message are required" },
@@ -30,25 +31,20 @@ export async function POST(
       );
     }
 
-    // Check if program exists
     const program = await prisma.program.findUnique({
       where: { id },
       select: { id: true },
     });
 
     if (!program) {
-      return NextResponse.json(
-        { error: "Program not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Program not found" }, { status: 404 });
     }
 
-    // Create the report
     const report = await prisma.programReport.create({
       data: {
         programId: id,
         type,
-        reason: type === "REPORT" ? reason : null,
+        reason: reason || null,
         message,
         email: email || null,
         isFounder: isFounder || false,

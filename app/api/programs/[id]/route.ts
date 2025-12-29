@@ -1,38 +1,25 @@
-/**
- * Program CRUD API
- * 
- * Handles individual program operations: GET, PATCH, DELETE
- */
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cleanAndValidateUrl } from "@/lib/url-validator";
-
-// =============================================================================
-// Types
-// =============================================================================
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-// =============================================================================
-// Helpers
-// =============================================================================
-
-async function extractId(params: Promise<{ id: string }>): Promise<string | null> {
+async function extractId(
+  params: Promise<{ id: string }>
+): Promise<string | null> {
   const { id } = await params;
   return id || null;
 }
 
-// =============================================================================
-// Handlers
-// =============================================================================
-
 /**
- * GET /api/programs/[id]
- * Retrieves a single program by ID
+ * Get Program by ID
+ * @param _request
+ * @param param1
+ * @returns
  */
+
 export async function GET(
   _request: Request,
   { params }: RouteContext
@@ -40,7 +27,10 @@ export async function GET(
   const id = await extractId(params);
 
   if (!id) {
-    return NextResponse.json({ error: "Program ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Program ID is required" },
+      { status: 400 }
+    );
   }
 
   const program = await prisma.program.findUnique({
@@ -55,8 +45,10 @@ export async function GET(
 }
 
 /**
- * PATCH /api/programs/[id]
- * Updates a program's fields
+ * Update Program by ID
+ * @param request
+ * @param param1
+ * @returns
  */
 export async function PATCH(
   request: Request,
@@ -66,15 +58,15 @@ export async function PATCH(
     const id = await extractId(params);
 
     if (!id) {
-      return NextResponse.json({ error: "Program ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Program ID is required" },
+        { status: 400 }
+      );
     }
 
     const body = await request.json();
+    const { ...updateData } = body;
 
-    // Remove id and createdAt from update payload
-    const { id: _discardId, createdAt: _discardCreatedAt, ...updateData } = body;
-
-    // 1. Data Hardening: Normalize URLs if provided
     try {
       if (updateData.websiteUrl) {
         updateData.websiteUrl = cleanAndValidateUrl(updateData.websiteUrl);
@@ -82,11 +74,13 @@ export async function PATCH(
       if (updateData.affiliateUrl) {
         updateData.affiliateUrl = cleanAndValidateUrl(updateData.affiliateUrl);
       }
-    } catch (error: any) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    } catch (error) {
+      return NextResponse.json(
+        { error: (error as Error).message },
+        { status: 400 }
+      );
     }
 
-    // 2. Validate program name length (max 30 characters)
     if (updateData.programName && updateData.programName.length > 30) {
       return NextResponse.json(
         { error: "Program name must be 30 characters or less." },
@@ -102,14 +96,20 @@ export async function PATCH(
     return NextResponse.json(program);
   } catch (error) {
     console.error("[PATCH /api/programs/:id]", error);
-    return NextResponse.json({ error: "Failed to update program" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update program" },
+      { status: 500 }
+    );
   }
 }
 
 /**
- * DELETE /api/programs/[id]
- * Removes a program from the database
+ * Delete Program by ID
+ * @param _request
+ * @param param1
+ * @returns
  */
+
 export async function DELETE(
   _request: Request,
   { params }: RouteContext
@@ -118,10 +118,12 @@ export async function DELETE(
     const id = await extractId(params);
 
     if (!id) {
-      return NextResponse.json({ error: "Program ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Program ID is required" },
+        { status: 400 }
+      );
     }
 
-    // Check if program exists first
     const exists = await prisma.program.findUnique({
       where: { id },
       select: { id: true },
@@ -138,6 +140,9 @@ export async function DELETE(
     return NextResponse.json({ message: "Program deleted successfully" });
   } catch (error) {
     console.error("[DELETE /api/programs/:id]", error);
-    return NextResponse.json({ error: "Failed to delete program" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete program" },
+      { status: 500 }
+    );
   }
 }
