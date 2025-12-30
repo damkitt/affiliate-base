@@ -27,6 +27,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/Tooltip";
+import { ImageCropper } from "@/components/ui/ImageCropper";
 
 interface DuplicateErrors {
   programName?: string;
@@ -69,6 +70,36 @@ export function BasicInfoStep({
 }: BasicInfoStepProps) {
   const websiteError = getUrlValidationError(formData.websiteUrl);
   const affiliateError = getUrlValidationError(formData.affiliateUrl);
+
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    setCropImageSrc(null); // Close cropper
+
+    // Create a synthetic event to pass to the original onLogoUpload
+    // We need to mimic the structure: e.target.files[0]
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(croppedFile);
+
+    const syntheticEvent = {
+      target: {
+        files: dataTransfer.files
+      }
+    } as unknown as ChangeEvent<HTMLInputElement>;
+
+    onLogoUpload(syntheticEvent);
+  };
 
   // Real-time duplicate checking
   const [duplicateErrors, setDuplicateErrors] = useState<DuplicateErrors>({});
@@ -232,11 +263,10 @@ export function BasicInfoStep({
       <div className="flex items-start gap-5">
         <div
           onClick={() => !isUploading && fileInputRef.current?.click()}
-          className={`group relative w-20 h-20 rounded-lg bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border)] flex items-center justify-center overflow-hidden transition-all duration-200 flex-shrink-0 ${
-            isUploading
-              ? "opacity-50 cursor-wait"
-              : "hover:border-[var(--accent-solid)] hover:bg-[var(--accent-dim)] cursor-pointer"
-          }`}
+          className={`group relative w-20 h-20 rounded-lg bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border)] flex items-center justify-center overflow-hidden transition-all duration-200 flex-shrink-0 ${isUploading
+            ? "opacity-50 cursor-wait"
+            : "hover:border-[var(--accent-solid)] hover:bg-[var(--accent-dim)] cursor-pointer"
+            }`}
         >
           {logoPreview ? (
             <Image
@@ -249,9 +279,8 @@ export function BasicInfoStep({
           ) : (
             <div className="text-center">
               <HiPhoto
-                className={`w-8 h-8 mx-auto text-[var(--text-secondary)] transition-colors duration-300 ${
-                  !isUploading && "group-hover:text-[var(--accent-solid)]"
-                }`}
+                className={`w-8 h-8 mx-auto text-[var(--text-secondary)] transition-colors duration-300 ${!isUploading && "group-hover:text-[var(--accent-solid)]"
+                  }`}
               />
               <span className="text-[10px] text-[var(--text-secondary)] mt-1 block font-medium">
                 {isUploading ? (
@@ -268,11 +297,23 @@ export function BasicInfoStep({
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            onChange={onLogoUpload}
+            onChange={handleFileSelect}
             disabled={isUploading}
             className="hidden"
           />
         </div>
+
+        {/* Image Cropper Modal */}
+        {cropImageSrc && (
+          <ImageCropper
+            imageSrc={cropImageSrc}
+            onCancel={() => {
+              setCropImageSrc(null);
+              if (fileInputRef.current) fileInputRef.current.value = "";
+            }}
+            onCropComplete={handleCropComplete}
+          />
+        )}
         <div className="flex-1 space-y-3">
           <div>
             <div className="flex justify-between items-center mb-1.5">
@@ -280,11 +321,10 @@ export function BasicInfoStep({
                 Program Name <span className="text-red-500">*</span>
               </label>
               <span
-                className={`text-[10px] font-medium ${
-                  (formData.programName?.length || 0) >= 30
-                    ? "text-red-500"
-                    : "text-[var(--text-tertiary)]"
-                }`}
+                className={`text-[10px] font-medium ${(formData.programName?.length || 0) >= 30
+                  ? "text-red-500"
+                  : "text-[var(--text-tertiary)]"
+                  }`}
               >
                 {formData.programName?.length || 0}/30
               </span>
@@ -297,11 +337,10 @@ export function BasicInfoStep({
               placeholder="e.g. Stripe, Notion, Figma..."
               required
               maxLength={30}
-              className={`w-full h-11 px-4 rounded-lg outline-none bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${
-                duplicateErrors.programName
-                  ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
-                  : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
-              }`}
+              className={`w-full h-11 px-4 rounded-lg outline-none bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${duplicateErrors.programName
+                ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+                : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
+                }`}
             />
             {renderFieldError(
               "programName",
@@ -348,11 +387,10 @@ export function BasicInfoStep({
                 </TooltipProvider>
               </span>
               <span
-                className={`text-[10px] font-bold tabular-nums ${
-                  formData.tagline.length >= 50
-                    ? "text-red-500"
-                    : "text-[var(--text-tertiary)]"
-                }`}
+                className={`text-[10px] font-bold tabular-nums ${formData.tagline.length >= 50
+                  ? "text-red-500"
+                  : "text-[var(--text-tertiary)]"
+                  }`}
               >
                 {formData.tagline.length}/50
               </span>
@@ -376,7 +414,7 @@ export function BasicInfoStep({
           Category
         </label>
         <div className="flex flex-wrap gap-2">
-          {CATEGORIES.slice(0, 10).map((cat) => {
+          {CATEGORIES.map((cat) => {
             const iconName = CATEGORY_ICONS[cat] || "HiCube";
             const isSelected = formData.category === cat;
             return (
@@ -384,11 +422,10 @@ export function BasicInfoStep({
                 key={cat}
                 type="button"
                 onClick={() => onCategorySelect(cat)}
-                className={`px-3 py-2 rounded-full text-xs font-semibold transition-colors duration-150 flex items-center gap-1.5 ${
-                  isSelected
-                    ? "bg-[var(--accent-solid)] text-white shadow-md"
-                    : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--accent-solid)]"
-                }`}
+                className={`px-3 py-2 rounded-full text-xs font-semibold transition-colors duration-150 flex items-center gap-1.5 ${isSelected
+                  ? "bg-[var(--accent-solid)] text-white shadow-md"
+                  : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--accent-solid)]"
+                  }`}
               >
                 <CategoryIcon iconName={iconName} className="w-4 h-4" />
                 {cat}
@@ -472,11 +509,10 @@ export function BasicInfoStep({
             </TooltipProvider>
           </span>
           <span
-            className={`text-[10px] font-bold tabular-nums ${
-              formData.description.length >= 2000
-                ? "text-red-500"
-                : "text-[var(--text-tertiary)]"
-            }`}
+            className={`text-[10px] font-bold tabular-nums ${formData.description.length >= 2000
+              ? "text-red-500"
+              : "text-[var(--text-tertiary)]"
+              }`}
           >
             {formData.description.length}/2000
           </span>
@@ -506,22 +542,21 @@ export function BasicInfoStep({
             onChange={onFormChange}
             onBlur={() => handleBlur("websiteUrl")}
             placeholder="https://..."
-            className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${
-              websiteError ||
+            className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${websiteError ||
               duplicateErrors.websiteUrl ||
               validationErrors.websiteUrl
-                ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
-                : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
-            }`}
+              ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+              : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
+              }`}
           />
           {renderFieldError(
             "websiteUrl",
             websiteError ||
-              duplicateErrors.websiteUrl ||
-              validationErrors.websiteUrl,
+            duplicateErrors.websiteUrl ||
+            validationErrors.websiteUrl,
             !websiteError &&
-              (checkingFields.has("websiteUrl") ||
-                checkingFields.has("websiteUrl-valid"))
+            (checkingFields.has("websiteUrl") ||
+              checkingFields.has("websiteUrl-valid"))
           )}
         </div>
         <div>
@@ -536,22 +571,21 @@ export function BasicInfoStep({
             onChange={onFormChange}
             onBlur={() => handleBlur("affiliateUrl")}
             placeholder="https://..."
-            className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${
-              affiliateError ||
+            className={`w-full h-11 px-4 rounded-lg bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] transition-all duration-300 ${affiliateError ||
               duplicateErrors.affiliateUrl ||
               validationErrors.affiliateUrl
-                ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
-                : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
-            }`}
+              ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+              : "border-[var(--border)] focus:border-[var(--accent-solid)] focus:ring-2 focus:ring-[var(--accent-solid)]/10"
+              }`}
           />
           {renderFieldError(
             "affiliateUrl",
             affiliateError ||
-              duplicateErrors.affiliateUrl ||
-              validationErrors.affiliateUrl,
+            duplicateErrors.affiliateUrl ||
+            validationErrors.affiliateUrl,
             !affiliateError &&
-              (checkingFields.has("affiliateUrl") ||
-                checkingFields.has("affiliateUrl-valid"))
+            (checkingFields.has("affiliateUrl") ||
+              checkingFields.has("affiliateUrl-valid"))
           )}
         </div>
       </div>

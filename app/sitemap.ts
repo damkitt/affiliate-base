@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { CATEGORY_SLUGS } from "@/constants";
 
 const BASE_URL = "https://affiliatebase.co";
 
@@ -47,5 +48,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
     ];
 
-    return [...staticEntries, ...programEntries];
+    // Category routes
+    const categoryEntries = Object.values(CATEGORY_SLUGS).map((slug) => ({
+        url: `${BASE_URL}/category/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.9,
+    }));
+
+    return [...staticEntries, ...categoryEntries, ...programEntries];
 }

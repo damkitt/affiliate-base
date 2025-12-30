@@ -16,6 +16,8 @@ export async function GET() {
             category: true,
             tagline: true,
             commissionRate: true,
+            // @ts-ignore
+            commissionType: true,
             commissionDuration: true,
             cookieDuration: true,
             targetAudience: true,
@@ -27,10 +29,14 @@ export async function GET() {
     text += `Last Updated: ${new Date().toISOString()}\n\n`;
 
     programs.forEach((p, index) => {
+        const commStr = (p as any).commissionType === "FIXED"
+            ? `$${p.commissionRate} per sale`
+            : `${p.commissionRate}% ${p.commissionDuration === 'Recurring' ? 'recurring' : 'one-time'}`;
+
         text += `## ${index + 1}. ${p.programName}\n`;
         text += `- Category: ${p.category}\n`;
         text += `- Pitch: ${p.tagline || 'N/A'}\n`;
-        text += `- Commission: ${p.commissionRate}% ${p.commissionDuration || ''}\n`;
+        text += `- Commission: ${commStr}\n`;
         text += `- Cookie: ${p.cookieDuration} days\n`;
         // Add these only if they exist in DB
         if (p.targetAudience) text += `- Target Audience: ${p.targetAudience}\n`;

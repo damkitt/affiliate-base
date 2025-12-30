@@ -93,6 +93,7 @@ export const INITIAL_FORM_DATA: FormData = {
   email: "",
   logoUrl: "",
   commissionRate: "",
+  commissionType: "PERCENTAGE", // Default
   commissionDuration: "",
   affiliatesCountRange: "",
   payoutsTotalRange: "",

@@ -15,6 +15,7 @@ export type Program = {
   readonly email?: string | null;
   readonly logoUrl?: string | null;
   readonly commissionRate: number;
+  readonly commissionType: "PERCENTAGE" | "FIXED";
   readonly commissionDuration?: string | null;
   readonly cookieDuration?: number | null;
   readonly payoutMethod?: string | null;

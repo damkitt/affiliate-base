@@ -4,7 +4,7 @@ import { NavBar } from "@/components/NavBar";
 export default function Loading() {
     return (
         <div className="min-h-screen bg-background relative overflow-hidden">
-            <NavBar showBackButton />
+            <NavBar showBackButton hideThemeToggle />
             <div className="h-14" /> {/* Spacer */}
 
             <div className="max-w-6xl mx-auto px-6 py-6">

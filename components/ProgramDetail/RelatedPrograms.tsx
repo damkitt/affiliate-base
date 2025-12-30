@@ -47,8 +47,16 @@ export async function RelatedPrograms({ category, currentId }: RelatedProgramsPr
                                     {program.programName}
                                 </h4>
                                 <div className="text-xs text-[var(--text-secondary)] mt-0.5 flex items-center gap-1">
-                                    <span className="text-[var(--accent-solid)] font-bold">{program.commissionRate}%</span>
-                                    <span>{program.commissionDuration || 'Commission'}</span>
+                                    <span className="text-[var(--accent-solid)] font-bold">
+                                        {program.commissionType === "FIXED"
+                                            ? `$${program.commissionRate}`
+                                            : `${program.commissionRate}%`}
+                                    </span>
+                                    <span>
+                                        {program.commissionType === "FIXED"
+                                            ? 'per sale'
+                                            : (program.commissionDuration === 'Recurring' ? 'recurring' : 'one-time')}
+                                    </span>
                                 </div>
                             </div>
                         </div>

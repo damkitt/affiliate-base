@@ -4,21 +4,29 @@ import { cache } from "react";
 
 /**
  * Fetches the leaderboard programs with strict caching and field selection.
- * Cached for 60 seconds to allow for rapid navigation without DB hits.
+ * The arguments passed to the cached function (like category) are automatically
+ * part of the cache key in Next.js 15.
  */
 export const getLeaderboardPrograms = unstable_cache(
-    async () => {
+    async (category?: string) => {
         try {
+            const whereClause: any = { approvalStatus: true };
+            if (category) {
+                whereClause.category = category;
+            }
+
             const allPrograms = await prisma.program.findMany({
-                where: { approvalStatus: true },
+                where: whereClause,
                 orderBy: [{ trendingScore: "desc" }, { createdAt: "desc" }],
-                take: 50,
+                take: 100,
                 select: {
                     id: true,
                     programName: true,
                     slug: true,
                     logoUrl: true,
                     commissionRate: true,
+                    // @ts-ignore
+                    commissionType: true,
                     commissionDuration: true,
                     category: true,
                     tagline: true,
@@ -29,7 +37,7 @@ export const getLeaderboardPrograms = unstable_cache(
                 },
             });
 
-            // Apply Sponsored-First Logic (must match API behavior)
+            // Apply Sponsored-First Logic
             const now = new Date();
             const sponsored = allPrograms.filter(
                 (p) => p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now
@@ -42,11 +50,11 @@ export const getLeaderboardPrograms = unstable_cache(
             return [...sponsored, ...organic];
         } catch (error) {
             console.error("[getLeaderboardPrograms] DB Error:", error);
-            return []; // Fail gracefully with empty list
+            return [];
         }
     },
-    ["leaderboard-programs-v3"], // Bump cache key version
-    { revalidate: 60, tags: ["programs"] }
+    ["leaderboard-programs-v9"],
+    { revalidate: 60, tags: ["programs", "leaderboard"] }
 );
 
 /**
@@ -80,8 +88,8 @@ export const getCachedProgramBySlug = cache(async (slug: string) => {
                 return null;
             }
         },
-        ["program-by-slug-v2", slug],
-        { revalidate: 300, tags: [`program-${slug}`] }
+        ["program-by-slug-v3", slug],
+        { revalidate: 60, tags: [`program-${slug}`] }
     )(slug);
 });
 
@@ -106,6 +114,8 @@ export const getCachedRelatedPrograms = cache(async (category: string, currentId
                         programName: true,
                         logoUrl: true,
                         commissionRate: true,
+                        // @ts-ignore
+                        commissionType: true,
                         slug: true,
                         commissionDuration: true,
                     },
@@ -126,6 +136,7 @@ export const getCachedRelatedPrograms = cache(async (category: string, currentId
                             programName: true,
                             logoUrl: true,
                             commissionRate: true,
+                            commissionType: true,
                             slug: true,
                             commissionDuration: true,
                         },
@@ -138,10 +149,32 @@ export const getCachedRelatedPrograms = cache(async (category: string, currentId
                 return [];
             }
         },
-        ["related-programs-v2", category, currentId],
+        ["related-programs-v3", category, currentId],
         { revalidate: 3600, tags: [`related-${category}`] }
     )(category, currentId);
 });
+
+/**
+ * Fetches all categories that have at least one approved program.
+ * Optimized with high revalidation time as categories don't change often.
+ */
+export const getActiveCategories = unstable_cache(
+    async (): Promise<string[]> => {
+        try {
+            const categories = await prisma.program.findMany({
+                where: { approvalStatus: true },
+                distinct: ["category"],
+                select: { category: true },
+            });
+            return categories.map((c) => c.category).filter(Boolean).sort();
+        } catch (error) {
+            console.error("[getActiveCategories] DB Error:", error);
+            return [];
+        }
+    },
+    ["active-categories-v1"],
+    { revalidate: 3600, tags: ["programs", "categories"] }
+);
 
 
 

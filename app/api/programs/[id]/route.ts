@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cleanAndValidateUrl } from "@/lib/url-validator";
+import { minioClient, AVATAR_BUCKET } from "@/lib/minio";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -88,6 +89,26 @@ export async function PATCH(
       );
     }
 
+    // Cleanup old logo if changing
+    if (updateData.logoUrl) {
+      const oldProgram = await prisma.program.findUnique({
+        where: { id },
+        select: { logoUrl: true },
+      });
+
+      if (oldProgram?.logoUrl && oldProgram.logoUrl !== updateData.logoUrl) {
+        try {
+          const urlParts = oldProgram.logoUrl.split("/");
+          const filename = urlParts[urlParts.length - 1];
+          if (filename) {
+            await minioClient.removeObject(AVATAR_BUCKET, filename);
+          }
+        } catch (e) {
+          console.error("Failed to delete old logo from storage:", e);
+        }
+      }
+    }
+
     const program = await prisma.program.update({
       where: { id },
       data: updateData,
@@ -124,13 +145,26 @@ export async function DELETE(
       );
     }
 
-    const exists = await prisma.program.findUnique({
+    const program = await prisma.program.findUnique({
       where: { id },
-      select: { id: true },
+      select: { logoUrl: true },
     });
 
-    if (!exists) {
+    if (!program) {
       return NextResponse.json({ error: "Program not found" }, { status: 404 });
+    }
+
+    // Cleanup logo from storage
+    if (program.logoUrl) {
+      try {
+        const urlParts = program.logoUrl.split("/");
+        const filename = urlParts[urlParts.length - 1];
+        if (filename) {
+          await minioClient.removeObject(AVATAR_BUCKET, filename);
+        }
+      } catch (e) {
+        console.error("Failed to delete program logo from storage during deletion:", e);
+      }
     }
 
     await prisma.program.delete({

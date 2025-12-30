@@ -232,10 +232,15 @@ function SelectionStep({ onSelect }: { onSelect: (p: Program) => void }) {
                     <p className={styles.programUrl}>{program.websiteUrl}</p>
                   </div>
                   <div className={styles.programCommission}>
-                    {program.commissionRate}%{" "}
-                    {program.commissionDuration?.toLowerCase() == "recurring"
-                      ? "Recurring"
-                      : "One-time"}
+                    {program.commissionType === "FIXED" ? (
+                      <>
+                        ${program.commissionRate} Per Sale
+                      </>
+                    ) : (
+                      <>
+                        {program.commissionRate}% {program.commissionDuration?.toLowerCase() == "recurring" ? "Recurring" : "One-time"}
+                      </>
+                    )}
                   </div>
                 </div>
               ))

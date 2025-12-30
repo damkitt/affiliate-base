@@ -5,7 +5,7 @@ import fs from "fs/promises";
 import path from "path";
 
 export const runtime = "nodejs";
-export const revalidate = 3600;
+export const revalidate = 3600; // Cache for 1 hour to prevent RAM/CPU spikes
 
 export const alt = "Program Detail";
 export const size = {
@@ -56,6 +56,8 @@ export default async function Image(props: {
         programName: true,
         logoUrl: true,
         commissionRate: true,
+        // @ts-ignore
+        commissionType: true,
         commissionDuration: true,
         tagline: true,
       },
@@ -163,7 +165,7 @@ export default async function Image(props: {
             />
           </div>
 
-          {}
+          { }
           <div
             style={{
               position: "absolute",
@@ -209,7 +211,7 @@ export default async function Image(props: {
             </div>
           </div>
 
-          {}
+          { }
           <div
             style={{
               display: "flex",
@@ -221,7 +223,7 @@ export default async function Image(props: {
               gap: "60px",
             }}
           >
-            {}
+            { }
             <div
               style={{
                 width: "360px",
@@ -279,7 +281,7 @@ export default async function Image(props: {
                     WebkitBoxOrient: "vertical",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
-                    paddingBottom: "10px",
+                    paddingBottom: "0px",
                   }}
                 >
                   {program.programName}
@@ -296,44 +298,68 @@ export default async function Image(props: {
                   {program.tagline || "Verified Affiliate Program"}
                 </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "flex-end",
-                    gap: "20px",
-                    marginTop: "48px",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "100px",
-                      fontWeight: 900,
-                      color: "#34d399",
-                      display: "flex",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {program.commissionRate}%
+                {/* @ts-ignore */}
+                {program.commissionType === "FIXED" ? (
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: "20px", marginTop: "48px" }}>
+                    <div
+                      style={{
+                        fontSize: "100px",
+                        fontWeight: 900,
+                        color: "#34d399",
+                        display: "flex",
+                        lineHeight: 1,
+                      }}
+                    >
+                      ${program.commissionRate}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "32px",
+                        fontWeight: 600,
+                        color: "#ffffff",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.15em",
+                        opacity: 0.8,
+                        display: "flex",
+                        lineHeight: 1,
+                        marginBottom: "12px",
+                      }}
+                    >
+                      PER SALE
+                    </div>
                   </div>
-                  <div
-                    style={{
-                      fontSize: "32px",
-                      fontWeight: 600,
-                      color: "#ffffff",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.15em",
-                      opacity: 0.8,
-                      display: "flex",
-                      lineHeight: 1,
-                      marginBottom: "10px",
-                    }}
-                  >
-                    {program.commissionDuration === "Recurring"
-                      ? "RECURRING"
-                      : "COMMISSION"}
+                ) : (
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: "20px" }}>
+                    <div
+                      style={{
+                        fontSize: "100px",
+                        fontWeight: 900,
+                        color: "#34d399",
+                        display: "flex",
+                        lineHeight: 1,
+                      }}
+                    >
+                      {program.commissionRate}%
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "32px",
+                        fontWeight: 600,
+                        color: "#ffffff",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.15em",
+                        opacity: 0.8,
+                        display: "flex",
+                        lineHeight: 1,
+                        marginBottom: "12px",
+                      }}
+                    >
+                      {program.commissionDuration === "Recurring"
+                        ? "RECURRING"
+                        : "COMMISSION"}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

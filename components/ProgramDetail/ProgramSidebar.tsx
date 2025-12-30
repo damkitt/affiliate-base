@@ -29,12 +29,14 @@ export function ProgramSidebar({
         <div className="p-6 rounded-3xl border border-emerald-500/30 bg-emerald-500/5 mb-6 relative overflow-hidden group">
           <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <p className="text-4xl font-bold text-emerald-400 mb-1 relative z-10">
-            {program.commissionRate ?? 0}%
+            {program.commissionType === "FIXED" ? `Up to $${program.commissionRate ?? 0}` : `${program.commissionRate ?? 0}%`}
           </p>
           <p className="text-sm font-medium text-[var(--text-secondary)] relative z-10">
-            {program.commissionDuration === "Recurring"
-              ? "Recurring commission"
-              : "One-time commission"}
+            {program.commissionType === "FIXED"
+              ? "Per sale"
+              : program.commissionDuration === "Recurring"
+                ? "Recurring commission"
+                : "One-time commission"}
           </p>
         </div>
 

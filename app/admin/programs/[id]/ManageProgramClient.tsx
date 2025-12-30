@@ -25,6 +25,8 @@ export default function ManageProgramClient({ initialProgram, initialStats }: Ma
     const [isPending, startTransition] = useTransition();
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         // Refresh stats when range changes
@@ -67,10 +69,14 @@ export default function ManageProgramClient({ initialProgram, initialStats }: Ma
     };
 
     const handleDelete = async () => {
-        if (!confirm("Are you sure you want to delete this program permanently?")) return;
+        setIsDeleting(true);
         const res = await fetch(`/api/programs/${program.id}`, { method: "DELETE" });
         if (res.ok) {
             router.push("/admin");
+        } else {
+            setIsDeleting(false);
+            setShowDeleteConfirm(false);
+            alert("Failed to delete program. Please try again.");
         }
     };
 
@@ -119,7 +125,7 @@ export default function ManageProgramClient({ initialProgram, initialStats }: Ma
                             {program.approvalStatus ? "Deactivate" : "Approve Now"}
                         </button>
                         <button
-                            onClick={handleDelete}
+                            onClick={() => setShowDeleteConfirm(true)}
                             className="p-2 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-all"
                         >
                             <HiTrash className="w-5 h-5" />
@@ -352,6 +358,55 @@ export default function ManageProgramClient({ initialProgram, initialStats }: Ma
                                 <p className="text-xs opacity-60">Program updated successfully.</p>
                             </div>
                         </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Custom Delete Confirmation Modal */}
+            <AnimatePresence>
+                {showDeleteConfirm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="w-full max-w-md p-8 rounded-3xl bg-[#0A0A0A] border border-white/10 shadow-2xl"
+                        >
+                            <div className="w-16 h-16 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mb-6 mx-auto">
+                                <HiTrash className="w-8 h-8" />
+                            </div>
+
+                            <h3 className="text-xl font-bold text-center mb-2">Delete Program?</h3>
+                            <p className="text-center text-white/40 text-sm mb-8 leading-relaxed">
+                                This action is permanent. All statistics, logs, and metadata for <span className="text-white font-medium">{program.programName}</span> will be lost forever.
+                            </p>
+
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={handleDelete}
+                                    disabled={isDeleting}
+                                    className="w-full h-12 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 disabled:opacity-50 flex items-center justify-center"
+                                >
+                                    {isDeleting ? (
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                        "Yes, Delete Permanently"
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    disabled={isDeleting}
+                                    className="w-full h-12 rounded-xl bg-white/5 text-white/60 font-medium hover:text-white transition-all"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>

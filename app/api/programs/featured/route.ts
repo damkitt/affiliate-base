@@ -33,6 +33,7 @@ export async function GET() {
       country: true,
       logoUrl: true,
       commissionRate: true,
+      commissionType: true,
       commissionDuration: true,
       isFeatured: true,
       featuredExpiresAt: true,

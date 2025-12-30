@@ -57,9 +57,9 @@ export function DetailsStep({
   const handlePayoutMethodToggle = (method: string) => {
     const currentMethods = formData.payoutMethod
       ? formData.payoutMethod
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
       : [];
     let newMethods;
     if (currentMethods.includes(method)) {
@@ -101,69 +101,113 @@ export function DetailsStep({
       </div>
 
       {/* Commission Rate */}
+      {/* Commission Rate - Reverted & Refined */}
       <div>
-        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide">
+        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-3 uppercase tracking-wide">
           Commission Rate <span className="text-red-400">*</span>
         </label>
+
+        <div className="flex bg-[var(--bg-secondary)] rounded-full p-1 border border-[var(--border)] items-center mb-3 w-fit">
+          <button
+            type="button"
+            onClick={() => {
+              const syntheticEvent = {
+                target: { name: "commissionType", value: "PERCENTAGE" },
+              } as ChangeEvent<HTMLInputElement>;
+              onFormChange(syntheticEvent);
+            }}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${formData.commissionType === "PERCENTAGE"
+              ? "bg-[var(--accent-solid)] text-white shadow-sm"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+          >
+            Percentage
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const syntheticEvent = {
+                target: { name: "commissionType", value: "FIXED" },
+              } as ChangeEvent<HTMLInputElement>;
+              onFormChange(syntheticEvent);
+            }}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${formData.commissionType === "FIXED"
+              ? "bg-[var(--accent-solid)] text-white shadow-sm"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+          >
+            Fixed Amount
+          </button>
+        </div>
+
+
         <div className="flex items-center gap-3">
-          {/* Numeric input with % sign */}
-          <div className="relative w-20">
+          {/* Input */}
+          <div className="relative w-32 shrink-0">
+            {formData.commissionType === "FIXED" && (
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] font-medium pointer-events-none">
+                $
+              </span>
+            )}
             <input
               type="text"
               name="commissionRate"
               value={formData.commissionRate}
               onChange={(e) => {
                 const value = e.target.value;
-                // Only allow digits, max 2 characters
-                if (/^\d{0,2}$/.test(value)) {
-                  onFormChange(e);
+                const isFixed = formData.commissionType === "FIXED";
+                if (isFixed) {
+                  if (/^\d{0,4}$/.test(value)) onFormChange(e);
+                } else {
+                  if (/^\d{0,2}$/.test(value)) onFormChange(e);
                 }
               }}
-              placeholder="30"
-              maxLength={2}
-              className="w-full h-11 px-3 pr-7 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 text-center"
+              placeholder={formData.commissionType === "FIXED" ? "500" : "30"}
+              maxLength={formData.commissionType === "FIXED" ? 4 : 2}
+              className={`w-full h-11 px-3 ${formData.commissionType === "FIXED" ? "pl-7 pr-3" : "pl-3 pr-8"} rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 text-center font-semibold`}
             />
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] font-medium pointer-events-none">
-              %
-            </span>
+            {formData.commissionType === "PERCENTAGE" && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] font-medium pointer-events-none">
+                %
+              </span>
+            )}
           </div>
 
-          {/* Commission Type Toggle */}
-          <div className="flex items-center h-11 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] px-1.5 gap-1.5">
-            <button
-              type="button"
-              onClick={() => {
-                const syntheticEvent = {
-                  target: { name: "commissionDuration", value: "One-time" },
-                } as React.ChangeEvent<HTMLInputElement>;
-                onFormChange(syntheticEvent);
-              }}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-                formData.commissionDuration === "One-time" ||
-                !formData.commissionDuration
-                  ? "bg-[var(--accent-solid)] text-white shadow-sm"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              One-time
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const syntheticEvent = {
-                  target: { name: "commissionDuration", value: "Recurring" },
-                } as React.ChangeEvent<HTMLInputElement>;
-                onFormChange(syntheticEvent);
-              }}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-                formData.commissionDuration === "Recurring"
-                  ? "bg-[var(--accent-solid)] text-white shadow-sm"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              Recurring
-            </button>
-          </div>
+          {/* Duration Toggle - Hidden for Fixed Type */}
+          {formData.commissionType === "PERCENTAGE" && (
+            <div className="flex items-center h-11 ml-2 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] p-1 gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  const syntheticEvent = {
+                    target: { name: "commissionDuration", value: "One-time" },
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  onFormChange(syntheticEvent);
+                }}
+                className={`h-full px-4 rounded-full text-sm font-semibold transition-all duration-200 flex items-center justify-center ${formData.commissionDuration === "One-time" || !formData.commissionDuration
+                  ? "bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                  : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                  }`}
+              >
+                One-time
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const syntheticEvent = {
+                    target: { name: "commissionDuration", value: "Recurring" },
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  onFormChange(syntheticEvent);
+                }}
+                className={`h-full px-4 rounded-full text-sm font-semibold transition-all duration-200 flex items-center justify-center ${formData.commissionDuration === "Recurring"
+                  ? "bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                  : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                  }`}
+              >
+                Recurring
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -300,9 +344,8 @@ export function DetailsStep({
               )}
             </div>
             <HiChevronDown
-              className={`w-4 h-4 text-[var(--text-secondary)] shrink-0 transition-transform ml-2 ${
-                payoutDropdownOpen ? "rotate-180" : ""
-              }`}
+              className={`w-4 h-4 text-[var(--text-secondary)] shrink-0 transition-transform ml-2 ${payoutDropdownOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
@@ -446,6 +489,6 @@ export function DetailsStep({
         searchable
         position="top"
       />
-    </div>
+    </div >
   );
 }

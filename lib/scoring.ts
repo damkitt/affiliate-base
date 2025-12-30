@@ -16,6 +16,7 @@ const OPTIONAL_QUALITY_FIELDS: (keyof Program)[] = [
   "approvalTimeRange",
   "email",
   "payoutsTotalRange",
+  "commissionType",
 ];
 
 /**
@@ -48,7 +49,7 @@ const PAYOUTS_TRUST_TIERS: Record<string, number> = {
  * Calculate quality score based on profile completeness
  * +10 for logo, +5 for each filled optional field
  */
-export function calculateQualityScore(program: Program): number {
+export function calculateQualityScore(program: Partial<Program>): number {
   let score = 0;
 
   if (program.logoUrl && program.logoUrl.trim() !== "") {

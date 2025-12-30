@@ -66,6 +66,7 @@ model Program {
   commissionRate       Int             @default(0)
   commissionDuration   String?         @map("commission_duration")
   cookieDuration       Int?            @map("cookie_duration")
+  commissionType       CommissionType  @default(PERCENTAGE) @map("commission_type")
   payoutMethod         String?         @map("payout_method")
   minPayoutValue       Int?            @map("min_payout_value")
   avgOrderValue        Int?            @map("avg_order_value")
@@ -127,6 +128,11 @@ enum ReportStatus {
   PENDING
   RESOLVED
   DISMISSED
+}
+
+enum CommissionType {
+  PERCENTAGE
+  FIXED
 }
 
 enum Country {

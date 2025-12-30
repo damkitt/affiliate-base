@@ -22,7 +22,7 @@ export function ProgramStatsGrid({ program }: ProgramStatsGridProps) {
     const commissionLabel = program.commissionDuration === "Recurring" ? "recurring" : program.commissionDuration === "One-time" ? "one-time" : null;
 
     const programDetails = [
-        { icon: HiBanknotes, label: "Commission", value: program.commissionRate != null ? `${program.commissionRate}%${commissionLabel ? ` ${commissionLabel}` : ""}` : null },
+        { icon: HiBanknotes, label: "Commission", value: program.commissionType === "FIXED" ? `Up to $${program.commissionRate} per sale` : (program.commissionRate != null ? `${program.commissionRate}%${commissionLabel ? ` ${commissionLabel}` : ""}` : null) },
         { icon: HiClock, label: "Cookie Duration", value: program.cookieDuration != null ? `${program.cookieDuration} days` : null },
         {
             icon: HiMapPin,

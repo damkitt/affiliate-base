@@ -45,18 +45,19 @@ export async function GET(
         logoUrl: true,
         websiteUrl: true,
         commissionRate: true,
+        commissionType: true,
         tagline: true,
       },
     });
 
     // Step 2: If we don't have enough, fill with top trending
     const remainingSlots = SIMILAR_PROGRAMS_COUNT - sameCategoryPrograms.length;
-    
+
     let trendingPrograms: typeof sameCategoryPrograms = [];
-    
+
     if (remainingSlots > 0) {
       const excludeIds = [id, ...sameCategoryPrograms.map((p) => p.id)];
-      
+
       trendingPrograms = await prisma.program.findMany({
         where: {
           approvalStatus: true,
@@ -71,6 +72,7 @@ export async function GET(
           logoUrl: true,
           websiteUrl: true,
           commissionRate: true,
+          commissionType: true,
           tagline: true,
         },
       });

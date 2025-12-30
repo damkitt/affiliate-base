@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { minioClient, AVATAR_BUCKET, MINIO_PUBLIC_URL } from "@/lib/minio";
 import { randomUUID } from "node:crypto";
+import sharp from "sharp";
 
 // =============================================================================
 // Constants
@@ -96,8 +97,18 @@ export async function POST(
 
     // Upload to MinIO
     const buffer = Buffer.from(await file.arrayBuffer());
-    await minioClient.putObject(AVATAR_BUCKET, filename, buffer, file.size, {
-      "Content-Type": file.type,
+
+    // Compress and resize image
+    const processedBuffer = await sharp(buffer)
+      .resize(400, 400, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .png({ quality: 85 })
+      .toBuffer();
+
+    await minioClient.putObject(AVATAR_BUCKET, filename, processedBuffer, processedBuffer.length, {
+      "Content-Type": "image/png",
     });
 
     const baseUrl = MINIO_PUBLIC_URL.replace(/\/$/, "");

@@ -20,6 +20,7 @@ const PROGRAM_SELECT = {
   slug: true,
   logoUrl: true,
   commissionRate: true,
+  commissionType: true,
   commissionDuration: true,
   category: true,
   tagline: true,
@@ -34,12 +35,15 @@ type ProgramListItem = Prisma.ProgramGetPayload<{
 }>;
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const search = new URL(request.url).searchParams.get("search")?.trim();
+  const url = new URL(request.url);
+  const search = url.searchParams.get("search")?.trim();
+  const category = url.searchParams.get("category")?.trim();
   const now = new Date();
   const dayAgo = new Date(now.getTime() - 86400000);
 
   const where: Prisma.ProgramWhereInput = {
     approvalStatus: true,
+    ...(category && { category }),
     ...(search && {
       OR: [
         { programName: { contains: search, mode: "insensitive" } },
@@ -153,8 +157,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     const program = await prisma.program.create({
       data: {
         ...programData,
-        qualityScore: calculateQualityScore(programData as Program),
-        trendingScore: calculateTrendingScore(programData as Program, 0, 0),
+        qualityScore: calculateQualityScore(programData as unknown as Program),
+        trendingScore: calculateTrendingScore(programData as unknown as Program, 0, 0),
       },
     });
 

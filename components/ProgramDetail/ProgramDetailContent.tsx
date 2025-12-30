@@ -11,7 +11,9 @@ import {
   HiShare,
   HiCheck,
 } from "react-icons/hi2";
-import type { Program } from "@/types";
+import Link from "next/link";
+import type { Program, Category } from "@/types";
+import { getSlugFromCategory } from "@/constants";
 import {
   EditReportModal,
   IncomeCalculator,
@@ -22,7 +24,6 @@ import {
 import { NavBar } from "@/components/NavBar";
 import { CallToAction } from "@/components/CallToAction";
 import AddProgramModal from "@/components/AddProgramModal";
-import { WhoopHero } from "@/components/WhoopHero";
 import { generateFingerprint } from "@/lib/fingerprint";
 
 const InterestChart = dynamic(
@@ -108,20 +109,19 @@ export function ProgramDetailContent({
     `https://www.google.com/s2/favicons?domain=${program.websiteUrl}&sz=128`;
 
   return (
-    <div className="min-h-screen bg-background text-[var(--text-primary)] font-sans selection:bg-emerald-500/30 relative">
-      {}
-      <WhoopHero />
+    <div className="min-h-screen text-[var(--text-primary)] font-sans selection:bg-emerald-500/30 relative">
+      { }
 
-      {}
+      { }
       <div className="relative z-10 flex flex-col min-h-screen">
-        {}
-        <NavBar showBackButton />
+        { }
+        <NavBar showBackButton hideThemeToggle />
 
-        {}
+        { }
         <div className="h-14" />
 
         <main className="max-w-7xl mx-auto px-4 md:px-6 py-8 flex-1 w-full">
-          {}
+          { }
           <div className="card-premium p-2 md:p-8 rounded-[2rem] animate-fade-in-up mb-8">
             <div className="flex flex-col md:flex-row items-start justify-between gap-6 md:gap-0">
               <div className="flex items-center gap-6 w-full md:w-auto">
@@ -144,9 +144,12 @@ export function ProgramDetailContent({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="px-3 py-1 text-[10px] md:text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full uppercase tracking-wide">
+                    <Link
+                      href={`/category/${getSlugFromCategory(program.category as Category)}`}
+                      className="px-3 py-1 text-[10px] md:text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full uppercase tracking-wide hover:bg-emerald-500/20 transition-all duration-200"
+                    >
                       {program.category}
-                    </span>
+                    </Link>
                   </div>
                   <h1 className="text-2xl md:text-4xl font-bold text-[var(--text-primary)] mb-2 leading-tight tracking-tight break-words">
                     {program.programName}
@@ -157,15 +160,14 @@ export function ProgramDetailContent({
                 </div>
               </div>
 
-              {}
+              { }
               <div className="flex items-center gap-3 w-auto mt-2 md:mt-0">
                 <button
                   onClick={handleShare}
-                  className={`px-5 py-2 rounded-full transition-all group border flex items-center gap-2 font-semibold text-xs md:text-sm ${
-                    copied
-                      ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
-                      : "bg-white/5 border-white/10 hover:border-white/20 text-white"
-                  }`}
+                  className={`px-5 py-2 rounded-full transition-all group border flex items-center gap-2 font-semibold text-xs md:text-sm ${copied
+                    ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
+                    : "bg-white/5 border-white/10 hover:border-white/20 text-white"
+                    }`}
                   title="Copy Link"
                 >
                   {copied ? (
@@ -193,12 +195,12 @@ export function ProgramDetailContent({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {}
+            { }
             <div className="lg:col-span-8 space-y-6">
-              {}
+              { }
               <ProgramStatsGrid program={program} />
 
-              {}
+              { }
               <div className="card-premium p-8 rounded-[2rem] animate-fade-in-up delay-200">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 rounded-xl bg-emerald-500/10">
@@ -226,10 +228,10 @@ export function ProgramDetailContent({
                 </div>
               </div>
 
-              {}
+              { }
               <HowItWorks />
 
-              {}
+              { }
               <div className="animate-fade-in-up delay-300">
                 <InterestChart
                   programId={program.id}
@@ -240,7 +242,7 @@ export function ProgramDetailContent({
               </div>
             </div>
 
-            {}
+            { }
             <ProgramSidebar
               program={program}
               onApply={handleApplyClick}
@@ -249,19 +251,19 @@ export function ProgramDetailContent({
             />
           </div>
 
-          {}
+          { }
         </main>
 
         <div className="max-w-7xl mx-auto px-6 w-full">
           {relatedProgramsSlot}
         </div>
 
-        {}
+        { }
         <CallToAction onAddProgram={() => setIsAddModalOpen(true)} />
 
-        {}
+        { }
 
-        {}
+        { }
         <EditReportModal
           isOpen={isReportModalOpen}
           onClose={() => setIsReportModalOpen(false)}
@@ -269,17 +271,18 @@ export function ProgramDetailContent({
           programName={program.programName}
         />
 
-        {}
+        { }
         <AddProgramModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
         />
 
-        {}
+        { }
         <IncomeCalculator
           isOpen={isCalculatorOpen}
           onClose={() => setIsCalculatorOpen(false)}
           commissionRate={program.commissionRate ?? 0}
+          commissionType={program.commissionType}
           commissionDuration={program.commissionDuration}
           avgOrderValue={program.avgOrderValue}
           programName={program.programName}

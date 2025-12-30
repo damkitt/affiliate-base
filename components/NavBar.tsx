@@ -5,15 +5,18 @@ import { ThemeToggle } from "./ThemeToggle";
 
 interface NavBarProps {
   showBackButton?: boolean;
+  hideThemeToggle?: boolean;
 }
 
-export function NavBar({ showBackButton = false }: NavBarProps) {
+export function NavBar({ showBackButton = false, hideThemeToggle = false }: NavBarProps) {
   return (
     <>
       {/* Theme Toggle - Fixed Position in viewport (same as Header) */}
-      <div className="fixed top-6 right-6 z-50">
-        <ThemeToggle />
-      </div>
+      {!hideThemeToggle && (
+        <div className="fixed top-6 right-6 z-50">
+          <ThemeToggle />
+        </div>
+      )}
 
       <nav className="fixed top-0 left-0 right-0 z-40 bg-[var(--bg)]/80 backdrop-blur-md border-b border-[var(--border)]">
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center">

@@ -1,10 +1,18 @@
 import { z } from "zod";
 
 export const categories = [
-    "Artificial Intelligence", "SaaS", "Developer Tools", "Fintech", "Productivity",
-    "Marketing", "E-commerce", "Design Tools", "No-Code", "Analytics",
-    "Education", "Crypto", "Web3", "Health", "Fitness", "Travel",
-    "Real Estate", "Content Creation", "Social Media", "Gaming"
+    "Artificial Intelligence",
+    "Marketing",
+    "E-commerce",
+    "Design Tools",
+    "Developer Tools",
+    "Fintech",
+    "Productivity",
+    "No-Code",
+    "Analytics",
+    "SaaS",
+    "Hosting & Web",
+    "Utilities",
 ] as const;
 
 export const programSchema = z.object({
@@ -15,7 +23,8 @@ export const programSchema = z.object({
     websiteUrl: z.string().trim().url("Invalid Website URL"),
     affiliateUrl: z.string().trim().url("Invalid Affiliate URL"),
     logoUrl: z.string().trim().url("Invalid Logo URL").nullable().optional(),
-    commissionRate: z.number().min(0).max(100),
+    commissionType: z.enum(["PERCENTAGE", "FIXED"]).default("PERCENTAGE"),
+    commissionRate: z.number().min(0),
     commissionDuration: z.enum(["One-time", "Recurring"]).nullable().optional(),
     cookieDuration: z.number().nullable().optional(),
     payoutMethod: z.string().trim().nullable().optional(),

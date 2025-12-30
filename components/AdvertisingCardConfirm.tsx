@@ -1,7 +1,6 @@
 import { Program } from "@/types";
 import s from "./AdvertisingCardConfirm.module.css";
-import { HiArrowUpRight, HiStar } from "react-icons/hi2";
-import Image from "next/image";
+import { ProgramCard } from "./ProgramCard";
 
 const AdvertisingCardConfirm = ({
   program,
@@ -12,39 +11,26 @@ const AdvertisingCardConfirm = ({
   onBack: () => void;
   onConfirm: () => void;
 }) => {
-  console.log("AdvertisingCardConfirm program:", program);
+  /* 
+    Force the program to look sponsored for the preview.
+    We create a new object so we don't mutate the original.
+  */
+  const previewProgram = {
+    ...program,
+    isFeatured: true,
+    featuredExpiresAt: new Date(Date.now() + 86400000 * 30), // +30 days
+  } as Program;
 
   return (
     <div className={s.content}>
-      <div className={s.container}>
-        <div className={s.row}>
-          <Dot />
-          <HiStar className={s.rankIcon} />
-          <Image
-            src={program.logoUrl ?? "/default-logo.png"}
-            width={512}
-            height={512}
-            className={s.programLogo}
-            alt={program.programName ?? "Program Logo"}
-          />
-          <div className={s.col}>
-            <h1>
-              {program.programName}
-              <div className={s.sponsored}>SPONSORED</div>
-            </h1>
-            <p>{program.description}</p>
-          </div>
-        </div>
-        <div className={s.row}>
-          <div className={s.category}>{program.category}</div>
-          <div className={s.commission}>
-            {program.commissionRate}%{" "}
-            {program.commissionDuration?.toLowerCase() == "recurring"
-              ? "Recurring"
-              : "One-time"}
-          </div>
-          <HiArrowUpRight className={s.actionIcon} />
-        </div>
+      <div className={s.containerWrapper} style={{ pointerEvents: 'none' }}>
+        {/* We reuse the actual ProgramCard to guarantee 1:1 visual match */}
+        <ProgramCard
+          program={previewProgram}
+          variant="row"
+          rank={1} // Show rank #1 for the preview to look extra premium
+          hideAction={true} // Hide the arrow since it's a preview
+        />
       </div>
 
       <div className={s.buttonGroup}>
@@ -60,15 +46,3 @@ const AdvertisingCardConfirm = ({
 };
 
 export default AdvertisingCardConfirm;
-
-const Dot = () => {
-  return (
-    <div className={s.newDotWrapper}>
-      <div className={`${s.newDot} ${s.newDotSponsored}`} />
-      <div className={s.newDotTooltip}>
-        New Arrival (24h)
-        <div className={s.newDotArrow} />
-      </div>
-    </div>
-  );
-};

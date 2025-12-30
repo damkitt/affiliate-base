@@ -11,6 +11,7 @@ export interface FormData {
   email: string;
   logoUrl: string;
   commissionRate: string;
+  commissionType: "PERCENTAGE" | "FIXED";
   commissionDuration: string;
   affiliatesCountRange: string;
   payoutsTotalRange: string;

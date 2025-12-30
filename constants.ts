@@ -7,49 +7,56 @@ export const SESSION_STORAGE_KEYS = {
 
 export const CATEGORIES = [
   "Artificial Intelligence",
-  "SaaS",
-  "Developer Tools",
-  "Fintech",
-  "Productivity",
   "Marketing",
   "E-commerce",
   "Design Tools",
+  "Developer Tools",
+  "Fintech",
+  "Productivity",
   "No-Code",
   "Analytics",
-  "Education",
-  "Health & Fitness",
-  "Social Media",
-  "Content Creation",
-  "Sales",
-  "Customer Support",
-  "Recruiting & HR",
-  "Real Estate",
-  "Travel",
-  "Security",
+  "SaaS",
+  "Hosting & Web",
+  "Utilities",
 ] as const;
 
 export const CATEGORY_ICONS: Readonly<Record<Category, string>> = {
   "Artificial Intelligence": "HiSparkles",
-  SaaS: "HiCloud",
-  "Developer Tools": "HiWrenchScrewdriver",
-  Fintech: "HiCreditCard",
-  Productivity: "HiBolt",
   Marketing: "HiMegaphone",
   "E-commerce": "HiShoppingCart",
   "Design Tools": "HiPaintBrush",
+  "Developer Tools": "HiWrenchScrewdriver",
+  Fintech: "HiCreditCard",
+  Productivity: "HiBolt",
   "No-Code": "HiPuzzlePiece",
   Analytics: "HiChartBar",
-  Education: "HiAcademicCap",
-  "Health & Fitness": "HiHeart",
-  "Social Media": "HiDevicePhoneMobile",
-  "Content Creation": "HiPencilSquare",
-  Sales: "HiBanknotes",
-  "Customer Support": "HiChatBubbleLeftRight",
-  "Recruiting & HR": "HiUserGroup",
-  "Real Estate": "HiHomeModern",
-  Travel: "HiPaperAirplane",
-  Security: "HiLockClosed",
+  SaaS: "HiCloud",
+  "Hosting & Web": "HiServerStack",
+  Utilities: "HiWrench",
 } as const;
+
+export const CATEGORY_SLUGS: Readonly<Record<Category, string>> = {
+  "Artificial Intelligence": "ai",
+  Marketing: "marketing",
+  "E-commerce": "ecommerce",
+  "Design Tools": "design-tools",
+  "Developer Tools": "developer-tools",
+  Fintech: "fintech",
+  Productivity: "productivity",
+  "No-Code": "no-code",
+  Analytics: "analytics",
+  SaaS: "saas",
+  "Hosting & Web": "hosting-web",
+  Utilities: "utilities",
+} as const;
+
+export const getSlugFromCategory = (category: Category): string =>
+  CATEGORY_SLUGS[category] || category.toLowerCase().replace(/\s+/g, "-");
+
+export const getCategoryFromSlug = (slug: string): Category | null => {
+  const entry = Object.entries(CATEGORY_SLUGS).find(([_, s]) => s === slug);
+  return entry ? (entry[0] as Category) : null;
+};
 
 export const VALID_COUNTRIES = [
   "US",

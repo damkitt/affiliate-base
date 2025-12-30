@@ -13,6 +13,7 @@ import { SearchAnalytics } from "@/components/Admin/Analytics/SearchAnalytics";
 import { ReferrerTable } from "@/components/Admin/Analytics/ReferrerTable";
 import { NewProgramsDetail } from "@/components/Admin/Analytics/NewProgramsDetail";
 import { DeviceOSSection } from "@/components/Admin/Analytics/DeviceOSSection";
+import { TopSourcesWidget } from "@/components/Admin/Analytics/TopSourcesWidget";
 
 function DashboardContent() {
     // Consume data and state from the Single Source of Truth Provider
@@ -133,7 +134,10 @@ function DashboardContent() {
                         <SearchAnalytics data={data} isLoading={isLoading} />
 
                         {/* Row 6: Sources & Geo */}
-                        <ReferrerTable data={data} isLoading={isLoading} />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <TopSourcesWidget data={data} isLoading={isLoading} />
+                            <ReferrerTable data={data} isLoading={isLoading} />
+                        </div>
 
                         {/* Row 7: Devices & OS */}
                         <DeviceOSSection data={data} isLoading={isLoading} />

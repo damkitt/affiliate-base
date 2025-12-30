@@ -61,7 +61,9 @@ export function ProgramCard({
         <div className="flex items-center gap-3 text-xs text-[var(--text-tertiary)]">
           <span className="truncate max-w-[150px]">{program.category}</span>
           <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
-          <span className="text-emerald-500 font-bold">{program.commissionRate}% Commission</span>
+          <span className="text-emerald-500 font-bold">
+            {program.commissionType === "FIXED" ? "$" : ""}{program.commissionRate}{program.commissionType === "FIXED" ? "" : "%"} Commission
+          </span>
           <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
           <span className="font-mono text-[10px]">Score: {Math.round(program.trendingScore || 0)}</span>
         </div>

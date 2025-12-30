@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import { WhoopHero } from "@/components/WhoopHero";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -54,7 +55,8 @@ export default function RootLayout({
             <AnalyticsTracker />
           </Suspense>
           <Analytics />
-          <main>{children}</main>
+          <WhoopHero />
+          <div className="relative z-10">{children}</div>
         </ThemeProvider>
       </body>
     </html>

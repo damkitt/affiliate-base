@@ -5,6 +5,8 @@ import { Footer } from "@/components/Footer";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { Suspense } from "react";
+import { getSlugFromCategory } from "@/constants";
+import { Category } from "@/types";
 
 // Revalidate every 60 seconds
 export const revalidate = 60;
@@ -33,11 +35,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const program = await getCachedProgramBySlug(slug);
   if (!program) return {};
 
-  // New Template
-  // Title: ${program.name} Affiliate Program Details
-  // Description: View commission rates, cookie duration, and payout terms for the ${program.name} affiliate program.
+  const commStr = (program as any).commissionType === "FIXED"
+    ? `$${program.commissionRate} per sale`
+    : `${program.commissionRate}% ${program.commissionDuration === 'Recurring' ? 'recurring' : 'one-time'}`;
+
   const title = `${program.programName} Affiliate Program Details`;
-  const description = `View commission rates, cookie duration, and payout terms for the ${program.programName} affiliate program.`;
+  const description = `Join the ${program.programName} affiliate program. Get ${commStr} commission with a ${program.cookieDuration}-day cookie duration. Direct application and program details.`;
 
   const canonicalUrl = `https://affiliatebase.co/programs/${slug}`;
 
@@ -110,8 +113,8 @@ export default async function ProgramPage({ params }: PageProps) {
           {
             '@type': 'ListItem',
             'position': 2,
-            'name': 'Programs',
-            'item': 'https://affiliatebase.co'
+            'name': program.category,
+            'item': `https://affiliatebase.co/category/${getSlugFromCategory(program.category as Category)}`
           },
           {
             '@type': 'ListItem',
@@ -129,7 +132,9 @@ export default async function ProgramPage({ params }: PageProps) {
         'offers': {
           '@type': 'Offer',
           'name': 'Affiliate Commission',
-          'description': `${program.commissionRate}% ${program.commissionDuration || ''}`,
+          'description': (program as any).commissionType === "FIXED"
+            ? `$${program.commissionRate} per sale`
+            : `${program.commissionRate}% ${program.commissionDuration || ''}`,
           'priceCurrency': 'USD',
           'price': '0.00'
         },

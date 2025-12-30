@@ -79,10 +79,19 @@ export const ProgramCard = memo(function ProgramCard({
         : styles.commissionPillDefault
         }`}
     >
-      <span className={styles.commissionRate}>{program.commissionRate ?? 0}%</span>
-      <span className={styles.commissionDuration}>
-        {program.commissionDuration === "Recurring" ? "recurring" : "one-time"}
-      </span>
+      {program.commissionType === "FIXED" ? (
+        <>
+          <span className={styles.commissionRate}>${program.commissionRate ?? 0}</span>
+          <span className={styles.commissionDuration}>per sale</span>
+        </>
+      ) : (
+        <>
+          <span className={styles.commissionRate}>{program.commissionRate ?? 0}%</span>
+          <span className={styles.commissionDuration}>
+            {program.commissionDuration === "Recurring" ? "recurring" : "one-time"}
+          </span>
+        </>
+      )}
     </div>
   );
 
@@ -162,11 +171,13 @@ export const ProgramCard = memo(function ProgramCard({
             </span>
           </div>
 
-          <div className={styles.commissionCol}>{CommissionPill}</div>
+          <div className={hideAction ? styles.commissionColExpanded : styles.commissionCol}>{CommissionPill}</div>
 
-          <div className={styles.actionCol}>
-            {!hideAction && <HiArrowUpRight className={styles.actionIcon} />}
-          </div>
+          {!hideAction && (
+            <div className={styles.actionCol}>
+              <HiArrowUpRight className={styles.actionIcon} />
+            </div>
+          )}
         </div>
       </Link>
     );
@@ -198,9 +209,11 @@ export const ProgramCard = memo(function ProgramCard({
           {program.commissionRate != null && (
             <div className={styles.cardCommission}>
               <div className={styles.cardCommissionRate}>
-                {program.commissionRate}%
+                {program.commissionType === "FIXED" ? `$${program.commissionRate}` : `${program.commissionRate}%`}
               </div>
-              <div className={styles.cardCommissionLabel}>commission</div>
+              <div className={styles.cardCommissionLabel}>
+                {program.commissionType === "FIXED" ? "per sale" : "commission"}
+              </div>
             </div>
           )}
         </div>

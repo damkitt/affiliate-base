@@ -156,7 +156,7 @@ export default function TermsPage() {
 
     return (
         <div className="min-h-screen bg-[var(--bg)] text-[var(--text-primary)] font-sans flex flex-col">
-            <NavBar showBackButton />
+            <NavBar showBackButton hideThemeToggle />
             <div className="h-14" />
 
             <main className="max-w-4xl mx-auto px-6 py-12 flex-1">

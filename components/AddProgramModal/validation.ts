@@ -29,6 +29,7 @@ export const shouldValidateField = (fieldName: string): boolean => {
     "description",
     "additionalInfo",
     "commissionRate",
+    "commissionType",
     "commissionDuration",
     "targetAudience",
     "minPayoutValue",

@@ -21,10 +21,13 @@ export function ContactStep({
     <div className="space-y-5 animate-fadeIn">
       {/* Contact Info */}
       <div className="p-5 bg-[var(--bg-secondary)] rounded-2xl">
-        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1 flex items-center gap-2">
           <HiChatBubbleLeftRight className="w-4 h-4 text-[var(--accent-solid)]" />
           Contact Information
         </h3>
+        <p className="text-[11px] text-[var(--text-secondary)] mb-4">
+          Affiliates will be able to contact you for questions or further details.
+        </p>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide">
@@ -101,6 +104,7 @@ export function ContactStep({
                 country: formData.country || "US",
                 logoUrl: logoPreview || null,
                 commissionRate: parseInt(formData.commissionRate) || 0,
+                commissionType: formData.commissionType as any,
                 commissionDuration: formData.commissionDuration || "Recurring",
                 cookieDuration: parseInt(formData.cookieDuration) || 30,
                 approvalStatus: true,

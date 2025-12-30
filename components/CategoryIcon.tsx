@@ -1,11 +1,9 @@
 "use client";
 
-import { 
+import {
     HiSparkles, HiCloud, HiWrenchScrewdriver, HiCreditCard, HiBolt,
     HiMegaphone, HiShoppingCart, HiPaintBrush, HiPuzzlePiece, HiChartBar,
-    HiAcademicCap, HiHeart, HiDevicePhoneMobile, HiPencilSquare, HiBanknotes,
-    HiChatBubbleLeftRight, HiUserGroup, HiHomeModern, HiPaperAirplane, HiLockClosed,
-    HiCube
+    HiServerStack, HiWrench, HiCube
 } from "react-icons/hi2";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -19,16 +17,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     "HiPaintBrush": HiPaintBrush,
     "HiPuzzlePiece": HiPuzzlePiece,
     "HiChartBar": HiChartBar,
-    "HiAcademicCap": HiAcademicCap,
-    "HiHeart": HiHeart,
-    "HiDevicePhoneMobile": HiDevicePhoneMobile,
-    "HiPencilSquare": HiPencilSquare,
-    "HiBanknotes": HiBanknotes,
-    "HiChatBubbleLeftRight": HiChatBubbleLeftRight,
-    "HiUserGroup": HiUserGroup,
-    "HiHomeModern": HiHomeModern,
-    "HiPaperAirplane": HiPaperAirplane,
-    "HiLockClosed": HiLockClosed,
+    "HiServerStack": HiServerStack,
+    "HiWrench": HiWrench,
 };
 
 interface CategoryIconProps {

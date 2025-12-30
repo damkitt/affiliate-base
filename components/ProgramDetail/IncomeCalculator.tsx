@@ -17,6 +17,7 @@ interface IncomeCalculatorProps {
     onClose: () => void;
     commissionRate: number;
     commissionDuration: string | null | undefined;
+    commissionType: "PERCENTAGE" | "FIXED";
     avgOrderValue: number | null | undefined;
     programName: string;
 }
@@ -26,6 +27,7 @@ export function IncomeCalculator({
     onClose,
     commissionRate,
     commissionDuration,
+    commissionType,
     avgOrderValue,
     programName,
 }: IncomeCalculatorProps) {
@@ -53,7 +55,7 @@ export function IncomeCalculator({
     // Calculate 12 month projections
     const { chartData, month1Income, month12Income, totalYearEarnings } = useMemo(() => {
         const price = parseFloat(productPrice) || 0;
-        const commPercent = parseFloat(commission) || 0;
+        const commValue = parseFloat(commission) || 0;
         const growthRate = audienceGrowth / 100;
 
         const data: { month: string; earnings: number; newSales: number }[] = [];
@@ -63,19 +65,25 @@ export function IncomeCalculator({
         let m12 = 0;
 
         for (let month = 1; month <= 12; month++) {
-            // Calculate new sales with growth
-            const growthMultiplier = 1 + growthRate * (month - 1);
-            const newSales = Math.round(salesPerMonth * growthMultiplier);
+            // Compound Growth: newSales = startingSales * (1 + growthRate)^(month - 1)
+            const newSales = Math.round(salesPerMonth * Math.pow(1 + growthRate, month - 1));
 
             let monthlyIncome = 0;
+            let revenuePerSale = 0;
+
+            if (commissionType === "FIXED") {
+                revenuePerSale = commValue;
+            } else {
+                revenuePerSale = price * (commValue / 100);
+            }
 
             if (isRecurring) {
                 // Recurring: snowball effect - all previous subscribers continue paying
                 totalSubscribers += newSales;
-                monthlyIncome = totalSubscribers * price * (commPercent / 100);
+                monthlyIncome = totalSubscribers * revenuePerSale;
             } else {
                 // One-time: only new sales count
-                monthlyIncome = newSales * price * (commPercent / 100);
+                monthlyIncome = newSales * revenuePerSale;
             }
 
             totalEarnings += monthlyIncome;
@@ -96,7 +104,7 @@ export function IncomeCalculator({
             month12Income: m12,
             totalYearEarnings: totalEarnings,
         };
-    }, [productPrice, commission, salesPerMonth, audienceGrowth, isRecurring]);
+    }, [productPrice, commission, salesPerMonth, audienceGrowth, isRecurring, commissionType]);
 
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat("en-US", {
@@ -191,21 +199,28 @@ export function IncomeCalculator({
                                 {/* Commission */}
                                 <div>
                                     <label className="block text-[10px] sm:text-xs font-semibold text-[var(--text-secondary)] mb-1.5 sm:mb-2 uppercase tracking-wide">
-                                        My Commission (%)
+                                        My Commission ({commissionType === "FIXED" ? "$" : "%"})
                                     </label>
                                     <div className="relative">
+                                        {commissionType === "FIXED" && (
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
+                                                $
+                                            </span>
+                                        )}
                                         <input
                                             type="number"
                                             inputMode="decimal"
                                             value={commission}
                                             onChange={(e) => setCommission(e.target.value)}
                                             min="1"
-                                            max="100"
-                                            className="w-full h-11 sm:h-12 px-4 pr-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-solid)] transition-all text-base"
+                                            max={commissionType === "FIXED" ? "10000" : "100"}
+                                            className={`w-full h-11 sm:h-12 px-4 ${commissionType === "FIXED" ? "pl-8" : "pr-10"} rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-solid)] transition-all text-base`}
                                         />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
-                                            %
-                                        </span>
+                                        {commissionType === "PERCENTAGE" && (
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
+                                                %
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
 
@@ -267,11 +282,14 @@ export function IncomeCalculator({
                                     <div className="flex items-center justify-between mb-4 sm:mb-5">
                                         <div>
                                             <label className="text-[10px] sm:text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
-                                                Audience Growth
+                                                Audience (Sales) Growth
                                             </label>
                                             <span className="ml-1.5 text-[9px] sm:text-[10px] text-[var(--text-tertiary)] font-normal normal-case tracking-normal">
                                                 / month
                                             </span>
+                                            <p className="text-[9px] text-[var(--text-tertiary)] opacity-70 mt-0.5 leading-tight">
+                                                Scales your monthly sales volume over time
+                                            </p>
                                         </div>
                                         <div className="flex items-center px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[var(--bg-card)] border border-[var(--border)]">
                                             <input

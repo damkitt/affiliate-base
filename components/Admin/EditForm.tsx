@@ -1,7 +1,10 @@
 import { CATEGORIES } from "@/constants";
 import type { Program } from "@/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/Tooltip";
-import { HiPencilSquare, HiQuestionMarkCircle } from "react-icons/hi2";
+import { HiPencilSquare, HiQuestionMarkCircle, HiPhoto, HiCheck, HiXMark } from "react-icons/hi2";
+import { ImageCropper } from "@/components/ui/ImageCropper";
+import { useState, useRef, ChangeEvent } from "react";
+import Image from "next/image";
 
 interface EditFormProps {
   program: Partial<Program>;
@@ -20,6 +23,47 @@ export function EditForm({
   isSaving,
   saveStatus,
 }: EditFormProps) {
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = async (croppedFile: File) => {
+    setCropImageSrc(null);
+    setIsUploading(true);
+
+    try {
+      const uploadData = new window.FormData();
+      uploadData.append("file", croppedFile);
+
+      const response = await fetch("/api/upload/avatar", {
+        method: "POST",
+        body: uploadData,
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+
+      const data = await response.json();
+      onChange("logoUrl", data.url);
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Failed to upload logo");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -195,19 +239,76 @@ export function EditForm({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
-            Commission Rate *
+        <div className="md:col-span-2 space-y-2">
+          <label className="block text-xs font-semibold text-[var(--text-tertiary)]">
+            Commission *
           </label>
-          <input
-            type="number"
-            className="w-full px-4 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)]"
-            value={program.commissionRate ?? ""}
-            onChange={(e) =>
-              onChange("commissionRate", Number.parseInt(e.target.value))
-            }
-            placeholder="e.g. 20"
-          />
+          <div className="flex flex-wrap gap-2 items-center">
+            <div className="flex gap-2 p-1 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border)] w-fit">
+              <button
+                type="button"
+                onClick={() => onChange("commissionType", "PERCENTAGE")}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${program.commissionType === "PERCENTAGE" || !program.commissionType
+                  ? "bg-white text-black shadow-sm"
+                  : "text-[var(--text-tertiary)] hover:text-white"
+                  }`}
+              >
+                PERCENTAGE
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange("commissionType", "FIXED")}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${program.commissionType === "FIXED"
+                  ? "bg-white text-black shadow-sm"
+                  : "text-[var(--text-tertiary)] hover:text-white"
+                  }`}
+              >
+                FIXED
+              </button>
+            </div>
+
+            {(program.commissionType === "PERCENTAGE" || !program.commissionType) && (
+              <div className="flex gap-2 p-1 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border)] w-fit animate-fadeIn">
+                <button
+                  type="button"
+                  onClick={() => onChange("commissionDuration", "One-time")}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${program.commissionDuration === "One-time" || !program.commissionDuration
+                    ? "bg-white text-black shadow-sm"
+                    : "text-[var(--text-tertiary)] hover:text-white"
+                    }`}
+                >
+                  ONE-TIME
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChange("commissionDuration", "Recurring")}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${program.commissionDuration === "Recurring"
+                    ? "bg-white text-black shadow-sm"
+                    : "text-[var(--text-tertiary)] hover:text-white"
+                    }`}
+                >
+                  RECURRING
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="relative">
+            {program.commissionType === "FIXED" && (
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] text-sm font-bold">
+                $
+              </span>
+            )}
+            <input
+              type="number"
+              className={`w-full py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] ${program.commissionType === "FIXED" ? "pl-8 pr-4" : "px-4"
+                }`}
+              value={program.commissionRate ?? ""}
+              onChange={(e) =>
+                onChange("commissionRate", Number.parseInt(e.target.value))
+              }
+              placeholder={program.commissionType === "FIXED" ? "e.g. 100" : "e.g. 20 (%)"}
+            />
+          </div>
         </div>
         <div>
           <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
@@ -261,15 +362,78 @@ export function EditForm({
 
       <div>
         <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
-          Logo URL
+          Program Logo
         </label>
-        <input
-          type="url"
-          className="w-full px-4 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)]"
-          value={program.logoUrl || ""}
-          onChange={(e) => onChange("logoUrl", e.target.value)}
-          placeholder="https://..."
-        />
+        <div className="flex items-center gap-6 p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)]">
+          <div
+            onClick={() => !isUploading && fileInputRef.current?.click()}
+            className={`relative w-24 h-24 rounded-xl bg-[var(--bg-elevated)] border-2 border-dashed border-[var(--border)] flex items-center justify-center overflow-hidden transition-all ${isUploading ? "opacity-50 cursor-wait" : "hover:border-[var(--accent-solid)] cursor-pointer group"
+              }`}
+          >
+            {program.logoUrl ? (
+              <Image
+                src={program.logoUrl}
+                alt="Logo"
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                <HiPhoto className="w-8 h-8 text-[var(--text-tertiary)] group-hover:text-[var(--accent-solid)] transition-colors" />
+                <span className="text-[10px] text-[var(--text-tertiary)] font-bold">Upload</span>
+              </div>
+            )}
+            {isUploading && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <p className="text-[11px] text-[var(--text-tertiary)] font-medium max-w-[200px]">
+              Click to upload and crop. Square images work best.
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => !isUploading && fileInputRef.current?.click()}
+                className="text-xs font-bold text-white hover:text-emerald-400 transition-colors"
+              >
+                Change Logo
+              </button>
+              {program.logoUrl && (
+                <button
+                  type="button"
+                  onClick={() => onChange("logoUrl", "")}
+                  className="text-xs font-bold text-red-500/60 hover:text-red-500 transition-colors"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+        </div>
+
+        {cropImageSrc && (
+          <ImageCropper
+            imageSrc={cropImageSrc}
+            onCancel={() => {
+              setCropImageSrc(null);
+              if (fileInputRef.current) fileInputRef.current.value = "";
+            }}
+            onCropComplete={handleCropComplete}
+          />
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

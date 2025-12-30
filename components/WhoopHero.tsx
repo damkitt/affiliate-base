@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-
+import { usePathname } from "next/navigation";
 
 export function WhoopHero() {
+    const pathname = usePathname();
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    // Don't render on admin pages to keep them clean
+    if (pathname?.startsWith("/admin")) return null;
 
     // Self-manage the clean up of the global spotlight
     useEffect(() => {
@@ -125,9 +129,9 @@ export function WhoopHero() {
         };
     }, []);
 
-    // Absolute positioning covering the full scrollable area of the parent
+    // Fixed positioning covering the viewport to stay stable during navigation
     return (
-        <div ref={containerRef} className="absolute inset-0 w-full min-h-full pointer-events-none overflow-hidden z-0 bg-[var(--bg)]">
+        <div ref={containerRef} className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden z-0 bg-[var(--bg)]">
             {/* Top Green Glow - "Horizon" effect */}
             {/* Top Green Glow - "Horizon" effect */}
             <div

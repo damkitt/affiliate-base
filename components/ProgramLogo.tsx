@@ -50,7 +50,7 @@ export function ProgramLogo({
 
     if (src && !error) {
         return (
-            <div className={cn("relative overflow-hidden bg-white dark:bg-zinc-900", sizeClasses[size], className)}>
+            <div className={cn("relative overflow-hidden bg-white dark:bg-zinc-900 shrink-0 grow-0", sizeClasses[size], className)}>
                 <Image
                     src={src}
                     alt={name}
@@ -67,7 +67,7 @@ export function ProgramLogo({
     return (
         <div
             className={cn(
-                "relative flex items-center justify-center font-bold text-white overflow-hidden shadow-inner",
+                "relative flex items-center justify-center font-bold text-white overflow-hidden shadow-inner shrink-0 grow-0",
                 `bg-gradient-to-br ${gradient}`,
                 sizeClasses[size],
                 className

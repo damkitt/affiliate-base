@@ -4,13 +4,13 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Program } from "@/types";
 import { cn, isProgramSponsored } from "@/lib/utils";
 import { ProgramCard } from "./ProgramCard";
-import { AnimatePresence, motion } from "framer-motion";
 
 interface LeaderboardProps {
   programs: Program[];
+  isPending?: boolean;
 }
 
-export function Leaderboard({ programs }: LeaderboardProps) {
+export function Leaderboard({ programs, isPending = false }: LeaderboardProps) {
   const [visibleCount, setVisibleCount] = useState(12);
 
   const sponsoredPrograms = useMemo(() => {
@@ -80,9 +80,13 @@ export function Leaderboard({ programs }: LeaderboardProps) {
           }
         `}</style>
 
-        <div className="min-w-[800px] md:min-w-0">
-          <div className="border border-zinc-200/60 dark:border-white/[0.1] rounded-2xl bg-white dark:bg-[#0A0A0A] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-300">
-            {}
+        <div className="min-w-[800px] md:min-w-0 relative min-h-[600px]">
+          <div
+            className={cn(
+              "rounded-2xl bg-white dark:bg-[#0A0A0A] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none transition-all duration-500 ease-in-out",
+              isPending && "opacity-90 grayscale-[0.1]"
+            )}
+          >
             <div className="grid grid-cols-12 gap-4 px-6 py-4 border-zinc-200 dark:border-white/[0.08] bg-zinc-50/50 dark:bg-white/[0.02] text-[11px] font-regular text-zinc-900 dark:text-zinc-300 uppercase tracking-widest backdrop-blur-sm">
               <div className="w-6 text-center opacity-60">#</div>
               <div className="col-span-5 opacity-60">Program</div>
@@ -94,29 +98,28 @@ export function Leaderboard({ programs }: LeaderboardProps) {
             {sponsoredPrograms.length > 0 && (
               <div className="bg-gradient-to-b from-amber-500/[0.03] to-transparent dark:from-amber-500/[0.05]">
                 {sponsoredPrograms.map((program) => (
-                  <ProgramCard
-                    key={program.id}
-                    program={program}
-                    variant="row"
-                    rank={undefined}
-                  />
-                ))}
-              </div>
-            )}
-
-            {programs.length > 0 && (
-              <AnimatePresence mode="popLayout">
-                {displayOrganicPrograms.map((program, index) => (
                   <div key={program.id}>
                     <ProgramCard
                       program={program}
                       variant="row"
-                      rank={index + 1}
+                      rank={undefined}
                     />
                   </div>
                 ))}
-              </AnimatePresence>
+              </div>
             )}
+
+            <div className="relative">
+              {displayOrganicPrograms.map((program, index) => (
+                <div key={program.id}>
+                  <ProgramCard
+                    program={program}
+                    variant="row"
+                    rank={index + 1}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

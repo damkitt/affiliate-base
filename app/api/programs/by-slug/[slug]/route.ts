@@ -23,6 +23,7 @@ export async function GET(
                 programName: true,
                 logoUrl: true,
                 commissionRate: true,
+                commissionType: true,
                 commissionDuration: true,
                 websiteUrl: true,
             },
