@@ -30,7 +30,7 @@ export const programSchema = z.object({
     payoutMethod: z.string().trim().nullable().optional(),
     minPayoutValue: z.number().nullable().optional(),
     avgOrderValue: z.number().nullable().optional(),
-    targetAudience: z.string().trim().nullable().optional(),
+    targetAudience: z.string().trim().max(80, "Target audience too long").nullable().optional(),
     additionalInfo: z.string().trim().nullable().optional(),
     affiliatesCountRange: z.string().trim().nullable().optional(),
     payoutsTotalRange: z.string().trim().nullable().optional(),

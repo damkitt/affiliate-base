@@ -11,7 +11,6 @@ import { CategoryFilter } from "@/components/CategoryFilter";
 import { RankingExplanation } from "@/components/RankingExplanation";
 import type { Program, Category } from "@/types";
 import { getSlugFromCategory, getCategoryFromSlug } from "@/constants";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface HomeContentProps {
   initialPrograms: Program[];

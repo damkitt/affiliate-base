@@ -207,8 +207,7 @@ export function EditForm({
         <textarea
           className="w-full px-4 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] min-h-[100px]"
           value={program.description || ""}
-          onChange={(e) => onChange("description", e.target.value)}
-          maxLength={2000}
+          onChange={(e) => onChange("description", e.target.value.slice(0, 2000))}
           placeholder="Tell partners about your program, ideal customers, and what content works best..."
         />
       </div>

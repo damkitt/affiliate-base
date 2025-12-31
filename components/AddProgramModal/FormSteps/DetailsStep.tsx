@@ -391,11 +391,11 @@ export function DetailsStep({
               value={formData.targetAudience || ""}
               onChange={onFormChange}
               placeholder="e.g. SaaS Founders, Creators"
-              maxLength={30}
+              maxLength={80}
               className="w-full h-11 pl-4 pr-14 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--text-tertiary)] tabular-nums pointer-events-none">
-              {formData.targetAudience?.length || 0}/30
+              {formData.targetAudience?.length || 0}/80
             </span>
           </div>
         </div>

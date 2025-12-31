@@ -2,7 +2,10 @@ import { FormData } from "./types";
 import { cleanAndValidateUrl } from "@/lib/url-validator";
 
 export const validateEnglishInput = (value: string): boolean => {
-  const regex = /^[a-zA-Z0-9\s.,!?'"@#$%^&*()_+\-=[\]{};:|\\/<>]*$/;
+  // Relaxed regex to allow smart quotes, dashes, ellipsis, and other common punctuation
+  // \u2000-\u206F covers General Punctuation (smart quotes, dashes, bullets, etc.)
+  // \u00A0-\u00BF covers Latin-1 Supplement (currency, fractions, etc.)
+  const regex = /^[a-zA-Z0-9\s.,!?'"@#$%^&*()_+\-=[\]{};:|\\/<>\u2000-\u206F\u00A0-\u00BF]*$/;
   return regex.test(value);
 };
 

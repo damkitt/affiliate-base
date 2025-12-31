@@ -520,10 +520,14 @@ export function BasicInfoStep({
         <textarea
           name="description"
           value={formData.description}
-          onChange={onFormChange}
+          onChange={(e) => {
+            const syntheticEvent = {
+              target: { name: "description", value: e.target.value.slice(0, 2000) }
+            } as ChangeEvent<HTMLTextAreaElement>;
+            onFormChange(syntheticEvent);
+          }}
           placeholder="Tell partners about your program, ideal customers, and what content works best..."
           rows={5}
-          maxLength={2000}
           className="w-full px-4 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300 resize-none"
         />
       </div>
