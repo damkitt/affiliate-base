@@ -12,7 +12,6 @@ const TrackSchema = z.object({
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    console.log("[API/Track] Received Payload:", JSON.stringify(body));
 
     const result = TrackSchema.safeParse(body);
     if (!result.success) {
@@ -95,21 +94,13 @@ export async function POST(request: Request) {
               });
             }
           });
-          console.log(
-            `[API/Track] Strict Event Recorded: ${type} for ${programId}`
-          );
-        } else {
-          console.warn(
-            "[API/Track] Skipping Strict Stats - Program not found:",
-            programId
-          );
         }
+
+        return NextResponse.json({ status: "ok" });
       } catch (error) {
-        console.error("[API/Track] ProgramEvent Error:", error);
-        return NextResponse.json({
-          status: "error_logged",
-          error: error,
-        });
+        console.error("[API/Track] Critical Failure:", error);
+        // Even on critical error, return a 200/ok to the client to avoid console spam
+        return NextResponse.json({ status: "critical_failure" }, { status: 200 });
       }
     }
 

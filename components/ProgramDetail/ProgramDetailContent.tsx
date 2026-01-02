@@ -15,16 +15,17 @@ import Link from "next/link";
 import type { Program, Category } from "@/types";
 import { getSlugFromCategory } from "@/constants";
 import {
-  EditReportModal,
-  IncomeCalculator,
   ProgramStatsGrid,
   HowItWorks,
   ProgramSidebar,
 } from "@/components/ProgramDetail";
 import { NavBar } from "@/components/NavBar";
 import { CallToAction } from "@/components/CallToAction";
-import AddProgramModal from "@/components/AddProgramModal";
 import { generateFingerprint } from "@/lib/fingerprint";
+
+const EditReportModal = dynamic(() => import("./EditReportModal").then(mod => mod.EditReportModal), { ssr: false });
+const IncomeCalculator = dynamic(() => import("./IncomeCalculator").then(mod => mod.IncomeCalculator), { ssr: false });
+const AddProgramModal = dynamic(() => import("@/components/AddProgramModal"), { ssr: false });
 
 const InterestChart = dynamic(
   () => import("./InterestChart").then((mod) => mod.InterestChart),

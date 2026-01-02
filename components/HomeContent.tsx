@@ -3,14 +3,18 @@
 import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
+import dynamic from "next/dynamic";
 import { Leaderboard } from "@/components/Leaderboard";
-import AddProgramModal from "@/components/AddProgramModal";
 import { Footer } from "@/components/Footer";
 import { usePrograms } from "@/hooks/usePrograms";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { RankingExplanation } from "@/components/RankingExplanation";
 import type { Program, Category } from "@/types";
 import { getSlugFromCategory, getCategoryFromSlug } from "@/constants";
+
+const AddProgramModal = dynamic(() => import("@/components/AddProgramModal"), {
+  ssr: false,
+});
 
 interface HomeContentProps {
   initialPrograms: Program[];

@@ -7,6 +7,7 @@ import { calculateQualityScore, calculateTrendingScore } from "@/lib/scoring";
 import { cleanAndValidateUrl } from "@/lib/url-validator";
 import { programSchema } from "@/lib/validation-schemas";
 import { Program } from "@/types";
+import { processLeaderboardPrograms } from "@/lib/data-fetching";
 
 const CACHE_HEADERS = {
   "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
@@ -38,8 +39,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const url = new URL(request.url);
   const search = url.searchParams.get("search")?.trim();
   const category = url.searchParams.get("category")?.trim();
+  const page = parseInt(url.searchParams.get("page") || "1", 10);
+  const limit = parseInt(url.searchParams.get("limit") || "200", 10);
   const now = new Date();
-  const dayAgo = new Date(now.getTime() - 86400000);
 
   const where: Prisma.ProgramWhereInput = {
     approvalStatus: true,
@@ -54,71 +56,45 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }),
   };
 
-  const allPrograms = await prisma.program.findMany({
+  // 1. Fetch Featured Programs (only for Page 1)
+  let featuredPrograms: ProgramListItem[] = [];
+  if (page === 1) {
+    featuredPrograms = await prisma.program.findMany({
+      where: {
+        ...where,
+        isFeatured: true,
+        featuredExpiresAt: { gt: now },
+      },
+      select: PROGRAM_SELECT,
+    });
+  }
+
+  // 2. Fetch Organic Programs
+  const topPrograms = await prisma.program.findMany({
     where,
     orderBy: [{ trendingScore: "desc" }, { createdAt: "desc" }],
-    take: 200,
+    take: limit,
+    skip: (page - 1) * limit,
     select: PROGRAM_SELECT,
   });
 
-  const sponsored = allPrograms
-    .filter(
-      (p) => p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now
-    )
-    .slice(0, 3);
+  // 3. Combine and Deduplicate (Robustly)
+  const dedupeMap = new Map<string, any>();
 
-  const sponsoredIds = new Set(sponsored.map((p) => p.id));
-  const organic = allPrograms.filter((p) => !sponsoredIds.has(p.id));
+  // Fill with organic first
+  topPrograms.forEach(p => dedupeMap.set(p.id, p));
+  // Overwrite with featured (if any) to ensure featured fields/status are correct
+  featuredPrograms.forEach(p => dedupeMap.set(p.id, p));
 
-  const top20Ids = new Set(organic.slice(0, 20).map((p) => p.id));
-  const newcomers = organic
-    .filter((p) => p.createdAt >= dayAgo && !top20Ids.has(p.id))
-    .sort(
-      (a, b) =>
-        b.trendingScore - a.trendingScore ||
-        b.createdAt.getTime() - a.createdAt.getTime()
-    );
+  const allPrograms = Array.from(dedupeMap.values());
 
-  const finalList = mergeWithNewcomers(sponsored, organic, newcomers);
+  const finalList = processLeaderboardPrograms(allPrograms, page);
 
   activeProgramsGauge.set(finalList.length);
 
   return NextResponse.json(finalList, { headers: CACHE_HEADERS });
 }
 
-function mergeWithNewcomers(
-  sponsored: ProgramListItem[],
-  organic: ProgramListItem[],
-  newcomers: ProgramListItem[]
-) {
-  const result: (ProgramListItem & { isInjected?: boolean })[] = [...sponsored];
-  const seen = new Set(sponsored.map((p) => p.id));
-
-  let oi = 0;
-  let ni = 0;
-
-  while (result.length < sponsored.length + organic.length) {
-    const pos = result.length + 1;
-    const isInjectionSlot = pos >= 8 && (pos - 8) % 5 === 0;
-
-    if (isInjectionSlot) {
-      while (ni < newcomers.length && seen.has(newcomers[ni].id)) ni++;
-      if (ni < newcomers.length) {
-        result.push({ ...newcomers[ni], isInjected: true });
-        seen.add(newcomers[ni++].id);
-        continue;
-      }
-    }
-
-    while (oi < organic.length && seen.has(organic[oi].id)) oi++;
-    if (oi >= organic.length) break;
-
-    result.push(organic[oi]);
-    seen.add(organic[oi++].id);
-  }
-
-  return result;
-}
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {

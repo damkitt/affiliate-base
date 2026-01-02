@@ -1,5 +1,6 @@
 import { useState, useEffect, memo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { HiArrowUpRight, HiStar, HiChartBar, HiInformationCircle } from "react-icons/hi2";
 import { Program } from "@/types";
@@ -30,11 +31,17 @@ export const ProgramCard = memo(function ProgramCard({
   highlightNew = true,
   hideAction = false,
 }: ProgramCardProps) {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleMouseEnter = () => {
+    const url = `/programs/${program.slug || program.id}`;
+    router.prefetch(url);
+  };
 
   const isNew = mounted && highlightNew && isProgramNew(program.createdAt);
   const isSponsored = isProgramSponsored(program);
@@ -99,6 +106,7 @@ export const ProgramCard = memo(function ProgramCard({
     return (
       <Link
         href={`/programs/${program.slug || program.id}`}
+        onMouseEnter={handleMouseEnter}
         className={`${styles.rowWrapper} ${isSponsored ? styles.rowWrapperSponsored : ""
           }`}
       >
@@ -187,6 +195,7 @@ export const ProgramCard = memo(function ProgramCard({
     return (
       <Link
         href={`/programs/${program.slug || program.id}`}
+        onMouseEnter={handleMouseEnter}
         className={styles.cardWrapper}
       >
         <div className={styles.cardContent}>

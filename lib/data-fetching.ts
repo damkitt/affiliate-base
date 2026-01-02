@@ -8,17 +8,48 @@ import { cache } from "react";
  * part of the cache key in Next.js 15.
  */
 export const getLeaderboardPrograms = unstable_cache(
-    async (category?: string) => {
+    async (category?: string, page: number = 1, limit: number = 200) => {
         try {
+            const now = new Date();
             const whereClause: any = { approvalStatus: true };
             if (category) {
                 whereClause.category = category;
             }
 
-            const allPrograms = await prisma.program.findMany({
+            // 1. Fetch Featured Programs (only for Page 1)
+            let featuredPrograms: any[] = [];
+            if (page === 1) {
+                featuredPrograms = await prisma.program.findMany({
+                    where: {
+                        ...whereClause,
+                        isFeatured: true,
+                        featuredExpiresAt: { gt: now },
+                    },
+                    select: {
+                        id: true,
+                        programName: true,
+                        slug: true,
+                        logoUrl: true,
+                        commissionRate: true,
+                        // @ts-ignore
+                        commissionType: true,
+                        commissionDuration: true,
+                        category: true,
+                        tagline: true,
+                        isFeatured: true,
+                        featuredExpiresAt: true,
+                        createdAt: true,
+                        trendingScore: true,
+                    },
+                });
+            }
+
+            // 2. Fetch Organic Programs
+            const topPrograms = await prisma.program.findMany({
                 where: whereClause,
                 orderBy: [{ trendingScore: "desc" }, { createdAt: "desc" }],
-                take: 100,
+                take: limit,
+                skip: (page - 1) * limit,
                 select: {
                     id: true,
                     programName: true,
@@ -37,25 +68,93 @@ export const getLeaderboardPrograms = unstable_cache(
                 },
             });
 
-            // Apply Sponsored-First Logic
-            const now = new Date();
-            const sponsored = allPrograms.filter(
-                (p) => p.isFeatured && p.featuredExpiresAt && p.featuredExpiresAt > now
-            ).slice(0, 3);
+            // 3. Combine and Deduplicate (Robustly)
+            const dedupeMap = new Map<string, any>();
 
-            const organic = allPrograms.filter(
-                (p) => !sponsored.some((s) => s.id === p.id)
-            );
+            // Fill with organic first
+            topPrograms.forEach(p => dedupeMap.set(p.id, p));
+            // Overwrite with featured (if any) to ensure featured fields/status are correct
+            featuredPrograms.forEach(p => dedupeMap.set(p.id, p));
 
-            return [...sponsored, ...organic];
+            // NOTE: We do NOT slice the result to the 'limit'. 
+            // This is "Variant A" (Add): if featured programs are added on top of organic, 
+            // the page length just grows. This ensures no programs are "swallowed" 
+            // when the next page uses 'skip = (page-1) * limit'.
+            const allPrograms = Array.from(dedupeMap.values());
+
+            return processLeaderboardPrograms(allPrograms, page);
         } catch (error) {
             console.error("[getLeaderboardPrograms] DB Error:", error);
             return [];
         }
     },
-    ["leaderboard-programs-v9"],
+    ["leaderboard-programs-v11"],
     { revalidate: 60, tags: ["programs", "leaderboard"] }
 );
+
+/**
+ * Shared utility to process programs for the leaderboard:
+ * 1. Filters sponsored/featured programs for the top slots
+ * 2. Identifies "newcomers" (last 24h)
+ * 3. Injects newcomers into the organic list at specific slots
+ */
+export function processLeaderboardPrograms(allPrograms: any[], page: number = 1) {
+    const now = new Date();
+    const dayAgo = new Date(now.getTime() - 86400000);
+
+    // 1. Sponsored-First (Only on Page 1)
+    const sponsored = page === 1
+        ? allPrograms.filter((p) => p.isFeatured && p.featuredExpiresAt && new Date(p.featuredExpiresAt) > now).slice(0, 3)
+        : [];
+
+    const sponsoredIds = new Set(sponsored.map((p) => p.id));
+    const organic = allPrograms.filter((p) => !sponsoredIds.has(p.id));
+
+    // 2. Newcomers (Page 1 Only: last 24h, and not in the top 20 organic)
+    const newcomers = page === 1
+        ? organic
+            .filter((p) => new Date(p.createdAt) >= dayAgo && !organic.slice(0, 20).some(top => top.id === p.id))
+            .sort((a, b) => b.trendingScore - a.trendingScore || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        : [];
+
+    // 3. Merge Logic
+    // If not Page 1, just return organic programs directly (already sorted by trendingScore from DB)
+    if (page > 1) {
+        return organic;
+    }
+
+    const result: any[] = [...sponsored];
+    const seen = new Set(sponsored.map((p) => p.id));
+
+    let oi = 0;
+    let ni = 0;
+
+    // NOTE: This loop completes until all organic items are accounted for.
+    // Length of result = sponsored.length + organic.length.
+    // This maintains "Variant A" safety for pagination.
+    while (result.length < sponsored.length + organic.length) {
+        const pos = result.length + 1;
+        // Inject newcomers at positions 8, 13, 18...
+        const isInjectionSlot = pos >= 8 && (pos - 8) % 5 === 0;
+
+        if (isInjectionSlot && ni < newcomers.length) {
+            while (ni < newcomers.length && seen.has(newcomers[ni].id)) ni++;
+            if (ni < newcomers.length) {
+                result.push({ ...newcomers[ni], isInjected: true });
+                seen.add(newcomers[ni++].id);
+                continue;
+            }
+        }
+
+        while (oi < organic.length && seen.has(organic[oi].id)) oi++;
+        if (oi >= organic.length) break;
+
+        result.push(organic[oi]);
+        seen.add(organic[oi++].id);
+    }
+
+    return result;
+}
 
 /**
  * Fetches a single program by slug for the detail page.

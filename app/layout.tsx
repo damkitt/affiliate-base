@@ -55,6 +55,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://www.google.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.google.com" />
+      </head>
       <body className={`${inter.className} ${dmSerif.variable}`}>
         <ThemeProvider
           attribute="class"

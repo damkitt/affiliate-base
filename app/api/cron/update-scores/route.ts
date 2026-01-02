@@ -89,14 +89,7 @@ export async function GET(request: Request) {
       );
 
       updatedCount += chunk.length;
-      console.log(
-        `[CRON] Processed ${updatedCount}/${programs.length} programs...`
-      );
     }
-
-    console.log(
-      "[CRON] Successfully updated all program scores and healed counters."
-    );
 
     return NextResponse.json({
       success: true,
