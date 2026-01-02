@@ -183,5 +183,35 @@ enum Country {
   ZA
   NG
   KE
+  RO
+  GR
+  HU
+  BG
+  HR
+  SK
+  LT
+  LV
+  EE
+  SI
+  LU
+  IS
+  PK
+  TW
+  KZ
+  LK
+  BD
+  PE
+  UY
+  EC
+  CR
+  PA
+  MA
+  GH
+  ET
+  TZ
+  KW
+  QA
+  BH
+  OM
   Other
 }
