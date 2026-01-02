@@ -1,8 +1,9 @@
-import { CATEGORIES } from "@/constants";
+import { CATEGORIES, COUNTRIES } from "@/constants";
 import type { Program } from "@/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/Tooltip";
 import { HiPencilSquare, HiQuestionMarkCircle, HiPhoto, HiCheck, HiXMark } from "react-icons/hi2";
 import { ImageCropper } from "@/components/ui/ImageCropper";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useState, useRef, ChangeEvent } from "react";
 import Image from "next/image";
 
@@ -326,10 +327,16 @@ export function EditForm({
           <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
             Country
           </label>
-          <input
-            className="w-full px-4 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)]"
+          <CustomSelect
             value={program.country || ""}
-            onChange={(e) => onChange("country", e.target.value)}
+            onChange={(val) => onChange("country", val)}
+            options={COUNTRIES.map((c) => ({
+              label: c.name,
+              value: c.code,
+              icon: c.flag,
+            }))}
+            searchable
+            placeholder="Select Country"
           />
         </div>
       </div>

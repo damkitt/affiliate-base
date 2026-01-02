@@ -150,68 +150,149 @@ enum Country {
   NO
   DK
   FI
+  IE
+  PT
   PL
   CZ
-  PT
-  IE
-  RU
-  UA
-  CA
-  MX
-  BR
-  AR
-  CO
-  CL
-  AU
-  NZ
-  JP
-  KR
-  CN
-  HK
-  SG
-  IN
-  ID
-  TH
-  VN
-  MY
-  PH
-  AE
-  SA
-  IL
-  TR
-  EG
-  ZA
-  NG
-  KE
+  HU
   RO
   GR
-  HU
+  SK
   BG
   HR
-  SK
   LT
   LV
   EE
   SI
   LU
   IS
-  PK
-  TW
-  KZ
-  LK
-  BD
+  MT
+  CY
+  RU
+  UA
+  BY
+  MD
+  AL
+  BA
+  ME
+  MK
+  RS
+  AM
+  AZ
+  GE
+  TR
+  CA
+  MX
+  BR
+  AR
+  CO
+  CL
   PE
-  UY
+  VE
   EC
+  BO
+  PY
+  UY
   CR
   PA
-  MA
-  GH
-  ET
-  TZ
-  KW
+  DO
+  GT
+  HN
+  SV
+  NI
+  CU
+  JM
+  TT
+  AU
+  NZ
+  JP
+  KR
+  CN
+  IN
+  ID
+  TH
+  VN
+  MY
+  PH
+  SG
+  TW
+  HK
+  MO
+  PK
+  BD
+  LK
+  NP
+  KP
+  KH
+  LA
+  MM
+  UZ
+  KZ
+  TM
+  TJ
+  KG
+  AE
+  SA
+  IL
   QA
-  BH
+  KW
   OM
+  BH
+  JO
+  LB
+  SY
+  IQ
+  IR
+  YE
+  PS
+  EG
+  ZA
+  NG
+  KE
+  MA
+  DZ
+  TN
+  LY
+  ET
+  GH
+  TZ
+  UG
+  SN
+  CI
+  CM
+  AO
+  MZ
+  ZM
+  ZW
+  NA
+  BW
+  MU
+  RW
+  SD
+  SS
+  ML
+  BF
+  NE
+  GN
+  LR
+  SL
+  BJ
+  TG
+  GA
+  CG
+  CD
+  GQ
+  ST
+  SC
+  MG
+  MR
+  ER
+  DJ
+  SO
+  LS
+  SZ
+  MW
+  BI
+  KM
   Other
 }

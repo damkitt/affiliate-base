@@ -483,7 +483,7 @@ export function DetailsStep({
         onChange={(val) => onSetCountry(val)}
         options={COUNTRIES.map((c) => ({
           label: c.name,
-          value: c.name,
+          value: c.code,
           icon: c.flag,
         }))}
         searchable

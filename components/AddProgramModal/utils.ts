@@ -20,8 +20,12 @@ export const calculateStartupAge = (
   return Math.max(0, months);
 };
 
-const getCountryCode = (countryName: string): CountryCode => {
-  return COUNTRY_CODE_MAP[countryName] || "Other";
+const getCountryCode = (countryValue: string): CountryCode => {
+  // If it's already a 2-letter code in our map, return it as a code
+  if (countryValue.length === 2) {
+    return countryValue as CountryCode;
+  }
+  return COUNTRY_CODE_MAP[countryValue] || "Other";
 };
 
 export const buildPayload = (formData: FormData) => {
