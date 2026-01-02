@@ -20,8 +20,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
         const category = getCategoryFromSlug(slug[1]);
         if (!category) return {};
         return {
-            title: `Best ${category} Affiliate Programs — AffiliateBase`,
-            description: `Explore the best curated ${category} affiliate programs. Discover top-tier SaaS tools and recurring revenue opportunities.`,
+            title: `Best ${category} Affiliate Programs (2026) — AffiliateBase`,
+            description: `A curated list of the highest-paying ${category} affiliate programs. Compare commission rates, cookie durations, and terms for top SaaS tools in ${category}.`,
             alternates: {
                 canonical: `/category/${slug[1]}`,
             }
@@ -81,11 +81,70 @@ export default async function UniversalHome({ params, searchParams }: PageProps)
 
     const serializedPrograms = JSON.parse(JSON.stringify(initialPrograms));
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://affiliatebase.co";
+
+    // Base Brand Schemas
+    const graph: any[] = [
+        {
+            "@type": "Organization",
+            "@id": `${baseUrl}/#organization`,
+            "name": "AffiliateBase",
+            "url": baseUrl,
+            "logo": `${baseUrl}/android-chrome-192x192.png`,
+            "sameAs": [
+                "https://x.com/affiliatebase_co"
+            ]
+        },
+        {
+            "@type": "WebSite",
+            "@id": `${baseUrl}/#website`,
+            "url": baseUrl,
+            "name": "AffiliateBase",
+            "publisher": { "@id": `${baseUrl}/#organization` },
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": `${baseUrl}/?search={search_term_string}`,
+                "query-input": "required name=search_term_string"
+            }
+        }
+    ];
+
+    // Add CollectionPage schema for categories
+    if (activeCategory) {
+        graph.push({
+            "@type": "CollectionPage",
+            "@id": `${baseUrl}/category/${getSlugFromCategory(activeCategory as Category)}#webpage`,
+            "url": `${baseUrl}/category/${getSlugFromCategory(activeCategory as Category)}`,
+            "name": `Best ${activeCategory} Affiliate Programs`,
+            "description": `A curated list of the top ${activeCategory} affiliate programs available in 2026.`,
+            "isPartOf": { "@id": `${baseUrl}/#website` },
+            "mainEntity": {
+                "@type": "ItemList",
+                "itemListElement": serializedPrograms.slice(0, 10).map((p: any, index: number) => ({
+                    "@type": "ListItem",
+                    "position": index + 1,
+                    "url": `${baseUrl}/programs/${p.slug || p.id}`
+                }))
+            }
+        });
+    }
+
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@graph": graph
+    };
+
     return (
-        <HomeContent
-            initialPrograms={serializedPrograms}
-            initialCategory={activeCategory as Category | null}
-            activeCategories={activeCategories}
-        />
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <HomeContent
+                initialPrograms={serializedPrograms}
+                initialCategory={activeCategory as Category | null}
+                activeCategories={activeCategories}
+            />
+        </>
     );
 }

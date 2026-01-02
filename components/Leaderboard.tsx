@@ -67,7 +67,10 @@ export function Leaderboard({ programs, isPending = false }: LeaderboardProps) {
   }, []);
 
   return (
-    <div className="max-w-[1000px] mx-auto px-4 md:px-6 relative group/list pb-24">
+    <section
+      aria-label="Affiliate Programs Leaderboard"
+      className="max-w-[1000px] mx-auto px-4 md:px-6 relative group/list pb-24"
+    >
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
@@ -98,26 +101,26 @@ export function Leaderboard({ programs, isPending = false }: LeaderboardProps) {
             {sponsoredPrograms.length > 0 && (
               <div className="bg-gradient-to-b from-amber-500/[0.03] to-transparent dark:from-amber-500/[0.05]">
                 {sponsoredPrograms.map((program) => (
-                  <div key={program.id}>
+                  <article key={program.id}>
                     <ProgramCard
                       program={program}
                       variant="row"
                       rank={undefined}
                     />
-                  </div>
+                  </article>
                 ))}
               </div>
             )}
 
             <div className="relative">
               {displayOrganicPrograms.map((program, index) => (
-                <div key={program.id}>
+                <article key={program.id}>
                   <ProgramCard
                     program={program}
                     variant="row"
                     rank={index + 1}
                   />
-                </div>
+                </article>
               ))}
             </div>
           </div>
@@ -151,6 +154,6 @@ export function Leaderboard({ programs, isPending = false }: LeaderboardProps) {
           </button>
         </div>
       )}
-    </div>
+    </section>
   );
 }

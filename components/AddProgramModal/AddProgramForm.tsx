@@ -52,7 +52,8 @@ export function AddProgramForm({
   ) => {
     const { name, value } = e.target;
 
-    if (shouldValidateField(name) && !validateEnglishInput(value)) {
+    const allowEmoji = name === "description" || name === "additionalInfo";
+    if (shouldValidateField(name) && !validateEnglishInput(value, allowEmoji)) {
       return;
     }
 
@@ -169,11 +170,10 @@ export function AddProgramForm({
 
   return (
     <div
-      className={`relative w-full ${
-        isModal
+      className={`relative w-full ${isModal
           ? "max-w-2xl bg-[var(--bg-card)] backdrop-blur-2xl rounded-3xl shadow-[var(--shadow-premium)] max-h-[90vh] flex flex-col overflow-hidden animate-scaleIn border border-[var(--border)]"
           : "bg-[var(--bg-card)] backdrop-blur-2xl rounded-2xl border border-[var(--border)] shadow-2xl flex flex-col overflow-hidden min-h-[600px]"
-      }`}
+        }`}
     >
       {/* Header */}
       <div className="relative px-6 pt-6 pb-4">
@@ -207,11 +207,10 @@ export function AddProgramForm({
       {/* Form Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <div
-          className={`min-h-full px-6 py-4 transition-all duration-500 ease-out ${
-            slideDirection === "right"
+          className={`min-h-full px-6 py-4 transition-all duration-500 ease-out ${slideDirection === "right"
               ? "animate-slideInRight"
               : "animate-slideInLeft"
-          }`}
+            }`}
           key={currentStep}
         >
           {currentStep === 1 && (
@@ -283,11 +282,10 @@ export function AddProgramForm({
             disabled={
               hasStepErrors || !canProceedToStep(currentStep + 1, formData)
             }
-            className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${
-              !hasStepErrors && canProceedToStep(currentStep + 1, formData)
+            className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${!hasStepErrors && canProceedToStep(currentStep + 1, formData)
                 ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
                 : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
-            }`}
+              }`}
           >
             Continue
             <HiArrowRight className="w-4 h-4" />
@@ -297,11 +295,10 @@ export function AddProgramForm({
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting || !canSubmitForm(formData)}
-            className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${
-              canSubmitForm(formData) && !isSubmitting
+            className={`h-10 px-5 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center gap-2 ${canSubmitForm(formData) && !isSubmitting
                 ? "bg-[var(--accent-solid)] text-white hover:bg-[var(--accent-hover)] shadow-md"
                 : "bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed border border-[var(--border)]"
-            }`}
+              }`}
           >
             {isSubmitting ? (
               <>
