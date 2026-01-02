@@ -37,6 +37,7 @@ export const buildPayload = (formData: FormData) => {
     email: formData.email || null,
     logoUrl: formData.logoUrl || null,
     commissionRate: Number.parseInt(formData.commissionRate) || 0,
+    commissionType: formData.commissionType,
     commissionDuration: formData.commissionDuration || null,
     cookieDuration: formData.cookieDuration
       ? Number.parseInt(formData.cookieDuration)

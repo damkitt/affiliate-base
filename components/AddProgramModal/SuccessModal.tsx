@@ -57,7 +57,7 @@ Check commission rates, cookie duration, and partner terms here:
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-xl animate-fadeIn" />
       <div className="relative w-full max-w-lg bg-[var(--bg-card)] rounded-[32px] shadow-[var(--shadow-premium)] p-8 flex flex-col items-center text-center animate-scaleIn border border-[var(--border)] overflow-hidden max-h-[90vh] overflow-y-auto ring-1 ring-[var(--border)]">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-40 bg-[var(--accent-solid)]/5 blur-[100px] pointer-events-none" />
@@ -130,11 +130,10 @@ Check commission rates, cookie duration, and partner terms here:
                       src={ogImageUrl}
                       alt="Social Preview"
                       fill
-                      className={`object-cover z-20 transition-all duration-700 ${
-                        ogImageLoaded
+                      className={`object-cover z-20 transition-all duration-700 ${ogImageLoaded
                           ? "opacity-100 scale-100"
                           : "opacity-0 scale-105"
-                      }`}
+                        }`}
                       unoptimized
                       onLoad={() => setOgImageLoaded(true)}
                       onError={() => setOgImageError(true)}
@@ -168,11 +167,10 @@ Check commission rates, cookie duration, and partner terms here:
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={handleCopyAnnouncement}
-                className={`flex items-center justify-center gap-2 h-12 rounded-xl transition-all group active:scale-[0.98] border ${
-                  copied
+                className={`flex items-center justify-center gap-2 h-12 rounded-xl transition-all group active:scale-[0.98] border ${copied
                     ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-500"
                     : "bg-white/5 hover:bg-white/10 border-white/10 hover:border-white/20 text-white"
-                }`}
+                  }`}
               >
                 {copied ? (
                   <HiCheck className="w-4 h-4" />

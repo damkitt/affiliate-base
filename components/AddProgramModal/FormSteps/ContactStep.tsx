@@ -105,7 +105,7 @@ export function ContactStep({
                 logoUrl: logoPreview || null,
                 commissionRate: parseInt(formData.commissionRate) || 0,
                 commissionType: formData.commissionType as any,
-                commissionDuration: formData.commissionDuration || "Recurring",
+                commissionDuration: formData.commissionDuration || "One-time",
                 cookieDuration: parseInt(formData.cookieDuration) || 30,
                 approvalStatus: true,
                 createdAt: new Date(),

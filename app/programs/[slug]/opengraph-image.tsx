@@ -87,7 +87,15 @@ export default async function Image(props: {
     let logoSrc = null;
     if (program.logoUrl) {
       try {
-        const logoRes = await fetch(program.logoUrl);
+        let fetchUrl = program.logoUrl;
+
+        // Handle relative URLs (e.g., /uploads/...)
+        if (fetchUrl.startsWith("/")) {
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://affiliatebase.co";
+          fetchUrl = `${baseUrl}${fetchUrl}`;
+        }
+
+        const logoRes = await fetch(fetchUrl);
         if (logoRes.ok) {
           const buffer = Buffer.from(await logoRes.arrayBuffer());
           const optimizedBuffer = await sharp(buffer)

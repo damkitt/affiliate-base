@@ -39,8 +39,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ? `$${program.commissionRate} per sale`
     : `${program.commissionRate}% ${program.commissionDuration === 'Recurring' ? 'recurring' : 'one-time'}`;
 
-  const title = `${program.programName} Affiliate Program Details`;
-  const description = `Join the ${program.programName} affiliate program. Get ${commStr} commission with a ${program.cookieDuration}-day cookie duration. Direct application and program details.`;
+  const title = `${program.programName} Affiliate Program: Commission Rates & Details`;
+
+  const commDescription = (program as any).commissionType === "FIXED"
+    ? `Earn $${program.commissionRate} per sale`
+    : `Earn ${program.commissionRate}% recurring commission`;
+
+  const description = `Join the ${program.programName} affiliate program. ${commDescription}. Verified details, cookie duration, and payout info for creators.`;
 
   const canonicalUrl = `https://affiliatebase.co/programs/${slug}`;
 
