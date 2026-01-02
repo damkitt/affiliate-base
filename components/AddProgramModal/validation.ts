@@ -2,16 +2,20 @@ import { FormData } from "./types";
 import { cleanAndValidateUrl } from "@/lib/url-validator";
 
 export const validateEnglishInput = (value: string, allowEmoji = false): boolean => {
-  const commonEmojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F3FB}-\u{1F3FF}\u{1F004}\u{1F0CF}\u{1F170}-\u{1F251}]/gu;
+  const baseRegex = /^[a-zA-Z0-9\s.,!?'"@#$%^&*()_+\-=[\]{};:|\\/<>\u2000-\u206F\u00A0-\u00BF]*$/;
 
   if (allowEmoji) {
-    // If emojis are allowed, we remove them from the string before checking if the rest is valid English
-    const cleanValue = value.replace(commonEmojiRegex, "");
-    return /^[a-zA-Z0-9\s.,!?'"@#$%^&*()_+\-=[\]{};:|\\/<>\u2000-\u206F\u00A0-\u00BF]*$/.test(cleanValue);
+    // Use Unicode property escapes for more comprehensive emoji/symbol detection
+    // \p{Extended_Pictographic} covers most emojis and symbols
+    // \p{Emoji_Component} covers things like skin tone modifiers
+    const emojiSymbolRegex = /[\p{Extended_Pictographic}\p{Emoji_Component}\u200d\ufe0f]/gu;
+
+    // Remove emojis and symbols then check if the rest is valid English
+    const cleanValue = value.replace(emojiSymbolRegex, "");
+    return baseRegex.test(cleanValue);
   }
 
-  const regex = /^[a-zA-Z0-9\s.,!?'"@#$%^&*()_+\-=[\]{};:|\\/<>\u2000-\u206F\u00A0-\u00BF]*$/;
-  return regex.test(value);
+  return baseRegex.test(value);
 };
 
 export const validateUrl = (url: string): boolean => {
