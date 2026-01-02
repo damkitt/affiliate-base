@@ -274,10 +274,11 @@ export default async function Image(props: {
                 flexDirection: "column",
                 flex: 1,
                 height: "360px",
-                justifyContent: "center",
+                justifyContent: "flex-start",
+                gap: "48px",
               }}
             >
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 <div
                   style={{
                     fontSize: "80px",
@@ -300,74 +301,52 @@ export default async function Image(props: {
                     fontSize: "34px",
                     fontWeight: 500,
                     color: "#a1a1aa",
-                    display: "flex",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                 >
                   {program.tagline || "Verified Affiliate Program"}
                 </div>
+              </div>
 
-                {/* @ts-ignore */}
-                {program.commissionType === "FIXED" ? (
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: "20px", marginTop: "48px" }}>
-                    <div
-                      style={{
-                        fontSize: "100px",
-                        fontWeight: 900,
-                        color: "#34d399",
-                        display: "flex",
-                        lineHeight: 1,
-                      }}
-                    >
-                      ${program.commissionRate}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "32px",
-                        fontWeight: 600,
-                        color: "#ffffff",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.15em",
-                        opacity: 0.8,
-                        display: "flex",
-                        lineHeight: 1,
-                        marginBottom: "12px",
-                      }}
-                    >
-                      PER SALE
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: "20px" }}>
-                    <div
-                      style={{
-                        fontSize: "100px",
-                        fontWeight: 900,
-                        color: "#34d399",
-                        display: "flex",
-                        lineHeight: 1,
-                      }}
-                    >
-                      {program.commissionRate}%
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "32px",
-                        fontWeight: 600,
-                        color: "#ffffff",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.15em",
-                        opacity: 0.8,
-                        display: "flex",
-                        lineHeight: 1,
-                        marginBottom: "12px",
-                      }}
-                    >
-                      {program.commissionDuration === "Recurring"
-                        ? "RECURRING"
-                        : "COMMISSION"}
-                    </div>
-                  </div>
-                )}
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "20px" }}>
+                <div
+                  style={{
+                    fontSize: "100px",
+                    fontWeight: 900,
+                    color: "#34d399",
+                    display: "flex",
+                    lineHeight: 1,
+                  }}
+                >
+                  {/* @ts-ignore */}
+                  {program.commissionType === "FIXED"
+                    ? `$${(program.commissionRate ?? 0).toLocaleString()}`
+                    : `${(program.commissionRate ?? 0).toLocaleString()}%`}
+                </div>
+                <div
+                  style={{
+                    fontSize: "32px",
+                    fontWeight: 600,
+                    color: "#ffffff",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.15em",
+                    opacity: 0.8,
+                    display: "flex",
+                    lineHeight: 1,
+                    marginBottom: "12px",
+                  }}
+                >
+                  {/* @ts-ignore */}
+                  {program.commissionType === "FIXED"
+                    ? "PER SALE"
+                    : program.commissionDuration === "Recurring"
+                      ? "RECURRING"
+                      : "COMMISSION"}
+                </div>
               </div>
             </div>
           </div>

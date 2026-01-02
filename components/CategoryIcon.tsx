@@ -3,7 +3,7 @@
 import {
     HiSparkles, HiCloud, HiWrenchScrewdriver, HiCreditCard, HiBolt,
     HiMegaphone, HiShoppingCart, HiPaintBrush, HiPuzzlePiece, HiChartBar,
-    HiServerStack, HiWrench, HiCube
+    HiServerStack, HiWrench, HiCube, HiAcademicCap
 } from "react-icons/hi2";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -19,6 +19,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     "HiChartBar": HiChartBar,
     "HiServerStack": HiServerStack,
     "HiWrench": HiWrench,
+    "HiAcademicCap": HiAcademicCap,
 };
 
 interface CategoryIconProps {

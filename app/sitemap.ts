@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { CATEGORY_SLUGS } from "@/constants";
 
-const BASE_URL = "https://affiliatebase.co";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://affiliatebase.co";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Fetch all approved programs

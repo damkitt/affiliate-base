@@ -18,6 +18,7 @@ export const CATEGORIES = [
   "SaaS",
   "Hosting & Web",
   "Utilities",
+  "Education",
 ] as const;
 
 export const CATEGORY_ICONS: Readonly<Record<Category, string>> = {
@@ -33,6 +34,7 @@ export const CATEGORY_ICONS: Readonly<Record<Category, string>> = {
   SaaS: "HiCloud",
   "Hosting & Web": "HiServerStack",
   Utilities: "HiWrench",
+  Education: "HiAcademicCap",
 } as const;
 
 export const CATEGORY_SLUGS: Readonly<Record<Category, string>> = {
@@ -48,6 +50,7 @@ export const CATEGORY_SLUGS: Readonly<Record<Category, string>> = {
   SaaS: "saas",
   "Hosting & Web": "hosting-web",
   Utilities: "utilities",
+  Education: "education",
 } as const;
 
 export const getSlugFromCategory = (category: Category): string =>
