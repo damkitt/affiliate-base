@@ -324,9 +324,6 @@ export function EditForm({
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
-            Country
-          </label>
           <CustomSelect
             value={program.country || ""}
             onChange={(val) => onChange("country", val)}
@@ -339,6 +336,22 @@ export function EditForm({
             placeholder="Select Country"
           />
         </div>
+        {program.commissionType !== "FIXED" && (
+          <div>
+            <label className="block text-xs font-semibold text-[var(--text-tertiary)] mb-2">
+              Avg Order Value ($)
+            </label>
+            <input
+              type="number"
+              className="w-full px-4 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)]"
+              value={program.avgOrderValue ?? ""}
+              onChange={(e) =>
+                onChange("avgOrderValue", e.target.value ? Number.parseInt(e.target.value) : null)
+              }
+              placeholder="e.g. 150"
+            />
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

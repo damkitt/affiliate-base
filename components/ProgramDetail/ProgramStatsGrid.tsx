@@ -38,7 +38,7 @@ export function ProgramStatsGrid({ program }: ProgramStatsGridProps) {
             label: program.payoutsTotalRange ? "Payouts Total" : "Founded",
             value: program.payoutsTotalRange ?? (program.foundingDate ? new Date(program.foundingDate).getFullYear() : null)
         },
-        { icon: HiChartBar, label: "Avg Order", value: program.avgOrderValue != null ? `$${program.avgOrderValue}` : null },
+        { icon: HiChartBar, label: "Avg Order", value: (program.commissionType !== "FIXED" && program.avgOrderValue != null) ? `$${program.avgOrderValue}` : null },
     ].filter(item => item.value != null);
 
     return (

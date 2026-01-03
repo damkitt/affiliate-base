@@ -263,27 +263,29 @@ export function DetailsStep({
         </div>
 
         {/* Avg Order Value */}
-        <div>
-          <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
-            <HiBanknotes className="w-3.5 h-3.5" /> Avg Order Value
-            <span className="text-[var(--text-secondary)] font-normal normal-case">
-              (optional)
-            </span>
-          </label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] pointer-events-none">
-              $
-            </span>
-            <input
-              type="text"
-              name="avgOrderValue"
-              value={formData.avgOrderValue}
-              onChange={onFormChange}
-              placeholder="120"
-              className="w-full h-11 pl-8 pr-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
-            />
+        {formData.commissionType === "PERCENTAGE" && (
+          <div>
+            <label className="flex text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide items-center gap-1.5">
+              <HiBanknotes className="w-3.5 h-3.5" /> Avg Order Value
+              <span className="text-[var(--text-secondary)] font-normal normal-case">
+                (optional)
+              </span>
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] pointer-events-none">
+                $
+              </span>
+              <input
+                type="text"
+                name="avgOrderValue"
+                value={formData.avgOrderValue}
+                onChange={onFormChange}
+                placeholder="120"
+                className="w-full h-11 pl-8 pr-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:bg-[var(--bg)] focus:border-[var(--accent-solid)] transition-all duration-300"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Min Payout */}
         <div>

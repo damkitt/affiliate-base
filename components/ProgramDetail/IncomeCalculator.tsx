@@ -115,7 +115,9 @@ export function IncomeCalculator({
         }).format(value);
     };
 
-    const isValid = parseFloat(productPrice) > 0 && parseFloat(commission) > 0;
+    const isValid = commissionType === "FIXED"
+        ? parseFloat(commission) > 0
+        : parseFloat(productPrice) > 0 && parseFloat(commission) > 0;
 
     if (!isOpen) return null;
 
@@ -168,33 +170,34 @@ export function IncomeCalculator({
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:divide-x divide-[var(--border)]">
                             {/* Left Panel: Controls */}
                             <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
-                                {/* Product Price */}
-                                <div>
-                                    <label className="block text-[10px] sm:text-xs font-semibold text-[var(--text-secondary)] mb-1.5 sm:mb-2 uppercase tracking-wide">
-                                        Product Price
-                                    </label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] text-sm sm:text-base">
-                                            $
-                                        </span>
-                                        <input
-                                            type="number"
-                                            inputMode="decimal"
-                                            value={productPrice}
-                                            onChange={(e) => setProductPrice(e.target.value)}
-                                            placeholder="Enter price..."
-                                            className={`w-full h-11 sm:h-12 pl-7 sm:pl-8 pr-4 rounded-xl bg-[var(--bg-secondary)] border text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent-solid)] transition-all text-base ${!productPrice
-                                                ? "border-amber-500/50 animate-pulse"
-                                                : "border-[var(--border)]"
-                                                }`}
-                                        />
+                                {commissionType === "PERCENTAGE" && (
+                                    <div>
+                                        <label className="block text-[10px] sm:text-xs font-semibold text-[var(--text-secondary)] mb-1.5 sm:mb-2 uppercase tracking-wide">
+                                            Product Price
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] text-sm sm:text-base">
+                                                $
+                                            </span>
+                                            <input
+                                                type="number"
+                                                inputMode="decimal"
+                                                value={productPrice}
+                                                onChange={(e) => setProductPrice(e.target.value)}
+                                                placeholder="Enter price..."
+                                                className={`w-full h-11 sm:h-12 pl-7 sm:pl-8 pr-4 rounded-xl bg-[var(--bg-secondary)] border text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent-solid)] transition-all text-base ${!productPrice
+                                                    ? "border-amber-500/50 animate-pulse"
+                                                    : "border-[var(--border)]"
+                                                    }`}
+                                            />
+                                        </div>
+                                        {!productPrice && (
+                                            <p className="text-[10px] sm:text-xs text-amber-500 mt-1 sm:mt-1.5">
+                                                ⚠ Enter a product price to see projections
+                                            </p>
+                                        )}
                                     </div>
-                                    {!productPrice && (
-                                        <p className="text-[10px] sm:text-xs text-amber-500 mt-1 sm:mt-1.5">
-                                            ⚠ Enter a product price to see projections
-                                        </p>
-                                    )}
-                                </div>
+                                )}
 
                                 {/* Commission */}
                                 <div>
@@ -412,7 +415,9 @@ export function IncomeCalculator({
                                                     <HiCalculator className="w-6 h-6 sm:w-8 sm:h-8 text-[var(--text-tertiary)]" />
                                                 </div>
                                                 <p className="text-xs sm:text-sm text-[var(--text-tertiary)]">
-                                                    Enter product price to see projections
+                                                    {commissionType === "FIXED"
+                                                        ? "Enter commission amount to see projections"
+                                                        : "Enter product price to see projections"}
                                                 </p>
                                             </div>
                                         </div>
