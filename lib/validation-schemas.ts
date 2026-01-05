@@ -1,25 +1,11 @@
 import { z } from "zod";
-
-export const categories = [
-    "Artificial Intelligence",
-    "Marketing",
-    "E-commerce",
-    "Design Tools",
-    "Developer Tools",
-    "Fintech",
-    "Productivity",
-    "No-Code",
-    "Analytics",
-    "SaaS",
-    "Hosting & Web",
-    "Utilities",
-] as const;
+import { CATEGORIES } from "@/constants";
 
 export const programSchema = z.object({
     programName: z.string().trim().min(2, "Name must be at least 2 chars").max(30, "Name too long"),
     tagline: z.string().trim().min(5, "Tagline too short").max(50, "Tagline too long").optional().default("No tagline provided."),
     description: z.string().trim().max(2000, "Description too long").optional().default("No description provided."),
-    category: z.enum(categories),
+    category: z.enum(CATEGORIES),
     websiteUrl: z.string().trim().url("Invalid Website URL"),
     affiliateUrl: z.string().trim().url("Invalid Affiliate URL"),
     logoUrl: z.string().trim().url("Invalid Logo URL").nullable().optional(),
