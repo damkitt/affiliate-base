@@ -40,18 +40,18 @@ export const buildPayload = (formData: FormData) => {
     xHandle: formData.xHandle || null,
     email: formData.email || null,
     logoUrl: formData.logoUrl || null,
-    commissionRate: Number.parseInt(formData.commissionRate) || 0,
+    commissionRate: Number(formData.commissionRate) || 0,
     commissionType: formData.commissionType,
-    commissionDuration: formData.commissionDuration || null,
+    commissionDuration: formData.commissionDuration || (formData.commissionType === "PERCENTAGE" ? "One-time" : null),
     cookieDuration: formData.cookieDuration
-      ? Number.parseInt(formData.cookieDuration)
+      ? Number(formData.cookieDuration)
       : null,
     payoutMethod: formData.payoutMethod || null,
     minPayoutValue: formData.minPayoutValue
-      ? Number.parseInt(formData.minPayoutValue)
+      ? Number(formData.minPayoutValue)
       : null,
     avgOrderValue: formData.avgOrderValue
-      ? Number.parseInt(formData.avgOrderValue)
+      ? Number(formData.avgOrderValue)
       : null,
     targetAudience: formData.targetAudience || null,
     additionalInfo: formData.additionalInfo || null,
@@ -60,7 +60,7 @@ export const buildPayload = (formData: FormData) => {
     foundingDate:
       formData.foundingMonth && formData.foundingYear
         ? new Date(
-          Number.parseInt(formData.foundingYear),
+          Number(formData.foundingYear),
           MONTHS.indexOf(formData.foundingMonth)
         ).toISOString()
         : null,

@@ -46,6 +46,29 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  openGraph: {
+    title: "Affiliate Base: The #1 Affiliate Directory for Creators",
+    description: "A curated directory of software affiliate programs. Discover high-paying SaaS tools and recurring revenue opportunities for creators and marketers.",
+    url: 'https://affiliatebase.co',
+    siteName: 'AffiliateBase',
+    locale: 'en_US',
+    type: 'website',
+    images: [
+      {
+        url: '/brand-og.png',
+        width: 1200,
+        height: 630,
+        alt: 'AffiliateBase — Curated SaaS Affiliate Programs',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "AffiliateBase — Curated SaaS Affiliate Programs",
+    description: "A curated directory of software affiliate programs. Discover high-paying SaaS tools and recurring revenue opportunities for creators and marketers.",
+    images: ['/brand-og.png'],
+    creator: '@affiliatebase_co',
+  },
 };
 
 export default function RootLayout({

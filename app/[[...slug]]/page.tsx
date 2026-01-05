@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
 
     // Default Home
     return {
-        title: "AffiliateBase — Curated SaaS Affiliate Programs",
+        title: "Affiliate Base: The #1 Affiliate Directory for Creators",
         description: "A curated directory of software affiliate programs. Discover high-paying SaaS tools and recurring revenue opportunities for creators and marketers.",
     };
 }

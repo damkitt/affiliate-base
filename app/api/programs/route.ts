@@ -177,7 +177,7 @@ async function generateUniqueSlug(name: string): Promise<string> {
   const base = name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+    .replace(/(^-|-$)/g, "") || "program";
 
   let slug = base;
   let i = 1;
