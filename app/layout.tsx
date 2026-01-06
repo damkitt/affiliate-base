@@ -21,7 +21,7 @@ const dmSerif = DM_Serif_Display({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://affiliatebase.co'),
-  title: "AffiliateBase — Curated SaaS Affiliate Programs",
+  title: "Affiliate Base: The #1 Affiliate Directory for Creators",
   description: "A curated directory of software affiliate programs. Discover high-paying SaaS tools and recurring revenue opportunities for creators and marketers.",
   icons: {
     icon: [
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
         url: '/brand-og.png',
         width: 1200,
         height: 630,
-        alt: 'AffiliateBase — Curated SaaS Affiliate Programs',
+        alt: 'Affiliate Base: The #1 Affiliate Directory for Creators',
       },
     ],
   },
