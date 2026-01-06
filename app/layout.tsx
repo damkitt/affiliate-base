@@ -48,14 +48,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Affiliate Base: The #1 Affiliate Directory for Creators",
-    description: "A curated directory of software affiliate programs. Discover high-paying SaaS tools and recurring revenue opportunities for creators and marketers.",
+    description: "Discover high-paying SaaS affiliate programs. Curated directory with transparent commissions and recurring revenue opportunities.",
     url: 'https://affiliatebase.co',
     siteName: 'AffiliateBase',
     locale: 'en_US',
     type: 'website',
     images: [
       {
-        url: '/brand-og.png',
+        url: 'https://affiliatebase.co/main-og.png',
         width: 1200,
         height: 630,
         alt: 'Affiliate Base: The #1 Affiliate Directory for Creators',
@@ -64,9 +64,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "AffiliateBase — Curated SaaS Affiliate Programs",
-    description: "A curated directory of software affiliate programs. Discover high-paying SaaS tools and recurring revenue opportunities for creators and marketers.",
-    images: ['/brand-og.png'],
+    title: "Affiliate Base: The #1 Affiliate Directory for Creators",
+    description: "Discover high-paying SaaS affiliate programs. Curated directory with transparent commissions and recurring revenue opportunities.",
+    images: ['https://affiliatebase.co/main-og.png'],
     creator: '@affiliatebase_co',
   },
 };
