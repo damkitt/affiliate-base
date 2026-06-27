@@ -104,7 +104,7 @@ function PricingStep({
 
         <div className={styles.planLabel}>MONTHLY SPONSORSHIP</div>
         <div className={styles.priceWrapper}>
-          <span className={styles.price}>$299</span>
+          <span className={styles.price}>$50</span>
           <span className={styles.period}>/month</span>
         </div>
 

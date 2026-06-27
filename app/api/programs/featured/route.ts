@@ -59,7 +59,7 @@ export async function POST(request: Request) {
         price_data: {
           currency: "usd",
           product: PRODUCT_ID,
-          unit_amount: 29900,
+          unit_amount: 5000,
         },
         quantity: 1,
       },

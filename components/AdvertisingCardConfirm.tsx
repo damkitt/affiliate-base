@@ -38,7 +38,7 @@ const AdvertisingCardConfirm = ({
           Back
         </button>
         <button onClick={onConfirm} className={s.confirmButton}>
-          Confirm & Pay $299
+          Confirm & Pay $50
         </button>
       </div>
     </div>
