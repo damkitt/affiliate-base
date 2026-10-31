@@ -1,12 +1,12 @@
 {
-    "crons": [
+    "framework": null,
+    "installCommand": "echo skip",
+    "buildCommand": "echo static",
+    "outputDirectory": "closed",
+    "rewrites": [
         {
-            "path": "/api/cron/update-scores",
-            "schedule": "0 * * * *"
-        },
-        {
-            "path": "/api/cron/prune-logs",
-            "schedule": "0 0 * * *"
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ]
 }
