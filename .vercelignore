@@ -1,0 +1,4 @@
+# Deploy only the static "closed" page; keep the old app source out of Vercel
+/*
+!/closed
+!/vercel.json
